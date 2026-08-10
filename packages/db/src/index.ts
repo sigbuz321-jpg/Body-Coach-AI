@@ -1,8 +1,12 @@
 /**
  * @bodycoach/db — schema, migration, repository (Postgres + pgvector + pg_trgm).
  *
- * Isi menyusul di M1: migrations/0001_init.sql (persis docs/02-technical-spec.md §3),
- * migrations/0002_rls.sql, src/client.ts, src/repositories/, src/seed.ts.
+ * Skema ada di migrations/, sumbernya docs/02-technical-spec.md §3.
+ * RLS aktif di semua tabel user-scoped; worker memakai service role yang melewatinya.
  */
 
 export const DB_PACKAGE = '@bodycoach/db' as const;
+
+export { closePool, getPool, withDirectClient, withTransaction } from './client';
+export * from './repositories';
+export type * from './types';

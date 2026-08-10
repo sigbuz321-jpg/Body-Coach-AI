@@ -1,0 +1,103 @@
+slug,label,grams,is_default
+nasi-putih,centong,75,false
+nasi-putih,porsi warteg,150,true
+nasi-putih,piring penuh,250,false
+nasi-goreng,porsi warteg,200,true
+nasi-goreng,piring penuh,300,false
+nasi-uduk,bungkus,180,true
+nasi-uduk,porsi warteg,150,false
+nasi-kuning,bungkus,180,true
+nasi-kuning,piring penuh,250,false
+nasi-padang,porsi bungkus,350,true
+nasi-padang,porsi piring,450,false
+lontong,potong sedang,100,true
+lontong,porsi mangkok,200,false
+bubur-ayam,mangkok sedang,300,true
+bubur-ayam,mangkok besar,400,false
+ayam-goreng,potong sedang,100,true
+ayam-goreng,potong besar,150,false
+ayam-goreng,dada utuh,180,false
+ayam-geprek,potong sedang,120,true
+ayam-geprek,potong besar,170,false
+ayam-bakar,potong sedang,110,true
+ayam-bakar,setengah ekor,300,false
+ayam-pop,potong sedang,110,true
+ayam-pop,potong besar,160,false
+rendang,potong sedang,60,true
+rendang,potong besar,90,false
+dendeng-balado,porsi warteg,50,true
+dendeng-balado,porsi besar,80,false
+telur-dadar,satu butir,55,true
+telur-dadar,dua butir,110,false
+telur-ceplok,satu butir,50,true
+telur-ceplok,dua butir,100,false
+telur-rebus,satu butir,50,true
+telur-rebus,dua butir,100,false
+telur-balado,satu butir,60,true
+telur-balado,dua butir,120,false
+lele-goreng,satu ekor,120,true
+lele-goreng,dua ekor,240,false
+kembung-goreng,satu ekor,90,true
+kembung-goreng,dua ekor,180,false
+sate-ayam,tusuk,25,false
+sate-ayam,porsi sepuluh tusuk,250,true
+sate-kambing,tusuk,30,false
+sate-kambing,porsi sepuluh tusuk,300,true
+tempe-goreng,potong sedang,25,false
+tempe-goreng,porsi warteg,60,true
+tahu-goreng,potong sedang,30,false
+tahu-goreng,porsi warteg,70,true
+bakwan,satu buah,50,true
+bakwan,dua buah,100,false
+tahu-isi,satu buah,55,true
+tahu-isi,dua buah,110,false
+pisang-goreng,satu buah,60,true
+pisang-goreng,dua buah,120,false
+risoles,satu buah,50,true
+risoles,dua buah,100,false
+cireng,satu buah,30,false
+cireng,porsi lima buah,150,true
+mie-ayam,mangkok sedang,350,true
+mie-ayam,mangkok besar,450,false
+mie-instan-goreng,satu bungkus,250,true
+mie-instan-goreng,dua bungkus,500,false
+mie-instan-kuah,satu bungkus,450,true
+mie-instan-kuah,dua bungkus,900,false
+kwetiau-goreng,porsi sedang,300,true
+kwetiau-goreng,porsi besar,400,false
+bakso,mangkok sedang,350,true
+bakso,mangkok besar,450,false
+soto-ayam,mangkok sedang,350,true
+soto-ayam,mangkok besar,450,false
+rawon,mangkok sedang,300,true
+rawon,mangkok besar,400,false
+sayur-sop,porsi warteg,150,true
+sayur-sop,mangkok sedang,250,false
+gulai-ayam,porsi warteg,150,true
+gulai-ayam,mangkok sedang,250,false
+gado-gado,porsi sedang,300,true
+gado-gado,porsi besar,400,false
+capcay,porsi warteg,150,true
+capcay,piring sedang,250,false
+tumis-kangkung,porsi warteg,100,true
+tumis-kangkung,piring sedang,180,false
+sayur-asem,mangkok sedang,200,true
+sayur-asem,mangkok besar,300,false
+urap,porsi warteg,100,true
+urap,piring sedang,180,false
+es-teh-manis,gelas sedang,250,true
+es-teh-manis,gelas besar,400,false
+es-kopi-susu,gelas sedang,250,true
+es-kopi-susu,gelas besar,400,false
+teh-tawar,gelas sedang,250,true
+teh-tawar,gelas besar,400,false
+jus-alpukat,gelas sedang,250,true
+jus-alpukat,gelas besar,400,false
+susu-uht,kotak kecil,200,true
+susu-uht,kotak besar,250,false
+martabak-manis,potong,80,false
+martabak-manis,porsi empat potong,320,true
+martabak-telur,potong,70,false
+martabak-telur,porsi empat potong,280,true
+keripik-singkong,bungkus kecil,40,true
+keripik-singkong,bungkus besar,100,false

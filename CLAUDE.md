@@ -242,7 +242,12 @@ pnpm format        prettier --write   ·   pnpm format:check untuk CI
 
 `typecheck`, `build`, `dev` dijalankan per package lewat Turborepo. `lint` dan `test` dijalankan sekali di root (`eslint.config.mjs`, `vitest.config.ts`) supaya aturan lintas package dievaluasi dari satu tempat.
 
-`pnpm db:migrate` · `pnpm db:seed` menyusul di M1. `pnpm evals` menyusul di M6.
+```
+pnpm db:migrate    terapkan migration yang belum jalan (idempoten, aman diulang)
+pnpm db:seed       muat data makanan dari data/seeds/food/ (idempoten)
+```
+
+Keduanya membaca `.env.local` dan memakai `DIRECT_URL` (session pooler :5432), bukan `DATABASE_URL`. `pnpm evals` menyusul di M6.
 
 ---
 

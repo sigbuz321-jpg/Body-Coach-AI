@@ -1,0 +1,172 @@
+slug,alias,weight
+nasi-putih,nasi,0.80
+nasi-putih,nasi putih,1.00
+nasi-putih,sepiring nasi,0.90
+nasi-putih,nasi anget,0.85
+nasi-goreng,nasi goreng,1.00
+nasi-goreng,nasgor,1.00
+nasi-goreng,nasi goreng biasa,0.95
+nasi-goreng,nasi goreng spesial,0.85
+nasi-uduk,nasi uduk,1.00
+nasi-uduk,uduk,0.90
+nasi-uduk,nasi gurih,0.85
+nasi-kuning,nasi kuning,1.00
+nasi-kuning,sego kuning,0.90
+nasi-kuning,nasi tumpeng,0.75
+nasi-padang,nasi padang,1.00
+nasi-padang,nasi pdg,0.90
+nasi-padang,rumah makan padang,0.80
+nasi-padang,nasi rames padang,0.85
+lontong,lontong,1.00
+lontong,ketupat,0.85
+lontong,lontong sayur,0.80
+bubur-ayam,bubur ayam,1.00
+bubur-ayam,bubur,0.85
+bubur-ayam,bubur ayam jakarta,0.90
+ayam-goreng,ayam goreng,1.00
+ayam-goreng,ayam kremes,0.90
+ayam-goreng,ayam crispy,0.90
+ayam-goreng,fried chicken,0.85
+ayam-geprek,ayam geprek,1.00
+ayam-geprek,geprek,1.00
+ayam-geprek,ayam penyet,0.85
+ayam-geprek,geprek sambal,0.90
+ayam-bakar,ayam bakar,1.00
+ayam-bakar,ayam panggang,0.90
+ayam-bakar,ayam bakar madu,0.85
+ayam-pop,ayam pop,1.00
+ayam-pop,ayam pop padang,0.95
+ayam-pop,ayam putih padang,0.80
+rendang,rendang,1.00
+rendang,rendang daging,1.00
+rendang,daging rendang,0.95
+rendang,rendang sapi,0.95
+dendeng-balado,dendeng balado,1.00
+dendeng-balado,dendeng,0.95
+dendeng-balado,dendeng batokok,0.85
+telur-dadar,telur dadar,1.00
+telur-dadar,omelet,0.90
+telur-dadar,dadar telur,0.95
+telur-dadar,telor dadar,0.95
+telur-ceplok,telur ceplok,1.00
+telur-ceplok,telur mata sapi,0.95
+telur-ceplok,telur goreng,0.90
+telur-ceplok,telor ceplok,0.95
+telur-rebus,telur rebus,1.00
+telur-rebus,telur setengah matang,0.85
+telur-rebus,telor rebus,0.95
+telur-balado,telur balado,1.00
+telur-balado,telur sambal,0.90
+telur-balado,telor balado,0.95
+lele-goreng,lele goreng,1.00
+lele-goreng,ikan lele,0.90
+lele-goreng,pecel lele,0.95
+lele-goreng,lele,0.85
+kembung-goreng,ikan kembung,1.00
+kembung-goreng,kembung goreng,1.00
+kembung-goreng,ikan goreng,0.70
+sate-ayam,sate ayam,1.00
+sate-ayam,sate,0.80
+sate-ayam,sate madura,0.90
+sate-kambing,sate kambing,1.00
+sate-kambing,sate kambing muda,0.90
+sate-kambing,sate domba,0.80
+tempe-goreng,tempe goreng,1.00
+tempe-goreng,tempe,0.90
+tempe-goreng,tempe mendoan,0.80
+tempe-goreng,tempe orek,0.70
+tahu-goreng,tahu goreng,1.00
+tahu-goreng,tahu,0.90
+tahu-goreng,tahu putih goreng,0.90
+bakwan,bakwan,1.00
+bakwan,bakwan sayur,1.00
+bakwan,bala-bala,0.90
+bakwan,ote-ote,0.85
+tahu-isi,tahu isi,1.00
+tahu-isi,tahu berontak,0.85
+tahu-isi,tahu bunting,0.80
+pisang-goreng,pisang goreng,1.00
+pisang-goreng,gorengan pisang,0.90
+pisang-goreng,pisgor,0.95
+risoles,risoles,1.00
+risoles,risol,0.95
+risoles,risol mayo,0.85
+cireng,cireng,1.00
+cireng,cireng isi,0.90
+cireng,aci digoreng,0.75
+mie-ayam,mie ayam,1.00
+mie-ayam,bakmi ayam,0.95
+mie-ayam,mi ayam,1.00
+mie-ayam,mie ayam bakso,0.85
+mie-instan-goreng,mie instan goreng,1.00
+mie-instan-goreng,indomie,1.00
+mie-instan-goreng,indomie goreng,1.00
+mie-instan-goreng,mie goreng instan,0.95
+mie-instan-goreng,mi goreng,0.85
+mie-instan-kuah,mie instan kuah,1.00
+mie-instan-kuah,indomie kuah,1.00
+mie-instan-kuah,indomie rebus,0.95
+mie-instan-kuah,mie rebus,0.85
+kwetiau-goreng,kwetiau goreng,1.00
+kwetiau-goreng,kwetiau,0.95
+kwetiau-goreng,kwetiaw,0.90
+bakso,bakso,1.00
+bakso,baso,1.00
+bakso,bakso kuah,0.95
+bakso,bakso urat,0.85
+soto-ayam,soto ayam,1.00
+soto-ayam,soto,0.90
+soto-ayam,soto lamongan,0.90
+rawon,rawon,1.00
+rawon,rawon daging,0.95
+rawon,nasi rawon,0.85
+sayur-sop,sayur sop,1.00
+sayur-sop,sop sayur,1.00
+sayur-sop,sup sayuran,0.90
+gulai-ayam,gulai ayam,1.00
+gulai-ayam,gulai,0.85
+gulai-ayam,kari ayam,0.85
+gado-gado,gado-gado,1.00
+gado-gado,gado gado,1.00
+gado-gado,lotek,0.80
+gado-gado,pecel sayur,0.70
+capcay,capcay,1.00
+capcay,cap cay,1.00
+capcay,tumis sayur campur,0.80
+tumis-kangkung,tumis kangkung,1.00
+tumis-kangkung,kangkung,0.90
+tumis-kangkung,cah kangkung,0.95
+sayur-asem,sayur asem,1.00
+sayur-asem,sayur asam,1.00
+sayur-asem,sayur bening asem,0.80
+urap,urap,1.00
+urap,urap sayur,1.00
+urap,urapan,0.90
+es-teh-manis,es teh manis,1.00
+es-teh-manis,teh manis dingin,1.00
+es-teh-manis,es teh,0.95
+es-teh-manis,teh manis,0.90
+es-kopi-susu,es kopi susu,1.00
+es-kopi-susu,kopi susu,0.95
+es-kopi-susu,kopsu,0.90
+es-kopi-susu,kopi susu gula aren,0.90
+teh-tawar,teh tawar,1.00
+teh-tawar,teh pahit,0.90
+teh-tawar,teh hangat tawar,0.90
+jus-alpukat,jus alpukat,1.00
+jus-alpukat,alpukat kocok,0.90
+jus-alpukat,jus avocado,0.85
+susu-uht,susu uht,1.00
+susu-uht,susu full cream,0.95
+susu-uht,susu putih,0.85
+susu-uht,susu sapi,0.85
+martabak-manis,martabak manis,1.00
+martabak-manis,terang bulan,1.00
+martabak-manis,kue bandung,0.85
+martabak-telur,martabak telur,1.00
+martabak-telur,martabak asin,0.95
+martabak-telur,martabak telor,1.00
+keripik-singkong,keripik singkong,1.00
+keripik-singkong,kripik singkong,1.00
+keripik-singkong,basreng singkong,0.70
+keripik-singkong,keripik balado,0.80

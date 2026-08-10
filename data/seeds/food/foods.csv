@@ -1,0 +1,51 @@
+slug,name_id,name_en,category,kcal_per_100g,protein_per_100g,carbs_per_100g,fat_per_100g,source,verified
+nasi-putih,Nasi putih,Steamed white rice,nasi,130,2.7,28.2,0.3,manual,false
+nasi-goreng,Nasi goreng,Indonesian fried rice,nasi,186,5.0,24.0,7.5,manual,false
+nasi-uduk,Nasi uduk,Coconut milk rice,nasi,195,4.0,27.0,8.0,manual,false
+nasi-kuning,Nasi kuning,Turmeric rice,nasi,175,3.5,28.0,5.5,manual,false
+nasi-padang,Nasi Padang,Padang mixed rice plate,nasi,210,8.0,22.0,10.5,manual,false
+lontong,Lontong,Compressed rice cake,nasi,95,1.8,21.0,0.2,manual,false
+bubur-ayam,Bubur ayam,Chicken rice porridge,nasi,85,4.5,11.0,2.5,manual,false
+ayam-goreng,Ayam goreng,Fried chicken,lauk,260,22.0,8.0,16.0,manual,false
+ayam-geprek,Ayam geprek,Smashed fried chicken with chilli,lauk,285,21.0,12.0,18.0,manual,false
+ayam-bakar,Ayam bakar,Grilled chicken,lauk,195,25.0,3.0,9.0,manual,false
+ayam-pop,Ayam pop,Padang-style boiled fried chicken,lauk,180,26.0,1.0,8.0,manual,false
+rendang,Rendang daging sapi,Beef rendang,lauk,290,20.0,6.0,21.0,manual,false
+dendeng-balado,Dendeng balado,Crispy beef with chilli,lauk,335,28.0,9.0,21.0,manual,false
+telur-dadar,Telur dadar,Omelette,lauk,205,13.5,1.5,16.0,manual,false
+telur-ceplok,Telur ceplok,Fried egg,lauk,195,13.0,0.8,15.0,manual,false
+telur-rebus,Telur rebus,Boiled egg,lauk,155,12.6,1.1,10.6,manual,false
+telur-balado,Telur balado,Egg in chilli sauce,lauk,180,11.5,6.0,12.0,manual,false
+lele-goreng,Ikan lele goreng,Fried catfish,lauk,240,22.0,5.0,14.5,manual,false
+kembung-goreng,Ikan kembung goreng,Fried mackerel,lauk,250,24.0,2.0,16.0,manual,false
+sate-ayam,Sate ayam,Chicken satay,lauk,200,24.0,4.0,10.0,manual,false
+sate-kambing,Sate kambing,Goat satay,lauk,250,22.0,3.0,17.0,manual,false
+tempe-goreng,Tempe goreng,Fried tempeh,gorengan,225,15.0,11.0,14.0,manual,false
+tahu-goreng,Tahu goreng,Fried tofu,gorengan,175,11.0,6.0,12.0,manual,false
+bakwan,Bakwan sayur,Vegetable fritter,gorengan,280,4.0,28.0,17.0,manual,false
+tahu-isi,Tahu isi,Stuffed fried tofu,gorengan,250,8.0,22.0,15.0,manual,false
+pisang-goreng,Pisang goreng,Fried banana,gorengan,265,2.0,38.0,12.0,manual,false
+risoles,Risoles,Savoury fried roll,gorengan,265,6.0,28.0,14.0,manual,false
+cireng,Cireng,Fried tapioca cake,gorengan,290,2.5,40.0,13.0,manual,false
+mie-ayam,Mie ayam,Chicken noodles,mie,145,7.0,19.0,4.5,manual,false
+mie-instan-goreng,Mie instan goreng,Instant fried noodles,mie,175,3.6,23.0,7.6,manual,false
+mie-instan-kuah,Mie instan kuah,Instant noodle soup,mie,90,2.0,12.0,3.6,manual,false
+kwetiau-goreng,Kwetiau goreng,Fried flat rice noodles,mie,190,6.0,25.0,7.0,manual,false
+bakso,Bakso,Meatball soup,kuah,100,7.0,7.0,5.0,manual,false
+soto-ayam,Soto ayam,Chicken soto soup,kuah,70,5.5,4.0,3.5,manual,false
+rawon,Rawon,Black beef soup,kuah,110,8.0,4.0,7.0,manual,false
+sayur-sop,Sayur sop,Clear vegetable soup,kuah,40,1.8,4.5,1.8,manual,false
+gulai-ayam,Gulai ayam,Chicken curry,kuah,150,11.0,4.0,10.0,manual,false
+gado-gado,Gado-gado,Vegetable salad with peanut sauce,sayur,140,6.0,11.0,8.5,manual,false
+capcay,Capcay,Stir-fried mixed vegetables,sayur,75,3.5,7.0,3.8,manual,false
+tumis-kangkung,Tumis kangkung,Stir-fried water spinach,sayur,85,2.5,5.0,6.0,manual,false
+sayur-asem,Sayur asem,Tamarind vegetable soup,sayur,45,1.5,6.5,1.5,manual,false
+urap,Urap,Vegetables with spiced coconut,sayur,120,4.0,9.0,7.5,manual,false
+es-teh-manis,Es teh manis,Iced sweet tea,minuman,40,0.0,10.0,0.0,manual,false
+es-kopi-susu,Es kopi susu,Iced milk coffee,minuman,65,1.5,10.5,1.8,manual,false
+teh-tawar,Teh tawar,Unsweetened tea,minuman,1,0.0,0.2,0.0,manual,false
+jus-alpukat,Jus alpukat,Avocado juice,minuman,105,1.5,12.0,6.0,manual,false
+susu-uht,Susu UHT full cream,UHT whole milk,minuman,62,3.2,4.8,3.4,manual,false
+martabak-manis,Martabak manis,Sweet thick pancake,snack,320,6.0,42.0,14.0,manual,false
+martabak-telur,Martabak telur,Savoury egg martabak,snack,265,11.0,20.0,16.0,manual,false
+keripik-singkong,Keripik singkong,Cassava chips,snack,480,2.0,60.0,25.0,manual,false

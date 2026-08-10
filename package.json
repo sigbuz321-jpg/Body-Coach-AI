@@ -4,9 +4,11 @@
   "version": "0.0.0",
   "packageManager": "pnpm@11.21.0",
   "engines": {
-    "node": ">=20.11"
+    "node": ">=22"
   },
   "scripts": {
+    "db:migrate": "pnpm --filter @bodycoach/db db:migrate",
+    "db:seed": "pnpm --filter @bodycoach/db db:seed",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",

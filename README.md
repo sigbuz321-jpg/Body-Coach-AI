@@ -67,6 +67,8 @@ Salin `.env.example` ke `.env.local` dan isi. Daftar variabel mengikuti
 
 ## Status
 
-M0 (scaffolding) selesai. Berikutnya M1 (skema database & seed), lalu M2
-(nutrition engine & guardrail) yang harus lulus test sebelum UI apa pun
-dikerjakan.
+M0 (scaffolding), M1 (skema database & seed), dan M2 (nutrition engine &
+guardrail) selesai. Berikutnya M3 — onboarding 10 langkah dan plan reveal.
+
+Titik masuk untuk siapa pun yang baru bergabung: bagian **"⇥ MULAI DARI SINI"**
+di awal [`PLAN.md`](./PLAN.md).

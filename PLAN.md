@@ -2,6 +2,88 @@
 
 Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diverifikasi pemilik produk dengan menjalankan perintah dan melihat hasilnya.
 
+---
+
+# ⇥ MULAI DARI SINI
+
+> Bagian ini untuk agen/pengembang yang baru masuk ke proyek ini.
+> Diperbarui 11 Agustus 2026. Commit terakhir: `499a66f`, sudah di `origin/main`.
+
+## Sudah selesai
+
+| Milestone | Status | Commit |
+| --- | --- | --- |
+| M0 — Scaffolding & tooling | ✅ selesai | `4d7c3fe` |
+| M1 — Skema database & seed | ✅ selesai | `6ed1d3e` |
+| M2 — Nutrition engine & guardrail | ✅ selesai | `499a66f` |
+| M3 — Onboarding & plan reveal | ⬅ **berikutnya** | — |
+
+Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.
+
+## Cara menjalankan proyek ini
+
+```
+pnpm install
+pnpm dev            # Next.js di http://localhost:3000
+pnpm typecheck      # 7 package lewat turbo
+pnpm lint           # eslint di root, termasuk aturan batas dependency
+pnpm test           # vitest
+pnpm test:coverage  # + ambang coverage 100% pada packages/core/src/nutrition
+pnpm build
+pnpm format         # prettier --write   ·   pnpm format:check untuk CI
+pnpm db:migrate     # idempoten, aman diulang
+pnpm db:seed        # idempoten, aman diulang
+```
+
+Gerbang sebelum commit: `format:check`, `typecheck`, `lint`, `test:coverage`, `build` — semuanya harus hijau. Itu juga isi `.github/workflows/ci.yml`.
+
+## Jebakan lingkungan yang sudah diketahui
+
+Ini semua sudah pernah memakan waktu. Jangan diulang.
+
+1. **pnpm tidak ada di PATH.** Terpasang di `%APPDATA%\npm` tapi direktori itu belum masuk user PATH. Di sesi baru mungkin belum dikenali — pakai path penuh atau tambahkan sendiri ke PATH.
+2. **`DIRECT_URL` bukan koneksi langsung.** Host `db.<ref>.supabase.co` IPv6-only dan **tidak resolve** dari jaringan IPv4 — DNS gagal, TCP tidak terjangkau. `.env.local` memakai **session pooler** (host pooler, port 5432) yang mendukung DDL. Jangan "perbaiki" kembali ke `db.<ref>...`.
+3. **`DATABASE_URL` wajib berakhiran `?pgbouncer=true`.** Transaction pooler tidak mendukung prepared statement.
+4. **Password Supabase tidak memakai kurung siku.** `[...]` di dashboard itu penanda placeholder, bukan bagian password.
+5. **Sertifikat TLS belum diverifikasi.** Supabase memakai CA sendiri; `packages/db/src/client.ts` mencetak peringatan setiap kali. Menutupnya: unduh CA di Dashboard → Project Settings → Database → SSL Configuration, lalu set `DATABASE_CA_CERT_PATH` di `.env.local`. **Wajib sebelum pengguna nyata.**
+6. **Kolom `date` di-parse sebagai string, bukan `Date`.** Disetel di `client.ts`. Jangan dikembalikan — driver menggeser tanggal mundur sehari saat serialisasi ke UTC dari WIB, dan `local_date` adalah sumbu semua rekap harian.
+7. **Prettier tidak menyentuh `*.md`, `docs/`, `design/`, dan `**/__snapshots__/`.** Bukan kelalaian: prettier pernah merusak blok token CSS di CLAUDE.md dan membuat snapshot JSON gagal cocok.
+8. **Pesan commit lewat file (`git commit -F`), bukan `-m`.** PowerShell memecah argumen pada tanda kutip ganda di dalam pesan.
+9. **`.env.local` di-gitignore, `.env.example` tidak.** Jangan pernah menaruh nilai asli di `.env.example`.
+
+## Yang berbeda dari teks milestone di bawah
+
+Teks M0–M2 di bawah sengaja dibiarkan apa adanya sebagai catatan rencana awal. Yang benar-benar dibangun berbeda di beberapa titik:
+
+- **`eslint.config.mjs`, bukan `.eslintrc.cjs`** — ESLint 9 memakai flat config.
+- **`lint` dan `test` jalan di root**, bukan per package lewat turbo. Aturan batas dependency itu lintas package, jadi dievaluasi dari satu konfigurasi. `typecheck`/`build`/`dev` tetap lewat turbo.
+- **Kode ada di `packages/*/src/`**, bukan `packages/core/nutrition/` seperti tertulis di M2.
+- **Skema menambahkan `citext`** (§3 memakai tipenya tapi tidak mencantumkan ekstensinya) dan **memberi nama eksplisit pada semua index**.
+- **RLS lebih ketat dari §3**: `link_tokens` dan `ai_usage` juga dikunci (RLS aktif tanpa policy — hanya service role). `target_versions` tidak punya policy UPDATE/DELETE, jadi **AD-4 ditegakkan database**, bukan hanya kode.
+- **Engine tidak membaca jam** — `computeTargets(profile, currentYear)`.
+- **`estimateTimeline` mengembalikan `null`** untuk laju nol (rumus §4.2 menghasilkan `Infinity` untuk maintain).
+- **Kalori dinaikkan bila protein + lemak minimum melebihinya.** Rumus §4.2 melanggar invariant §4.4 untuk berat tinggi pada tubuh pendek. Ditemukan property test.
+- **`validateGoal` mengumpulkan semua warn**, tidak berhenti di yang pertama (§4.3 menutupi `medical_flag` dengan `extreme_delta`).
+
+## Utang yang belum dibayar
+
+- [ ] **Nilai gizi 50 makanan masih `source=manual`, `verified=false`.** Konsisten secara internal (seed menolak baris yang makronya tidak menjelaskan kalorinya) tapi **belum dicocokkan dengan TKPI**. Ini fondasi L1 Truth. Wajib diverifikasi sebelum pengguna nyata.
+- [ ] **`docs/02-technical-spec.md` §4.4 salah di dua vektor uji BMR.** Pria 25th 70kg 175cm = **1674** (§4.4 menulis 1673, itu pembulatan ke bawah padahal §4.2 memakai `Math.round`). Wanita 25th 55kg 160cm = **1264** (§4.4 menulis 1257; selisih 7 kkal tidak dapat dijelaskan pembulatan). Rumus §4.2 yang dipakai kode. Perbaiki dokumennya.
+- [ ] **Index `ivfflat` dibangun saat tabel kosong**, jadi klasternya tidak berguna. Wajib `REINDEX` setelah embedding terisi di M6.
+- [ ] **`DATABASE_CA_CERT_PATH` belum diset** (lihat jebakan no. 5).
+- [ ] **Status CI di GitHub belum pernah diperiksa.** Repo privat dan `gh` belum login di mesin ini.
+- [ ] **ER diagram `docs/01-system-design.md` §5 menyebut tabel `conversations`** yang tidak ada di §3; `messages` menempel langsung ke `users`. §3 yang dipakai. Rapikan salah satunya.
+
+## Berikutnya: M3
+
+Baca bagian M3 di bawah. Tiga hal yang mudah terlewat:
+
+1. **Terapkan keputusan konflik CLAUDE.md**: warna makro **Protein hijau / Karbo kuning / Lemak biru** (versi plan reveal, bukan versi Dashboard), dan tambahkan token `--iron-300: #A7B3AD`, `--iron-400: #87948E`, `--plate-yellow-ink: #8B6914`.
+2. **`design/Rencana-_-WhatsApp.dc.html` tidak bisa dijalankan** — formatnya Claude Design (`<x-dc>`, `<sc-if>`, binding `{{ }}`, butuh `./support.js` yang tidak ada). Baca sebagai spesifikasi, bangun ulang sebagai React. `Onboarding.dc.html` HTML biasa dan bisa dibuka di browser.
+3. **Engine sudah siap dipakai** — `import { computeTargets, validateGoal, evaluateProfile, estimateTimeline } from '@bodycoach/core'`. Layar guardrail memakai hasil `evaluateProfile`; varian `blocked` secara struktural tidak membawa angka apa pun, jadi tidak ada yang bisa bocor ke layar. Repository database yang relevan sudah ada di `@bodycoach/db`: `createUser`, `upsertProfile`, `appendTargetVersion`, `getTargetOn`.
+
+---
+
 **Status desain:** keempat layar sudah jadi dan token sudah diverifikasi di CLAUDE.md. Layar yang belum didesain dan harus dibuat mengikuti sistem yang sama: Riwayat, Akun & Pengaturan, halaman Pro/paywall penuh, halaman Laporan Mingguan yang bisa dibagikan, dan kartu berbagi 4:5.
 
 **Aturan urutan yang tidak boleh ditukar:** M2 (nutrition engine + guardrail) selesai dan lulus test **sebelum** menyentuh UI apa pun. Engine adalah fondasi kepercayaan produk ini; UI yang cantik di atas angka yang salah adalah kerugian bersih.
@@ -10,7 +92,9 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 
 ---
 
-## M0 — Scaffolding & tooling
+## M0 — Scaffolding & tooling ✅ SELESAI (`4d7c3fe`)
+
+> Semua DoD terpenuhi kecuali "CI hijau di GitHub", yang belum bisa diperiksa karena repo privat dan `gh` belum login. Aturan batas dependency sudah **dibuktikan** memblokir: SDK vendor, package workspace lain, framework, Node builtin, dan jalur relatif tembus semuanya ditolak lint, lalu file buktinya dihapus.
 
 **Tujuan:** repo yang bisa dijalankan, dites, dan di-typecheck dalam satu perintah.
 
@@ -40,7 +124,9 @@ README.md
 
 ---
 
-## M1 — Skema database & seed
+## M1 — Skema database & seed ✅ SELESAI (`6ed1d3e`)
+
+> Semua DoD terverifikasi terhadap Supabase nyata. Trigram: `name_id % 'nasi pdang'` mengembalikan **Nasi Padang** teratas (similarity 0,643). RLS: user A hanya melihat barisnya sendiri, `anon` ditolak sepenuhnya. `UNIQUE(user_id, effective_from)` menolak duplikat dengan kode 23505. Di database: 50 makanan, 171 alias, 102 porsi. `db:migrate` dan `db:seed` idempoten, sudah diuji tiga kali berturut-turut.
 
 **Tujuan:** database berjalan dengan skema lengkap, RLS aktif, dan cukup data makanan untuk mengetes alur.
 
@@ -68,7 +154,19 @@ packages/db/src/seed.ts
 
 ---
 
-## M2 — Nutrition engine & guardrail ★ prioritas tertinggi
+## M2 — Nutrition engine & guardrail ✅ SELESAI (`499a66f`)
+
+> 67 test lolos, coverage **100%** pada `packages/core/src/nutrition` (ditegakkan sebagai ambang di `vitest.config.ts`, dijalankan CI lewat `pnpm test:coverage`). Property test **10.000 profil acak** dengan seed tetap: semua invariant §4.4 terpenuhi. Snapshot 20 profil referensi di `packages/core/src/nutrition/__snapshots__/reference-profiles.json` — **jangan diperbarui tanpa menaikkan `ENGINE_VERSION`**, snapshot itu kontrak yang menjaga target lama tetap bisa dijelaskan asal-usulnya.
+>
+> Hasil verifikasi manual lima profil PLAN.md:
+>
+> | Profil | Hasil |
+> | --- | --- |
+> | Pria 22th 175cm 63kg bulk→70kg gym 4x | 2.882 kkal · P113 K428 L80 · +0,22 kg/mgg · 27–43 minggu |
+> | Pria 28th 178cm 85kg cut→75kg gym 3x | 2.242 kkal · P165 K256 L62 · −0,64 kg/mgg · 13–21 minggu |
+> | Wanita 25th 160cm 60kg cut→55kg gym 3x | 1.391 kkal · P121 K139 L39 · −0,45 kg/mgg |
+> | Wanita 20th 170cm 48kg cut→45kg | **DIBLOKIR** `cut_underweight`, tanpa angka apa pun |
+> | Pria 30th 172cm 70kg maintain | 2.624 kkal = TDEE 2.624 |
 
 **Tujuan:** angka target yang deterministik, teruji, dan aman.
 

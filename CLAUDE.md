@@ -1,6 +1,13 @@
 # CLAUDE.md
 
-Konteks proyek untuk Claude Code. Dibaca setiap sesi. Detail panjang ada di `docs/`.
+Konteks proyek untuk agen coding. Dibaca setiap sesi. Detail panjang ada di `docs/`.
+
+> **Status 11 Agustus 2026 — M0, M1, M2 selesai. Berikutnya M3.**
+> Sebelum mulai, baca bagian **"⇥ MULAI DARI SINI"** di awal `PLAN.md`. Isinya
+> jebakan lingkungan yang sudah pernah memakan waktu (pnpm tidak di PATH,
+> `DIRECT_URL` harus session pooler karena koneksi langsung Supabase IPv6-only,
+> prettier tidak boleh menyentuh markdown dan snapshot), daftar penyimpangan dari
+> spesifikasi yang sudah diterapkan, dan utang yang belum dibayar.
 Design token di bawah **sudah diverifikasi** terhadap `design/preview/*.html` dan keempat layar pada 10 Agustus 2026.
 
 ---

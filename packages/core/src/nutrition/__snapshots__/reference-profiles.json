@@ -1,0 +1,384 @@
+[
+  {
+    "label": "PLAN-1 · pria 22th 175cm 63kg bulk→70kg gym 4x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1619,
+      "tdee": 2639,
+      "kcal": 2882,
+      "proteinG": 113,
+      "carbsG": 428,
+      "fatG": 80,
+      "weeklyKg": 0.2205,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 27,
+      "maxWeeks": 43
+    }
+  },
+  {
+    "label": "PLAN-2 · pria 28th 178cm 85kg cut→75kg gym 3x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1828,
+      "tdee": 2943,
+      "kcal": 2242,
+      "proteinG": 165,
+      "carbsG": 256,
+      "fatG": 62,
+      "weeklyKg": -0.6375,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 13,
+      "maxWeeks": 21
+    }
+  },
+  {
+    "label": "PLAN-3 · wanita 25th 160cm 60kg cut→55kg gym 3x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1314,
+      "tdee": 1886,
+      "kcal": 1391,
+      "proteinG": 121,
+      "carbsG": 139,
+      "fatG": 39,
+      "weeklyKg": -0.44999999999999996,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 9,
+      "maxWeeks": 15
+    }
+  },
+  {
+    "label": "PLAN-4 · wanita 20th 170cm 48kg cut→45kg (harus diblokir)",
+    "guardrail": {
+      "kind": "block",
+      "reason": "cut_underweight",
+      "alternatives": [
+        "maintain",
+        "bulk"
+      ]
+    }
+  },
+  {
+    "label": "PLAN-5 · pria 30th 172cm 70kg maintain",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1630,
+      "tdee": 2624,
+      "kcal": 2624,
+      "proteinG": 126,
+      "carbsG": 366,
+      "fatG": 73,
+      "weeklyKg": 0,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": null
+  },
+  {
+    "label": "pria 19th 168cm 55kg bulk→62kg sedentary",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1510,
+      "tdee": 1872,
+      "kcal": 2084,
+      "proteinG": 99,
+      "carbsG": 292,
+      "fatG": 58,
+      "weeklyKg": 0.1925,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 31,
+      "maxWeeks": 49
+    }
+  },
+  {
+    "label": "pria 35th 180cm 100kg cut→85kg gym 5x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1955,
+      "tdee": 3568,
+      "kcal": 2743,
+      "proteinG": 187,
+      "carbsG": 328,
+      "fatG": 76,
+      "weeklyKg": -0.75,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 17,
+      "maxWeeks": 27
+    }
+  },
+  {
+    "label": "wanita 30th 155cm 70kg cut→58kg gym 4x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1358,
+      "tdee": 2214,
+      "kcal": 1637,
+      "proteinG": 128,
+      "carbsG": 180,
+      "fatG": 45,
+      "weeklyKg": -0.525,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 19,
+      "maxWeeks": 31
+    }
+  },
+  {
+    "label": "wanita 24th 165cm 50kg bulk→56kg gym 3x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1250,
+      "tdee": 1794,
+      "kcal": 1987,
+      "proteinG": 90,
+      "carbsG": 283,
+      "fatG": 55,
+      "weeklyKg": 0.17500000000000002,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 29,
+      "maxWeeks": 46
+    }
+  },
+  {
+    "label": "pria 45th 170cm 80kg maintain sedentary",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1643,
+      "tdee": 1972,
+      "kcal": 1972,
+      "proteinG": 144,
+      "carbsG": 225,
+      "fatG": 55,
+      "weeklyKg": 0,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": null
+  },
+  {
+    "label": "pria 26th 185cm 75kg bulk→88kg gym 6x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1781,
+      "tdee": 3286,
+      "kcal": 3575,
+      "proteinG": 135,
+      "carbsG": 536,
+      "fatG": 99,
+      "weeklyKg": 0.2625,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 42,
+      "maxWeeks": 67
+    }
+  },
+  {
+    "label": "wanita 40th 158cm 65kg cut→58kg konservatif",
+    "guardrail": {
+      "kind": "warn",
+      "reasons": [
+        "medical_flag"
+      ]
+    },
+    "targets": {
+      "bmr": 1277,
+      "tdee": 1807,
+      "kcal": 1536,
+      "proteinG": 128,
+      "carbsG": 159,
+      "fatG": 43,
+      "weeklyKg": -0.4875,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 12,
+      "maxWeeks": 19
+    }
+  },
+  {
+    "label": "pria 21th 173cm 58kg bulk→70kg (selisih ekstrem)",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1561,
+      "tdee": 2576,
+      "kcal": 2799,
+      "proteinG": 104,
+      "carbsG": 420,
+      "fatG": 78,
+      "weeklyKg": 0.203,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 50,
+      "maxWeeks": 80
+    }
+  },
+  {
+    "label": "wanita 22th 168cm 90kg cut→60kg gym 3x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1679,
+      "tdee": 2703,
+      "kcal": 1961,
+      "proteinG": 132,
+      "carbsG": 237,
+      "fatG": 54,
+      "weeklyKg": -0.6749999999999999,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 38,
+      "maxWeeks": 60
+    }
+  },
+  {
+    "label": "pria 55th 165cm 68kg maintain light",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1441,
+      "tdee": 2010,
+      "kcal": 2010,
+      "proteinG": 122,
+      "carbsG": 255,
+      "fatG": 56,
+      "weeklyKg": 0,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": null
+  },
+  {
+    "label": "wanita 19th 152cm 45kg bulk→52kg",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1144,
+      "tdee": 1642,
+      "kcal": 1815,
+      "proteinG": 81,
+      "carbsG": 260,
+      "fatG": 50,
+      "weeklyKg": 0.1575,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 38,
+      "maxWeeks": 60
+    }
+  },
+  {
+    "label": "pria 33th 176cm 120kg cut→95kg sedentary",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 2140,
+      "tdee": 2568,
+      "kcal": 2247,
+      "proteinG": 209,
+      "carbsG": 191,
+      "fatG": 72,
+      "weeklyKg": -0.8999999999999999,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 24,
+      "maxWeeks": 38
+    }
+  },
+  {
+    "label": "pria 27th 170cm 65kg bulk→72kg very_high gym 7x",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1583,
+      "tdee": 3008,
+      "kcal": 3258,
+      "proteinG": 117,
+      "carbsG": 493,
+      "fatG": 91,
+      "weeklyKg": 0.2275,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 26,
+      "maxWeeks": 42
+    }
+  },
+  {
+    "label": "wanita 29th 172cm 62kg maintain moderate",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1389,
+      "tdee": 2264,
+      "kcal": 2264,
+      "proteinG": 112,
+      "carbsG": 312,
+      "fatG": 63,
+      "weeklyKg": 0,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": null
+  },
+  {
+    "label": "wanita 65th 120cm 100kg cut→90kg (kasus batas paling ekstrem)",
+    "guardrail": {
+      "kind": "ok"
+    },
+    "targets": {
+      "bmr": 1264,
+      "tdee": 1517,
+      "kcal": 1332,
+      "proteinG": 198,
+      "carbsG": 0,
+      "fatG": 60,
+      "weeklyKg": -0.75,
+      "engineVersion": "nutrition@1.0.0"
+    },
+    "timeline": {
+      "minWeeks": 11,
+      "maxWeeks": 18
+    }
+  }
+]

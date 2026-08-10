@@ -237,6 +237,7 @@ pnpm build         build produksi
 pnpm typecheck     tsc --noEmit di 7 package (lewat turbo)
 pnpm lint          eslint seluruh workspace, termasuk aturan batas dependency
 pnpm test          vitest
+pnpm test:coverage vitest + ambang coverage 100% pada packages/core/src/nutrition
 pnpm format        prettier --write   ·   pnpm format:check untuk CI
 ```
 

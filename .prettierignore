@@ -7,6 +7,10 @@ pnpm-lock.yaml
 # Output desain — jangan diformat, ini artefak sumber, bukan kode produksi.
 design/
 
+# Snapshot dihasilkan mesin dan dibandingkan byte per byte. Memformatnya ulang
+# membuat test gagal tanpa ada yang berubah pada perilakunya.
+**/__snapshots__/
+
 # Dokumen rujukan ditulis tangan dengan format yang disengaja. Prettier
 # memformat ulang blok kode di dalam markdown dan merusak blok token CSS
 # di CLAUDE.md (yang memang sengaja bukan CSS valid). Jangan disentuh.

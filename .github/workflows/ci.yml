@@ -34,8 +34,11 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
-      - name: Test
-        run: pnpm test
+      # Coverage, bukan `pnpm test` biasa: ambang 100% pada modul nutrition
+      # ditegakkan di sini. Cabang yang tidak teruji di engine berarti angka
+      # yang tidak pernah diperiksa sampai ada pengguna yang menerimanya.
+      - name: Test + coverage
+        run: pnpm test:coverage
 
       - name: Build
         run: pnpm build

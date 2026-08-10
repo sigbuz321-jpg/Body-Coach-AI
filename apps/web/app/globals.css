@@ -1,17 +1,10 @@
 /*
- * Placeholder M0. Design token "Piring & Plat" yang sebenarnya masuk di M3
- * sebagai packages/ui/src/tokens.css, lalu diimpor dari sini.
- * Jangan menambah gaya produk di file ini.
+ * Reset kecil + tipografi dasar. Semua warna, jarak, dan bentuk dari token
+ * di packages/ui/src/tokens.css (diimpor lewat @bodycoach/ui).
+ *
+ * Jangan menambah gaya produk di file ini — tempatkan di komponen
+ * packages/ui/src/.
  */
-
-:root {
-  --bg: #f5f7f6;
-  --surface: #ffffff;
-  --fg: #131a24;
-  --muted: #6b7780;
-  --border: #dce2df;
-  --accent: #1156c7;
-}
 
 * {
   box-sizing: border-box;
@@ -23,11 +16,41 @@ body {
   padding: 0;
 }
 
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: system-ui, sans-serif;
-  font-size: 15px;
-  line-height: 23px;
-  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--iron-900);
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }

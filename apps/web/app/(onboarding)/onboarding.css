@@ -1,0 +1,717 @@
+/*
+ * Style spesifik onboarding + rencana + sambungkan.
+ *
+ * Bertumpu pada token dari packages/ui/src/tokens.css. Tidak menulis warna
+ * atau jarak secara hardcode.
+ */
+
+/* ── Layout utama wizard ────────────────────────────────────────────── */
+
+.ob {
+  min-height: 100dvh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+.ob-stages {
+  flex: 1;
+  position: relative;
+  padding: 48px 20px 120px;
+}
+@media (min-width: 768px) {
+  .ob-stages {
+    padding: 72px 24px 120px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
+.ob-stage {
+  display: none;
+}
+.ob-stage--active {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 168px);
+  animation: ob-fade-in var(--motion);
+}
+@keyframes ob-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Tombol next dan back fixed-bottom */
+
+.ob-back {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 201;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--iron-900);
+  border-radius: var(--radius-pill);
+  transition: background var(--motion);
+}
+.ob-back:hover {
+  background: var(--enamel-100);
+}
+
+.ob-nextbar {
+  position: fixed;
+  bottom: 24px;
+  left: 20px;
+  right: 20px;
+  z-index: 100;
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ob-nextbar--stack {
+  background: transparent;
+}
+.ob-nextbar--center {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+@media (min-width: 390px) {
+  .ob-nextbar {
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+  }
+}
+
+/* ── Step (umum) ───────────────────────────────────────────────────── */
+
+.ob-step {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.ob-step__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: -0.01em;
+  color: var(--iron-900);
+  margin: 0;
+}
+.ob-step__sub {
+  margin: -16px 0 0;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--muted);
+}
+.ob-step__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ob-step__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ── Step 2: gender cards ──────────────────────────────────────────── */
+
+.ob-gender {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition:
+    border-color var(--motion),
+    background var(--motion);
+}
+.ob-gender:hover {
+  border-color: var(--iron-400);
+}
+.ob-gender--selected {
+  border-color: var(--iron-900);
+  background: var(--enamel-50);
+}
+.ob-gender__icon {
+  font-size: 32px;
+}
+.ob-gender__title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--iron-900);
+}
+.ob-gender__sub {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 18px;
+}
+
+/* ── Step 4–6: slider screens ─────────────────────────────────────── */
+
+.ob-step__slider {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 32px;
+  padding-bottom: 40px;
+}
+.ob-step__slider-value {
+  text-align: center;
+}
+.ob-step__slider-number {
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1;
+  color: var(--iron-900);
+}
+.ob-step__slider-unit {
+  font-size: 18px;
+  color: var(--muted);
+  margin-left: 8px;
+}
+.ob-step__slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
+/* ── Step 6: journey (now → target) ───────────────────────────────── */
+
+.ob-journey {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+.ob-journey__visual {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+.ob-journey__point {
+  text-align: center;
+}
+.ob-journey__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.ob-journey__weight {
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--iron-900);
+}
+.ob-journey__arrow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+.ob-journey__line {
+  flex: 1;
+  height: 2px;
+  background: var(--enamel-200);
+}
+.ob-journey__diff {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.ob-journey__diff--positive {
+  background: var(--plate-blue-tint);
+  color: var(--plate-blue);
+}
+.ob-journey__diff--negative {
+  background: var(--plate-red-tint);
+  color: var(--plate-red);
+}
+.ob-journey__diff--neutral {
+  background: var(--plate-yellow-tint);
+  color: var(--plate-yellow-ink);
+}
+.ob-journey__hint {
+  font-size: 13px;
+  line-height: 20px;
+  padding: 12px 16px;
+  border-radius: var(--radius-card);
+}
+.ob-journey__hint[data-tone='blue'] {
+  background: var(--plate-blue-tint);
+  color: var(--plate-blue);
+}
+.ob-journey__hint[data-tone='red'] {
+  background: var(--plate-red-tint);
+  color: var(--plate-red);
+}
+
+/* ── Step 7: activity ──────────────────────────────────────────────── */
+
+.ob-activity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transition:
+    border-color var(--motion),
+    background var(--motion);
+}
+.ob-activity:hover {
+  border-color: var(--iron-400);
+}
+.ob-activity--selected {
+  border-color: var(--iron-900);
+  background: var(--enamel-50);
+}
+.ob-activity__dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  transition:
+    background var(--motion),
+    border-color var(--motion);
+}
+.ob-activity--selected .ob-activity__dot {
+  background: var(--iron-900);
+  border-color: var(--iron-900);
+}
+.ob-activity__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.ob-activity__title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--iron-900);
+}
+.ob-activity__sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── Step 8: gym chips ─────────────────────────────────────────────── */
+
+.ob-gym {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.ob-gym__scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 24px 0 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.ob-gym__scroll::-webkit-scrollbar {
+  display: none;
+}
+.ob-gym__caption {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* ── Step 9: preference chips ──────────────────────────────────────── */
+
+.ob-prefs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Step 10: budget chips ─────────────────────────────────────────── */
+
+.ob-budget {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ob-budget .bc-chip {
+  flex: 1 1 30%;
+  font-size: 14px;
+  padding: 0 14px;
+  height: 48px;
+}
+.ob-budget__skip {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 8px;
+  align-self: center;
+}
+
+/* ── Agreement ─────────────────────────────────────────────────────── */
+
+.ob-agreement {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.ob-agreement__row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  cursor: pointer;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.ob-agreement__box {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  color: var(--surface);
+  transition:
+    background var(--motion),
+    border-color var(--motion);
+}
+.ob-agreement__box svg {
+  opacity: 0;
+  transition: opacity var(--motion);
+}
+.ob-agreement__row--checked .ob-agreement__box {
+  background: var(--iron-900);
+  border-color: var(--iron-900);
+}
+.ob-agreement__row--checked .ob-agreement__box svg {
+  opacity: 1;
+}
+.ob-agreement__text {
+  font-size: 14px;
+  color: var(--iron-900);
+  line-height: 1.5;
+}
+.ob-agreement__text a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* ── Calculating ───────────────────────────────────────────────────── */
+
+.ob-calc {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  text-align: center;
+}
+.ob-calc__stack {
+  position: relative;
+  width: 280px;
+  height: 48px;
+}
+.ob-calc__bar {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: var(--enamel-200);
+  border-radius: 4px;
+  transform: translateY(-50%);
+}
+.ob-calc__plate {
+  position: absolute;
+  top: 50%;
+  height: 36px;
+  background: var(--iron-700);
+  border-radius: 3px;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    width 0.3s ease;
+}
+.ob-calc__plate--loaded {
+  opacity: 1;
+}
+.ob-calc__plate--over {
+  background: var(--plate-red);
+}
+.ob-calc__text {
+  font-size: var(--fs-h3);
+  color: var(--muted);
+  min-height: 28px;
+}
+
+/* ── Guardrail ─────────────────────────────────────────────────────── */
+
+.ob-guard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 24px;
+  padding: 24px;
+}
+.ob-guard__icon {
+  font-size: 48px;
+}
+.ob-guard__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 30px;
+  color: var(--iron-900);
+  margin: 0;
+}
+.ob-guard__body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--muted);
+  max-width: 320px;
+  margin: 0;
+}
+.ob-guard__btns {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 280px;
+  margin-top: 8px;
+}
+
+/* ── Rencana (plan reveal) ─────────────────────────────────────────── */
+
+.ob--plan .ob-plan__scroll {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 48px 20px 140px;
+  overflow-y: auto;
+}
+@media (min-width: 768px) {
+  .ob--plan .ob-plan__scroll {
+    padding: 72px 24px 140px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+
+/* ── Sambungkan WA ─────────────────────────────────────────────────── */
+
+.ob-wa {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 48px 20px 140px;
+}
+@media (min-width: 768px) {
+  .ob-wa {
+    padding: 72px 24px 140px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+}
+.ob-wa__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--iron-900);
+}
+.ob-wa__sub {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  color: var(--iron-600);
+  margin: 12px 0 0;
+  text-wrap: pretty;
+}
+.ob-wa__token-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ob-wa__token-label {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--muted);
+}
+.ob-wa__token-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ob-wa__token-value {
+  flex: 1;
+  background: var(--enamel-50);
+  border: 1px solid var(--enamel-100);
+  border-radius: var(--radius-inner);
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: var(--fs-data-m);
+  line-height: var(--lh-data-m);
+  letter-spacing: 0.02em;
+}
+.ob-wa__token-hint {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--muted);
+}
+.ob-wa__prompts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ob-wa__prompts-label {
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--muted);
+}
+.ob-wa__prompts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ob-wa__prompt {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 12px 16px;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+.ob-wa__waiting {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px 32px;
+  text-align: center;
+}
+.ob-wa__dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+}
+.ob-wa__dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--enamel-400);
+  animation: ob-dotpulse 1.2s ease-in-out infinite;
+}
+.ob-wa__dots span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.ob-wa__dots span:nth-child(3) {
+  animation-delay: 0.36s;
+}
+@keyframes ob-dotpulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+.ob-wa__waiting-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--iron-900);
+}
+.ob-wa__waiting-sub {
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--muted);
+  margin: 0;
+  text-wrap: pretty;
+}
+.ob-wa__waiting-token {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 23px;
+  letter-spacing: 0.02em;
+  color: var(--iron-600);
+}

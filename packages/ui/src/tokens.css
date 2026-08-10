@@ -1,0 +1,112 @@
+/*
+ * Design tokens "Piring & Plat" untuk AI Body Coach.
+ *
+ * Sumber kebenaran tunggal untuk warna, tipografi, jarak, dan bentuk.
+ * Konsumen mengimpor satu file ini lewat @bodycoach/ui/tokens.css.
+ *
+ * Penyesuaian dari CLAUDE.md sudah diterapkan:
+ * - --iron-300 dan --iron-400 ditambahkan (untuk hover tombol sekunder & chip)
+ * - --plate-yellow-ink ditambahkan (teks di atas --plate-yellow-tint;
+ *   kuning murni gagal kontras WCAG AA di putih)
+ * - Pemetaan makro final mengikuti Rencana (plan reveal), bukan Dashboard:
+ *   Protein hijau, Karbo kuning, Lemak biru. Dashboard dan components.html
+ *   akan ikut diseragamkan di M8.
+ *
+ * Catatan: ini bukan CSS aplikasi — file ini adalah library variabel. Pemakaian
+ * konkret (kelas komponen) tinggal di komponen masing-masing.
+ */
+
+:root {
+  /* Enamel */
+  --enamel-0: #ffffff;
+  --enamel-50: #f5f7f6;
+  --enamel-100: #eaeeec;
+  --enamel-200: #dce2df;
+  --enamel-300: #c2cbc6;
+  --enamel-400: #98a5a0;
+
+  /* Iron */
+  --iron-300: #a7b3ad;
+  --iron-400: #87948e;
+  --iron-500: #6b7780;
+  --iron-600: #4a555e;
+  --iron-700: #2c3742;
+  --iron-900: #131a24;
+  --iron-950: #0c1119;
+
+  /* Plate */
+  --plate-blue: #1156c7;
+  --plate-blue-tint: #e8f0fc;
+  --plate-red: #e0332c;
+  --plate-red-tint: #fdebea;
+  --plate-yellow: #f5b301;
+  --plate-yellow-tint: #fef5e0;
+  --plate-yellow-ink: #8b6914;
+  --plate-green: #1e9e5a;
+  --plate-green-tint: #e6f5ed;
+
+  /* Semantic */
+  --bg: var(--enamel-50);
+  --surface: var(--enamel-0);
+  --fg: var(--iron-900);
+  --muted: var(--iron-500);
+  --border: var(--enamel-200);
+  --accent: var(--plate-blue);
+
+  /* Shape */
+  --radius-card: 16px;
+  --radius-sheet: 24px;
+  --radius-pill: 999px;
+  --radius-inner: 12px;
+  --radius-xs: 8px;
+
+  /* Motion */
+  --motion: 200ms cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Typography */
+  --font-display: 'Archivo', sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Type scale (mobile / desktop) */
+  --fs-hero: 56px;
+  --lh-hero: 61px;
+  --fs-hero-md: 40px;
+  --lh-hero-md: 44px;
+  --fs-display: 32px;
+  --lh-display: 36px;
+  --fs-display-md: 26px;
+  --lh-display-md: 32px;
+  --fs-h2: 21px;
+  --lh-h2: 28px;
+  --fs-h3: 17px;
+  --lh-h3: 26px;
+  --fs-body: 15px;
+  --lh-body: 23px;
+  --fs-caption: 13px;
+  --lh-caption: 20px;
+  --fs-label: 12px;
+  --lh-label: 16px;
+  --fs-data-xl: 44px;
+  --lh-data-xl: 48px;
+  --fs-data-l: 28px;
+  --lh-data-l: 32px;
+  --fs-data-m: 18px;
+  --lh-data-m: 24px;
+  --fs-data-s: 13px;
+  --lh-data-s: 20px;
+
+  /* Tracking & case untuk label */
+  --tracking-label: 0.08em;
+  --tracking-display: -0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,41 +1,52 @@
-import { CORE_PACKAGE } from '@bodycoach/core';
-import { DB_PACKAGE } from '@bodycoach/db';
-import { UI_PACKAGE } from '@bodycoach/ui';
+import Link from 'next/link';
 
 /**
- * Halaman sementara M0. Isinya bukan produk — ini bukti bahwa resolusi
- * package lintas workspace benar-benar bekerja di dalam Next.js.
- * Diganti seluruhnya oleh landing page di M4.
+ * Placeholder root — halaman landing dibangun di M4.
+ * Untuk sekarang hanya tautan masuk ke onboarding supaya engineer bisa
+ * mengetes alur dengan cepat.
  */
-const WIRED = [CORE_PACKAGE, DB_PACKAGE, UI_PACKAGE];
-
 export default function Page() {
   return (
-    <main style={{ maxWidth: 640, margin: '0 auto', padding: 20 }}>
-      <h1 style={{ fontSize: 32, lineHeight: '36px', margin: '40px 0 8px' }}>AI Body Coach</h1>
-      <p style={{ color: 'var(--muted)', margin: '0 0 32px' }}>
-        M0 — scaffolding. Landing page yang sebenarnya dibangun di M4.
-      </p>
-
-      <section
+    <main
+      style={{
+        maxWidth: 480,
+        margin: '0 auto',
+        padding: 24,
+        fontFamily: 'var(--font-body)',
+        color: 'var(--iron-900)',
+      }}
+    >
+      <h1
         style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: 16,
-          padding: 20,
+          fontFamily: 'var(--font-display)',
+          fontWeight: 800,
+          fontSize: 40,
+          lineHeight: '44px',
+          letterSpacing: '-0.02em',
+          margin: '40px 0 8px',
         }}
       >
-        <h2 style={{ fontSize: 17, lineHeight: '26px', margin: '0 0 12px' }}>
-          Package yang tersambung
-        </h2>
-        <ul style={{ margin: 0, paddingLeft: 20, color: 'var(--muted)' }}>
-          {WIRED.map((name) => (
-            <li key={name} style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13 }}>
-              {name}
-            </li>
-          ))}
-        </ul>
-      </section>
+        AI Body Coach
+      </h1>
+      <p style={{ color: 'var(--muted)', margin: '0 0 32px' }}>
+        Landing page menyusul di M4. Untuk sekarang, masuk ke wizard onboarding.
+      </p>
+      <Link
+        href="/onboarding"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          height: 52,
+          padding: '0 24px',
+          background: 'var(--iron-900)',
+          color: 'var(--enamel-0)',
+          borderRadius: 999,
+          fontWeight: 600,
+          textDecoration: 'none',
+        }}
+      >
+        Mulai onboarding
+      </Link>
     </main>
   );
 }

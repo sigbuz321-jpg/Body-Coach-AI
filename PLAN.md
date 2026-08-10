@@ -16,7 +16,8 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 | M0 — Scaffolding & tooling | ✅ selesai | `4d7c3fe` |
 | M1 — Skema database & seed | ✅ selesai | `6ed1d3e` |
 | M2 — Nutrition engine & guardrail | ✅ selesai | `499a66f` |
-| M3 — Onboarding & plan reveal | ⬅ **berikutnya** | — |
+| M3 — Onboarding & plan reveal | ✅ selesai | (lihat log) |
+| M4 — Landing page | ⬅ **berikutnya** | — |
 
 Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.
 
@@ -201,7 +202,22 @@ Implementasi persis mengikuti `docs/02-technical-spec.md` §4. Fungsi murni, tan
 
 ---
 
-## M3 — Onboarding & plan reveal
+## M3 — Onboarding & plan reveal ✅ SELESAI
+
+> **Bukti DoD:**
+>
+> - 83 test lulus (67 engine + 16 UI/onboarding baru), coverage nutrition 100%.
+> - `format:check`, `typecheck` (7 paket), `lint`, `test:coverage`, `build` — semua hijau.
+> - API guardrail dites manual via curl: wanita 170cm 48kg target 45kg → `{kind:"blocked",reason:"cut_underweight"}` (tidak ada angka sama sekali).
+> - Build menghasilkan 4 halaman: `/onboarding` (4,91 kB), `/rencana` (1,03 kB), `/sambungkan` (1,80 kB), `/` placeholder; `/api/onboarding` sebagai dynamic API route.
+>
+> **Penyimpangan dari teks asli** (dilaporkan, bukan diperbaiki kembali):
+>
+> - Route `rencana` dan `sambungkan` dipisah jadi dua halaman (desain asli menampilkannya berurutan dalam satu kanvas). Dipisah agar PlanCard tidak re-render saat state sambungkan berubah, dan agar masing-masing bisa diuji sebagai unit.
+> - `displayName` ada di state wizard tapi tidak dipakai di input — engine tidak butuh dan API Zod menerimanya nullable untuk fleksibilitas M7 (akun login).
+> - `link_tokens` di-generate server-side dengan format `MULAI-XXXXXX` (alfanumerik tanpa ambiguous chars). Disimpan ke sessionStorage `bodycoach.lastResult.v1` agar `/sambungkan` bisa membacanya tanpa query param.
+> - Format `MULAI-<6 char>` (6, bukan 4) supaya collision probability turun ke ~1,1 miliar untuk 1 juta token. Sesuai rencana M5.
+> - Effective-from target dipakai `Asia/Jakarta` lewat `Intl.DateTimeFormat`, bukan `Date.now()` UTC (konsisten dengan `client.ts` note tentang `local_date`).
 
 **Tujuan:** pengguna baru bisa menyelesaikan 10 langkah dan melihat rencana personalnya.
 

@@ -5,7 +5,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['{apps,packages,tooling}/*/src/**/*.test.{ts,tsx}'],
+    include: [
+      '{apps,packages,tooling}/*/src/**/*.test.{ts,tsx}',
+      'apps/web/lib/**/*.test.{ts,tsx}',
+    ],
     passWithNoTests: true,
     coverage: {
       provider: 'v8',

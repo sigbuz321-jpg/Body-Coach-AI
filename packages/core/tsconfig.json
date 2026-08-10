@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Sengaja kosong: `core` adalah domain murni tanpa I/O (AD, docs/02-technical-spec.md §1).
+    // Tanpa @types/node, `import 'node:fs'` gagal di typecheck — lapis kedua di atas aturan ESLint.
+    "types": []
+  },
+  "include": ["src/**/*.ts"]
+}

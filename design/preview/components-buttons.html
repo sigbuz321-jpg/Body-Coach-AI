@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Components: Buttons — AI Body Coach</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    [data-theme="dark"] {
+      --bg: #0C1119;
+      --surface: #131A24;
+      --fg: #EAEEEC;
+      --muted: #98A5A0;
+      --border: #2C3742;
+      --enamel-100: #1E2832;
+      --enamel-200: #2C3742;
+      --enamel-300: #4A555E;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 16px;
+      margin-top: 40px;
+    }
+    .section { margin-bottom: 32px; }
+    .specimen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .specimen-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .component-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .btn-primary {
+      height: 52px;
+      padding: 0 24px;
+      border-radius: var(--radius-pill);
+      background: var(--fg);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background var(--motion);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { background: var(--iron-950); }
+    .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn-primary:disabled { background: var(--enamel-200); color: var(--enamel-400); cursor: not-allowed; }
+    .btn-secondary {
+      height: 52px;
+      padding: 0 24px;
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--fg);
+      font-size: 15px;
+      font-weight: 600;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover { border-color: var(--iron-400); background: var(--enamel-50); }
+    .btn-secondary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-small {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: var(--radius-pill);
+      background: var(--iron-900);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: background var(--motion);
+    }
+    .btn-small:hover { background: var(--iron-700); }
+    .btn-small:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .goal-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      height: 48px;
+      padding: 0 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .chip.selected { background: var(--fg); color: #fff; border-color: var(--fg); }
+    .chip:hover:not(.selected) { border-color: var(--iron-300); }
+    .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .pref-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .pref-chip.selected { background: var(--fg); color: #fff; border-color: var(--fg); }
+    .pref-chip:hover:not(.selected) { border-color: var(--iron-300); }
+    .pref-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .state-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .state-row:last-child { border-bottom: none; }
+    .state-label {
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+      flex-shrink: 0;
+    }
+    .icon-btn:hover { border-color: var(--iron-300); background: var(--enamel-50); }
+    .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <h1>Components: Buttons</h1>
+  <p class="subtitle">Primary, secondary, small, goal chips, and selection chips — from source evidence</p>
+
+  <div class="section">
+    <h2>Primary Button</h2>
+    <div class="specimen">
+      <div class="specimen-label">Solid dark, pill radius, 52px height — from Dashboard.dc.html</div>
+      <div class="state-row">
+        <span class="state-label">Default</span>
+        <button class="btn-primary">Mulai gratis</button>
+      </div>
+      <div class="state-row">
+        <span class="state-label">Hover</span>
+        <button class="btn-primary" style="background: var(--iron-950);">Mulai gratis</button>
+      </div>
+      <div class="state-row">
+        <span class="state-label">Disabled</span>
+        <button class="btn-primary" disabled>Mulai gratis</button>
+      </div>
+      <div class="state-row">
+        <span class="state-label">With icon</span>
+        <button class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          Dengan icon
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Secondary Button</h2>
+    <div class="specimen">
+      <div class="specimen-label">Ghost with border, pill radius, 52px height</div>
+      <div class="state-row">
+        <span class="state-label">Default</span>
+        <button class="btn-secondary">Ubah data</button>
+      </div>
+      <div class="state-row">
+        <span class="state-label">Hover</span>
+        <button class="btn-secondary" style="border-color: var(--iron-400); background: var(--enamel-50);">Ubah data</button>
+      </div>
+      <div class="state-row">
+        <span class="state-label">Disabled</span>
+        <button class="btn-secondary" disabled>Ubah data</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Small Button</h2>
+    <div class="specimen">
+      <div class="specimen-label">36px height, 16px padding — from Onboarding.dc.html</div>
+      <div class="state-row">
+        <span class="state-label">Default</span>
+        <button class="btn-small">Sambungkan</button>
+      </div>
+      <div class="state-row">
+        <span class="state-label">Hover</span>
+        <button class="btn-small" style="background: var(--iron-700);">Sambungkan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Goal Chips</h2>
+    <div class="specimen">
+      <div class="specimen-label">Pill-shaped, uppercase, goal-based color — from Onboarding.dc.html</div>
+      <div class="component-row">
+        <span class="goal-chip" style="background: var(--plate-blue-tint); color: var(--plate-blue);">BULK</span>
+        <span class="goal-chip" style="background: var(--plate-red-tint); color: var(--plate-red);">CUT</span>
+        <span class="goal-chip" style="background: var(--plate-yellow-tint); color: #8B6914;">MAINTAIN</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Selection Chips</h2>
+    <div class="specimen">
+      <div class="specimen-label">Single select — gym frequency days</div>
+      <div class="component-row">
+        <button class="chip">0</button>
+        <button class="chip">1</button>
+        <button class="chip selected">3</button>
+        <button class="chip">5</button>
+        <button class="chip">7</button>
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="specimen-label">Multi select — food preferences</div>
+      <div class="component-row">
+        <button class="pref-chip selected">Halal</button>
+        <button class="pref-chip">Tanpa babi</button>
+        <button class="pref-chip selected">Vegetarian</button>
+        <button class="pref-chip">Tanpa seafood</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Icon Button</h2>
+    <div class="specimen">
+      <div class="specimen-label">44px circular touch target</div>
+      <div class="component-row">
+        <button class="icon-btn" aria-label="Kurangi">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Tambah">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

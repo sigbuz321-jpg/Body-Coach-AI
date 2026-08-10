@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Color Palette — AI Body Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --enamel-0: #FFFFFF;
+      --enamel-50: #F5F7F6;
+      --enamel-100: #EAEEEC;
+      --enamel-200: #DCE2DF;
+      --enamel-300: #C2CBC6;
+      --enamel-400: #98A5A0;
+      --iron-500: #6B7780;
+      --iron-600: #4A555E;
+      --iron-700: #2C3742;
+      --iron-900: #131A24;
+      --iron-950: #0C1119;
+      --plate-blue: #1156C7;
+      --plate-blue-tint: #E8F0FC;
+      --plate-red: #E0332C;
+      --plate-red-tint: #FDEBEA;
+      --plate-yellow: #F5B301;
+      --plate-yellow-tint: #FEF5E0;
+      --plate-green: #1E9E5A;
+      --plate-green-tint: #E6F5ED;
+      --bg: #F5F7F6;
+      --surface: #FFFFFF;
+      --fg: #131A24;
+      --muted: #6B7780;
+      --border: #DCE2DF;
+      --accent: #1156C7;
+      --font-display: 'Archivo', sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
+      --radius-sheet: 24px;
+      --radius-pill: 999px;
+      --motion: 200ms cubic-bezier(.32,.72,0,1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0C1119;
+      --surface: #131A24;
+      --fg: #EAEEEC;
+      --muted: #98A5A0;
+      --border: #2C3742;
+      --enamel-100: #1E2832;
+      --enamel-200: #2C3742;
+      --enamel-300: #4A555E;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 16px;
+      margin-top: 32px;
+    }
+    .swatch-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .swatch-chip {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .swatch-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .section { margin-bottom: 40px; }
+    .semantic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .semantic-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 16px;
+    }
+    .semantic-card h3 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .semantic-preview {
+      height: 48px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .semantic-token {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .theme-toggle:hover { background: var(--enamel-100); }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark')">Toggle Dark</button>
+
+  <h1>Color Palette</h1>
+
+  <div class="section">
+    <h2>Enamel Scale</h2>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch-chip" style="background: #FFFFFF; border-color: #DCE2DF;"></div><span class="swatch-label">enamel-0</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #F5F7F6;"></div><span class="swatch-label">enamel-50</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #EAEEEC;"></div><span class="swatch-label">enamel-100</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #DCE2DF;"></div><span class="swatch-label">enamel-200</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #C2CBC6;"></div><span class="swatch-label">enamel-300</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #98A5A0;"></div><span class="swatch-label">enamel-400</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Iron Scale</h2>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="swatch-chip" style="background: #6B7780;"></div><span class="swatch-label">iron-500</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #4A555E;"></div><span class="swatch-label">iron-600</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #2C3742;"></div><span class="swatch-label">iron-700</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #131A24;"></div><span class="swatch-label">iron-900</span></div>
+      <div class="swatch"><div class="swatch-chip" style="background: #0C1119;"></div><span class="swatch-label">iron-950</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Plate System</h2>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #1156C7;"></div>
+        <span class="swatch-label">plate-blue</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #E8F0FC;"></div>
+        <span class="swatch-label">plate-blue-tint</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #E0332C;"></div>
+        <span class="swatch-label">plate-red</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #FDEBEA;"></div>
+        <span class="swatch-label">plate-red-tint</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #F5B301;"></div>
+        <span class="swatch-label">plate-yellow</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #FEF5E0;"></div>
+        <span class="swatch-label">plate-yellow-tint</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #1E9E5A;"></div>
+        <span class="swatch-label">plate-green</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #E6F5ED;"></div>
+        <span class="swatch-label">plate-green-tint</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Semantic Tokens (Light)</h2>
+    <div class="semantic-grid">
+      <div class="semantic-card">
+        <h3>Background</h3>
+        <div class="semantic-preview" style="background: #F5F7F6;"></div>
+        <div class="semantic-token">--bg: #F5F7F6</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Surface</h3>
+        <div class="semantic-preview" style="background: #FFFFFF; border: 1px solid #DCE2DF;"></div>
+        <div class="semantic-token">--surface: #FFFFFF</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Foreground</h3>
+        <div class="semantic-preview" style="background: #131A24;"></div>
+        <div class="semantic-token">--fg: #131A24</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Muted</h3>
+        <div class="semantic-preview" style="background: #6B7780;"></div>
+        <div class="semantic-token">--muted: #6B7780</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Border</h3>
+        <div class="semantic-preview" style="background: #FFFFFF; border: 2px solid #DCE2DF;"></div>
+        <div class="semantic-token">--border: #DCE2DF</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Accent</h3>
+        <div class="semantic-preview" style="background: #1156C7;"></div>
+        <div class="semantic-token">--accent: #1156C7</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Goal Chips</h2>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #E8F0FC; border: 1px solid #1156C7;"></div>
+        <span class="swatch-label">BULK</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #FDEBEA; border: 1px solid #E0332C;"></div>
+        <span class="swatch-label">CUT</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #FEF5E0; border: 1px solid #F5B301;"></div>
+        <span class="swatch-label">MAINTAIN</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Status States</h2>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #E6F5ED; border: 1px solid #1E9E5A;"></div>
+        <span class="swatch-label">Success</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #FEF5E0; border: 1px solid #F5B301;"></div>
+        <span class="swatch-label">Warning</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #FDEBEA; border: 1px solid #E0332C;"></div>
+        <span class="swatch-label">Danger</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: #EAEEEC; border: 1px solid #DCE2DF;"></div>
+        <span class="swatch-label">Neutral</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Pro Gradient</h2>
+    <div class="swatch">
+      <div class="swatch-chip" style="background: linear-gradient(135deg, #131A24, #2C3742);"></div>
+      <span class="swatch-label">iron-900 → iron-700</span>
+    </div>
+  </div>
+</body>
+</html>

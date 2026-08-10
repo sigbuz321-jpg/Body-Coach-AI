@@ -1,0 +1,10 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'tooling/*'
+
+# Build script yang diizinkan berjalan saat install.
+# esbuild → dipakai vitest. sharp → optimisasi gambar Next.js.
+allowBuilds:
+  esbuild: true
+  sharp: true

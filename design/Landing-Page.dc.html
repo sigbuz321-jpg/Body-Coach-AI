@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Body Coach — Coach Nutrisi di WhatsApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --enamel-0: #FFFFFF;
+      --enamel-50: #F5F7F6;
+      --enamel-100: #EAEEEC;
+      --enamel-200: #DCE2DF;
+      --enamel-300: #C2CBC6;
+      --enamel-400: #98A5A0;
+      --iron-500: #6B7780;
+      --iron-600: #4A555E;
+      --iron-700: #2C3742;
+      --iron-900: #131A24;
+      --iron-950: #0C1119;
+      --plate-blue: #1156C7;
+      --plate-blue-tint: #E8F0FC;
+      --plate-red: #E0332C;
+      --plate-red-tint: #FDEBEA;
+      --plate-yellow: #F5B301;
+      --plate-yellow-tint: #FEF5E0;
+      --plate-green: #1E9E5A;
+      --plate-green-tint: #E6F5ED;
+      --bg: #F5F7F6;
+      --surface: #FFFFFF;
+      --fg: #131A24;
+      --muted: #6B7780;
+      --border: #DCE2DF;
+      --accent: #1156C7;
+      --font-display: 'Archivo', sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
+      --radius-sheet: 24px;
+      --radius-pill: 999px;
+      --motion: 200ms cubic-bezier(.32,.72,0,1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    @media (min-width: 768px) {
+      .container { padding: 0 48px; }
+    }
+
+    /* NAV */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(245, 247, 246, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+    }
+    .nav-cta {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: var(--radius-pill);
+      background: var(--fg);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      transition: background var(--motion);
+    }
+    .nav-cta:hover { background: var(--iron-950); text-decoration: none; }
+
+    /* HERO */
+    .hero {
+      padding: 96px 0 56px;
+      background: var(--bg);
+    }
+    .hero-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+    .hero-headline {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 40px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+    }
+    @media (min-width: 768px) {
+      .hero-headline { font-size: 56px; }
+    }
+    .hero-sub {
+      font-size: 17px;
+      line-height: 1.55;
+      color: var(--iron-600);
+      max-width: 44ch;
+    }
+    .hero-cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    @media (min-width: 480px) {
+      .hero-cta-group { flex-direction: row; align-items: center; }
+    }
+    .btn-primary {
+      height: 52px;
+      padding: 0 28px;
+      border-radius: var(--radius-pill);
+      background: var(--fg);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      transition: background var(--motion);
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: var(--iron-950); text-decoration: none; }
+    .btn-secondary {
+      height: 44px;
+      padding: 0 16px;
+      border-radius: var(--radius-pill);
+      color: var(--iron-600);
+      font-size: 15px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      transition: background var(--motion);
+    }
+    .btn-secondary:hover { background: var(--enamel-100); color: var(--fg); text-decoration: none; }
+    .hero-micro {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* PLATE STACK */
+    .plate-stack-wrapper {
+      padding: 24px 0 0;
+    }
+    .plate-stack {
+      position: relative;
+      height: 120px;
+      display: flex;
+      align-items: center;
+    }
+    .plate-stack-bar {
+      position: absolute;
+      left: 0;
+      right: 80px;
+      height: 2px;
+      background: var(--enamel-300);
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .plate-stack-plates {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      position: relative;
+      z-index: 1;
+    }
+    .plate {
+      height: 88px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 11px;
+      color: #fff;
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    .plate.iron { background: var(--iron-700); }
+    .plate.over { background: var(--plate-red); }
+    .plate.loaded {
+      animation: plateIn 400ms cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes plateIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .plate-stack-label {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: right;
+    }
+    .plate-stack-number {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 44px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+    }
+    .plate-stack-sub {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-weight: 500;
+    }
+
+    /* SECTION COMMON */
+    section { padding: 56px 0; }
+    @media (min-width: 768px) { section { padding: 80px 0; } }
+    .section-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 26px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+      margin-bottom: 8px;
+    }
+    @media (min-width: 768px) { .section-title { font-size: 32px; } }
+    .section-sub {
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--iron-600);
+      margin-bottom: 32px;
+    }
+
+    /* DEMO CHAT */
+    .demo-section { background: var(--bg); }
+    .demo-header { margin-bottom: 24px; }
+    .chat-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      max-width: 420px;
+    }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--enamel-50);
+    }
+    .chat-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--iron-700);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .chat-name { font-size: 15px; font-weight: 600; }
+    .chat-tag { font-size: 12px; color: var(--muted); }
+    .chat-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .chat-bubble {
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 85%;
+    }
+    .chat-bubble.out {
+      background: var(--fg);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      align-self: flex-end;
+    }
+    .chat-bubble.in {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+      align-self: flex-start;
+    }
+    .chat-bubble img {
+      width: 100%;
+      max-width: 200px;
+      border-radius: 8px;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .chat-coach-response {
+      background: var(--enamel-50);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .chat-coach-text { font-size: 14px; line-height: 1.5; color: var(--fg); }
+    .nutrition-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--enamel-100);
+      color: var(--iron-600);
+    }
+    .chip-kcal { color: var(--iron-700); font-weight: 700; }
+    .chip-actions { display: flex; gap: 8px; }
+    .chip-btn {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      transition: background var(--motion);
+    }
+    .chip-btn.primary { background: var(--fg); color: #fff; }
+    .chip-btn.primary:hover { background: var(--iron-950); }
+    .chip-btn.secondary { background: var(--enamel-100); color: var(--iron-600); }
+    .chip-btn.secondary:hover { background: var(--enamel-200); }
+    .chat-demo-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      padding: 8px 16px;
+      background: var(--enamel-50);
+      border-top: 1px solid var(--border);
+    }
+
+    /* CARA KERJA */
+    .steps-section { background: var(--surface); }
+    .steps-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    @media (min-width: 768px) {
+      .steps-grid { flex-direction: row; gap: 32px; }
+    }
+    .step-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .step-number {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+    .step-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .step-desc {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--iron-600);
+    }
+
+    /* FOOD GRID */
+    .food-section { background: var(--bg); }
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (min-width: 480px) {
+      .food-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    }
+    @media (min-width: 768px) {
+      .food-grid { grid-template-columns: repeat(6, 1fr); gap: 16px; }
+    }
+    .food-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .food-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.3;
+    }
+    .food-cal {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .food-note {
+      margin-top: 20px;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--iron-600);
+      max-width: 52ch;
+    }
+
+    /* BULK VS CUT */
+    .goal-section { background: var(--surface); }
+    .goal-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 640px) {
+      .goal-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
+    .goal-card {
+      border-radius: var(--radius-card);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .goal-card.bulk { background: var(--plate-blue); }
+    .goal-card.cut { background: var(--plate-red); }
+    .goal-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: rgba(255,255,255,0.7);
+    }
+    .goal-problem {
+      font-size: 15px;
+      font-weight: 500;
+      color: #fff;
+      line-height: 1.45;
+    }
+    .goal-solution {
+      font-size: 14px;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.5;
+    }
+
+    /* PRICING */
+    .pricing-section { background: var(--bg); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-width: 600px;
+    }
+    @media (min-width: 640px) {
+      .pricing-grid { grid-template-columns: 1fr 1fr; max-width: none; }
+    }
+    .pricing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .pricing-card.featured {
+      border-color: var(--fg);
+      position: relative;
+    }
+    .pricing-badge {
+      position: absolute;
+      top: -1px;
+      right: 20px;
+      background: var(--fg);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 0 0 8px 8px;
+      letter-spacing: .02em;
+    }
+    .pricing-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .pricing-price {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+    .pricing-amount {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 32px;
+      color: var(--fg);
+    }
+    .pricing-period {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .pricing-save {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--plate-green);
+      background: var(--plate-green-tint);
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      display: inline-block;
+    }
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pricing-feature {
+      font-size: 14px;
+      color: var(--iron-600);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .pricing-feature::before {
+      content: '';
+      width: 16px;
+      height: 16px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.5l3.5 3.5L13 5' stroke='%231E9E5A' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+      background-size: contain;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .pricing-cta {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--motion);
+    }
+    .pricing-cta.primary { background: var(--fg); color: #fff; }
+    .pricing-cta.primary:hover { background: var(--iron-950); }
+    .pricing-cta.secondary { background: var(--enamel-100); color: var(--fg); }
+    .pricing-cta.secondary:hover { background: var(--enamel-200); }
+
+    /* FAQ */
+    .faq-section { background: var(--surface); }
+    .faq-list { display: flex; flex-direction: column; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-question {
+      width: 100%;
+      min-height: 56px;
+      padding: 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--fg);
+      text-align: left;
+      cursor: pointer;
+      transition: color var(--motion);
+    }
+    .faq-question:hover { color: var(--iron-600); }
+    .faq-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      transition: transform var(--motion);
+    }
+    .faq-item.open .faq-icon { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 300ms cubic-bezier(.32,.72,0,1);
+    }
+    .faq-item.open .faq-answer { max-height: 300px; }
+    .faq-answer-inner {
+      padding-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--iron-600);
+    }
+
+    /* FOOTER */
+    .footer {
+      background: var(--enamel-100);
+      border-top: 1px solid var(--border);
+      padding: 40px 0;
+    }
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    @media (min-width: 640px) {
+      .footer-inner { flex-direction: row; justify-content: space-between; align-items: flex-start; }
+    }
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+    }
+    .footer-tagline { font-size: 13px; color: var(--muted); }
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-link {
+      font-size: 13px;
+      color: var(--muted);
+      transition: color var(--motion);
+    }
+    .footer-link:hover { color: var(--fg); text-decoration: none; }
+    .footer-disclaimer {
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--enamel-400);
+      max-width: 60ch;
+      padding-top: 24px;
+      border-top: 1px solid var(--enamel-200);
+    }
+
+    /* STICKY MOBILE CTA */
+    .mobile-cta {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 90;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+      display: flex;
+      gap: 12px;
+    }
+    @media (min-width: 768px) { .mobile-cta { display: none; } }
+    .mobile-cta .btn-primary { flex: 1; justify-content: center; }
+    .mobile-cta .btn-secondary { flex: 1; justify-content: center; }
+
+    /* DESKTOP HERO LAYOUT */
+    @media (min-width: 768px) {
+      .hero-inner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 48px;
+      }
+      .hero-content { max-width: 520px; }
+      .plate-stack-wrapper { flex: 1; max-width: 480px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" data-od-id="nav">
+  <div class="container nav-inner">
+    <span class="nav-logo">AI Body Coach</span>
+    <a href="#harga" class="nav-cta">Mulai gratis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" data-od-id="hero">
+  <div class="container hero-inner">
+    <div class="hero-content">
+      <div class="eyebrow">Coach nutrisi di WhatsApp</div>
+      <h1 class="hero-headline">BULK ATAU CUT. TINGGAL CHAT.</h1>
+      <p class="hero-sub">Foto makanan kamu, kirim ke WhatsApp. Coach-nya yang hitung, ingat target kamu, dan bilang apa yang sebaiknya kamu makan berikutnya.</p>
+      <div class="hero-cta-group">
+        <a href="#harga" class="btn-primary" data-od-id="hero-cta">Mulai gratis</a>
+        <a href="#cara-kerja" class="btn-secondary">Lihat cara kerjanya</a>
+      </div>
+      <p class="hero-micro">Gratis untuk mulai. Tanpa download aplikasi.</p>
+    </div>
+    <div class="plate-stack-wrapper">
+      <div class="plate-stack" data-od-id="plate-stack">
+        <div class="plate-stack-bar"></div>
+        <div class="plate-stack-plates" id="platePlates">
+          <div class="plate iron" style="width:28px" data-delay="0">P</div>
+          <div class="plate iron" style="width:22px" data-delay="120">P</div>
+          <div class="plate iron" style="width:35px" data-delay="240">P</div>
+          <div class="plate iron" style="width:18px" data-delay="360">P</div>
+        </div>
+        <div class="plate-stack-label">
+          <div class="plate-stack-number">1.830</div>
+          <div class="plate-stack-sub">dari 2.650 kkal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO CHAT -->
+<section class="demo-section" data-od-id="demo">
+  <div class="container">
+    <div class="demo-header">
+      <h2 class="section-title">Begini rasanya.</h2>
+    </div>
+    <div class="chat-container" data-od-id="chat">
+      <div class="chat-header">
+        <div class="chat-avatar">C</div>
+        <div>
+          <div class="chat-name">Coach</div>
+          <div class="chat-tag">Online</div>
+        </div>
+      </div>
+      <div class="chat-body">
+        <div class="chat-bubble out">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'%3E%3Crect fill='%23EAEEEC' width='200' height='140'/%3E%3Ctext x='100' y='60' font-family='system-ui' font-size='13' fill='%2398A5A0' text-anchor='middle'%3EFoto makanan%3C/text%3E%3Ctext x='100' y='80' font-family='system-ui' font-size='11' fill='%23C2CBC6' text-anchor='middle'%3Enasi padang%3C/text%3E%3C/svg%3E" alt="Foto nasi padang">
+        </div>
+        <div class="chat-coach-response">
+          <div class="chat-coach-text">Nasi + rendang + daun singkong + sambal ijo. Estimasi ±870 kkal, 38g protein. Gue catat ke makan siang ya?</div>
+          <div class="nutrition-chip">
+            <span class="chip-kkal">±870 kkal</span>
+            <span>·</span>
+            <span>38g P</span>
+          </div>
+          <div class="chip-actions">
+            <button class="chip-btn primary">Catat</button>
+            <button class="chip-btn secondary">Ubah porsi</button>
+          </div>
+        </div>
+        <div class="chat-bubble in">protein gue kurang berapa?</div>
+        <div class="chat-coach-response">
+          <div class="chat-coach-text">Hari ini 98/140g. Kurang 42g. Kalau malam mau simpel, 150g ayam + 2 telur udah nutup.</div>
+        </div>
+      </div>
+      <div class="chat-demo-label">Contoh percakapan</div>
+    </div>
+  </div>
+</section>
+
+<!-- CARA KERJA -->
+<section class="steps-section" id="cara-kerja" data-od-id="cara-kerja">
+  <div class="container">
+    <h2 class="section-title">Gampang banget.</h2>
+    <p class="section-sub">Tiga langkah, selesai.</p>
+    <div class="steps-grid">
+      <div class="step-card" data-od-id="step-1">
+        <div class="step-number">01</div>
+        <div class="step-title">Jawab 10 pertanyaan</div>
+        <div class="step-desc">Kami hitung target kalori dan protein kamu.</div>
+      </div>
+      <div class="step-card" data-od-id="step-2">
+        <div class="step-number">02</div>
+        <div class="step-title">Chat coach di WhatsApp</div>
+        <div class="step-desc">Foto atau ketik makanan kamu. Tidak perlu buka aplikasi.</div>
+      </div>
+      <div class="step-card" data-od-id="step-3">
+        <div class="step-number">03</div>
+        <div class="step-title">Lihat progress</div>
+        <div class="step-desc">Berat, kalori, dan tren mingguan di satu halaman.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOD DATABASE -->
+<section class="food-section" data-od-id="makanan">
+  <div class="container">
+    <h2 class="section-title">Bukan cuma chicken breast dan brokoli.</h2>
+    <p class="food-note">Database makanan Indonesia — warteg, Padang, street food, sampai kopi susu kekinian.</p>
+    <div class="food-grid">
+      <div class="food-card" data-od-id="food-padang"><div class="food-name">Nasi Padang</div><div class="food-cal">±870 kkal</div></div>
+      <div class="food-card" data-od-id="food-geprek"><div class="food-name">Ayam Geprek</div><div class="food-cal">±430 kkal</div></div>
+      <div class="food-card" data-od-id="food-warteg"><div class="food-name">Warteg</div><div class="food-cal">±550 kkal</div></div>
+      <div class="food-card" data-od-id="food-mie"><div class="food-name">Mie Ayam</div><div class="food-cal">±490 kkal</div></div>
+      <div class="food-card" data-od-id="food-bakso"><div class="food-name">Bakso</div><div class="food-cal">±380 kkal</div></div>
+      <div class="food-card" data-od-id="food-nasgor"><div class="food-name">Nasi Goreng</div><div class="food-cal">±560 kkal</div></div>
+      <div class="food-card" data-od-id="food-indomie"><div class="food-name">Indomie</div><div class="food-cal">±420 kkal</div></div>
+      <div class="food-card" data-od-id="food-soto"><div class="food-name">Soto</div><div class="food-cal">±320 kkal</div></div>
+      <div class="food-card" data-od-id="food-gado"><div class="food-name">Gado-gado</div><div class="food-cal">±340 kkal</div></div>
+      <div class="food-card" data-od-id="food-martabak"><div class="food-name">Martabak</div><div class="food-cal">±480 kkal</div></div>
+      <div class="food-card" data-od-id="food-kopisus"><div class="food-name">Kopi Susu</div><div class="food-cal">±180 kkal</div></div>
+      <div class="food-card" data-od-id="food-sate"><div class="food-name">Sate Ayam</div><div class="food-cal">±290 kkal</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BULK VS CUT -->
+<section class="goal-section" data-od-id="bulk-cut">
+  <div class="container">
+    <h2 class="section-title">Coach yang ngerti tujuan lo.</h2>
+    <p class="section-sub">Setiap orang beda目标, strateginya beda.</p>
+    <div class="goal-grid">
+      <div class="goal-card bulk" data-od-id="goal-bulk">
+        <div class="goal-label">BULK</div>
+        <div class="goal-problem">Udah makan banyak tapi berat nggak naik.</div>
+        <div class="goal-solution">Coach bantu kamu konsisten surplus tanpa jadi gendut.</div>
+      </div>
+      <div class="goal-card cut" data-od-id="goal-cut">
+        <div class="goal-label">CUT</div>
+        <div class="goal-problem">Udah gym tapi lemak nggak turun.</div>
+        <div class="goal-solution">Coach bantu kamu defisit tanpa harus berhenti makan nasi.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="harga" data-od-id="harga">
+  <div class="container">
+    <h2 class="section-title">Langganan yang jujur.</h2>
+    <p class="section-sub">Tidak ada harga tersembunyi. Berhenti kapan saja.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card" data-od-id="plan-free">
+        <div class="pricing-name">Gratis</div>
+        <div class="pricing-price">
+          <span class="pricing-amount">Rp0</span>
+          <span class="pricing-period">untuk selalu</span>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature">Target kalori dan makro personal</li>
+          <li class="pricing-feature">3 catatan makanan per hari</li>
+          <li class="pricing-feature">1 analisis foto per hari</li>
+          <li class="pricing-feature">Chat coach terbatas</li>
+        </ul>
+        <button class="pricing-cta secondary">Mulai gratis</button>
+      </div>
+      <div class="pricing-card featured" data-od-id="plan-pro">
+        <div class="pricing-badge">Untuk yang serius 3 bulan ke depan</div>
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price">
+          <span class="pricing-amount">Rp39.000</span>
+          <span class="pricing-period">/ bulan</span>
+        </div>
+        <div>
+          <span class="pricing-save">Hemat 36%</span>
+          <span style="font-size:13px;color:var(--muted);margin-left:8px">atau Rp299.000 / tahun</span>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature">Catatan makanan tanpa batas</li>
+          <li class="pricing-feature">Analisis foto tanpa batas</li>
+          <li class="pricing-feature">Rekomendasi makanan harian</li>
+          <li class="pricing-feature">Check-in berat harian</li>
+          <li class="pricing-feature">Laporan tren mingguan</li>
+          <li class="pricing-feature">Riwayat penuh</li>
+        </ul>
+        <button class="pricing-cta primary">Mulai langganan</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" data-od-id="faq">
+  <div class="container">
+    <h2 class="section-title">Pertanyaan umum.</h2>
+    <div class="faq-list">
+      <div class="faq-item" data-od-id="faq-download">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>Perlu download aplikasi?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9.5l6 6 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Tidak. Semua interaksi lewat WhatsApp yang sudah ada di HP kamu. Web hanya untuk onboarding dan lihat progress.</div></div>
+      </div>
+      <div class="faq-item" data-od-id="faq-accuracy">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>Seakurat apa estimasi dari foto?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9.5l6 6 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Estimasi, bisa dikoreksi 1 ketukan. Tren lebih penting daripada angka satu kali makan. Coach akan belajar dari koreksi kamu supaya estimasi następnyanya makin tepat.</div></div>
+      </div>
+      <div class="faq-item" data-od-id="faq-privacy">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>Data saya aman?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9.5l6 6 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Ya. Data nutrition kamu dienkripsi dan tidak pernah dijual. Kamu bisa hapus semua data kapan saja lewat pengaturan.</div></div>
+      </div>
+      <div class="faq-item" data-od-id="faq-cancel">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>Bisa berhenti kapan saja?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9.5l6 6 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Bisa. Langsung berhenti tanpa biaya tambahan. Tidak ada kontrak mengikat.</div></div>
+      </div>
+      <div class="faq-item" data-od-id="faq-diff">
+        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>Bedanya sama aplikasi calorie tracker lain?</span>
+          <svg class="faq-icon" viewBox="0 0 24 24" fill="none"><path d="M6 9.5l6 6 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">Kamu tidak perlu buka aplikasi dan ketik manual. Cukup chat seperti biasa. Coach yang adaptif sama makanan Indonesia — bukan cuma "chicken breast dan brokoli".</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" data-od-id="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <span class="footer-logo">AI Body Coach</span>
+      <span class="footer-tagline">Coach nutrisi di WhatsApp.</span>
+    </div>
+    <div class="footer-links">
+      <a href="#" class="footer-link">Kebijakan Privasi</a>
+      <a href="#" class="footer-link">Syarat & Ketentuan</a>
+      <a href="#" class="footer-link">Hubungi kami</a>
+    </div>
+  </div>
+  <div class="container">
+    <p class="footer-disclaimer">Panduan nutrisi umum, bukan nasihat medis. Konsultasikan dengan tenaga kesehatan jika kamu punya kondisi tertentu.</p>
+  </div>
+</footer>
+
+<!-- MOBILE STICKY CTA -->
+<div class="mobile-cta" data-od-id="mobile-cta">
+  <a href="#harga" class="btn-primary">Mulai gratis</a>
+  <a href="#cara-kerja" class="btn-secondary">Cara kerja</a>
+</div>
+
+<script>
+  (function() {
+    var plates = document.querySelectorAll('.plate');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      plates.forEach(function(p) { p.classList.add('loaded'); });
+      return;
+    }
+    plates.forEach(function(plate) {
+      var delay = parseInt(plate.getAttribute('data-delay') || '0', 10);
+      setTimeout(function() {
+        plate.classList.add('loaded');
+      }, delay + 200);
+    });
+  })();
+</script>
+
+</body>
+</html>

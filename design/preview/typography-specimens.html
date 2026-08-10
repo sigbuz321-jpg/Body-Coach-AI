@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Typography Specimens — AI Body Coach</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    [data-theme="dark"] {
+      --bg: #0C1119;
+      --surface: #131A24;
+      --fg: #EAEEEC;
+      --muted: #98A5A0;
+      --border: #2C3742;
+      --enamel-100: #1E2832;
+      --enamel-200: #2C3742;
+      --enamel-300: #4A555E;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 16px;
+      margin-top: 40px;
+    }
+    .section { margin-bottom: 32px; }
+    .specimen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .specimen-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .display-800 { font-family: var(--font-display); font-weight: 800; font-size: 56px; line-height: 1.1; letter-spacing: -0.02em; }
+    .display-700 { font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 1.15; letter-spacing: -0.02em; }
+    .display-700-alt { font-family: var(--font-display); font-weight: 700; font-size: 32px; line-height: 1.2; letter-spacing: -0.02em; }
+    .body-600 { font-family: var(--font-body); font-weight: 600; font-size: 17px; }
+    .body-500 { font-family: var(--font-body); font-weight: 500; font-size: 15px; line-height: 1.5; }
+    .body-400 { font-family: var(--font-body); font-weight: 400; font-size: 15px; line-height: 1.5; }
+    .caption { font-family: var(--font-body); font-size: 13px; font-weight: 500; color: var(--muted); }
+    .label { font-family: var(--font-body); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .mono-700 { font-family: var(--font-mono); font-weight: 700; font-size: 64px; line-height: 1; font-variant-numeric: tabular-nums; }
+    .mono-500 { font-family: var(--font-mono); font-weight: 500; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .type-row { display: flex; align-items: baseline; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border); gap: 16px; }
+    .type-row:last-child { border-bottom: none; }
+    .type-meta { font-family: var(--font-mono); font-size: 11px; color: var(--muted); flex-shrink: 0; }
+    .font-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .chat-row { display: flex; flex-direction: column; gap: 8px; }
+    .chat-bubble { padding: 12px 14px; border-radius: 16px; font-size: 14px; max-width: 85%; }
+    .chat-bubble.outgoing { background: var(--fg); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-bubble.incoming { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Typography Specimens</h1>
+  <p class="subtitle">Display, body, and mono typefaces with real Indonesian content from source evidence</p>
+
+  <div class="section">
+    <h2>Display Type — Archivo</h2>
+    <div class="specimen">
+      <div class="specimen-label">Hero Headline — Archivo 800, 56px</div>
+      <div class="display-800">BULK ATAU CUT.<br>TINGGAL CHAT.</div>
+    </div>
+    <div class="font-grid">
+      <div class="specimen">
+        <div class="specimen-label">Screen Title — Archivo 700, 40px</div>
+        <div class="display-700">Apa yang mau kamu capai?</div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Section Title — Archivo 700, 32px</div>
+        <div class="display-700-alt">Coach yang ngerti tujuan lo.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Body Type — Plus Jakarta Sans</h2>
+    <div class="specimen">
+      <div class="specimen-label">Body Text — 15px Regular &amp; Medium</div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <p class="body-400">Coach akan bantu hitung kalori dan macro lo setiap hari. Tanpa aplikasi ribet — tinggal chat.</p>
+        <p class="body-500">Gue udah 2 bulan pake AI Body Coach dan hasilnya luar biasa. Berat turun 4 kg tanpa ribet.</p>
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="specimen-label">Card Title — 17px SemiBold</div>
+      <div class="body-600">Porsi Makan Siang</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Mono Numeric — JetBrains Mono</h2>
+    <div class="specimen">
+      <div class="specimen-label">Large Caloric Display — Mono 700, 64px, Tabular</div>
+      <div class="mono-700">1.830</div>
+    </div>
+    <div class="font-grid">
+      <div class="specimen">
+        <div class="specimen-label">Delta Value — Mono 700, 24px</div>
+        <div style="font-family: var(--font-mono); font-weight: 700; font-size: 24px; font-variant-numeric: tabular-nums; color: var(--plate-green);">+0,8 kg</div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Small Mono — Mono 500, 14px</div>
+        <div class="mono-500">dari 2.650 kkal</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Type Scale</h2>
+    <div class="specimen">
+      <div class="type-row">
+        <span class="display-800" style="font-size: 40px;">Hero 40px</span>
+        <span class="type-meta">Archivo 800</span>
+      </div>
+      <div class="type-row">
+        <span class="display-700">Title 40px</span>
+        <span class="type-meta">Archivo 700</span>
+      </div>
+      <div class="type-row">
+        <span class="display-700-alt">Section 32px</span>
+        <span class="type-meta">Archivo 700</span>
+      </div>
+      <div class="type-row">
+        <span class="body-600">Card Title 17px</span>
+        <span class="type-meta">Plus Jakarta Sans 600</span>
+      </div>
+      <div class="type-row">
+        <span class="body-400">Body 15px Regular</span>
+        <span class="type-meta">Plus Jakarta Sans 400</span>
+      </div>
+      <div class="type-row">
+        <span class="caption">Caption 13px</span>
+        <span class="type-meta">Plus Jakarta Sans 500</span>
+      </div>
+      <div class="type-row">
+        <span class="label">LABEL 11px UPPERCASE</span>
+        <span class="type-meta">Plus Jakarta Sans 600 · 0.08em</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Chat Tone — Indonesian Informal</h2>
+    <div class="specimen">
+      <div class="specimen-label">User messages use "gue" and food-first language</div>
+      <div class="chat-row">
+        <div class="chat-bubble outgoing">foto nasi padang</div>
+        <div class="chat-bubble outgoing">protein gue kurang berapa?</div>
+        <div class="chat-bubble outgoing">malam makan apa?</div>
+        <div class="chat-bubble incoming">Hari ini sisa 820 kkal. Cukup buat makan malam normal ya.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

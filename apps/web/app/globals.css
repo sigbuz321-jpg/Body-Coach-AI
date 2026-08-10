@@ -1,0 +1,33 @@
+/*
+ * Placeholder M0. Design token "Piring & Plat" yang sebenarnya masuk di M3
+ * sebagai packages/ui/src/tokens.css, lalu diimpor dari sini.
+ * Jangan menambah gaya produk di file ini.
+ */
+
+:root {
+  --bg: #f5f7f6;
+  --surface: #ffffff;
+  --fg: #131a24;
+  --muted: #6b7780;
+  --border: #dce2df;
+  --accent: #1156c7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 23px;
+  -webkit-font-smoothing: antialiased;
+}

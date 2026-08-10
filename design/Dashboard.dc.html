@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard — AI Body Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --enamel-0: #FFFFFF;
+      --enamel-50: #F5F7F6;
+      --enamel-100: #EAEEEC;
+      --enamel-200: #DCE2DF;
+      --enamel-300: #C2CBC6;
+      --enamel-400: #98A5A0;
+      --iron-500: #6B7780;
+      --iron-600: #4A555E;
+      --iron-700: #2C3742;
+      --iron-900: #131A24;
+      --iron-950: #0C1119;
+      --plate-blue: #1156C7;
+      --plate-blue-tint: #E8F0FC;
+      --plate-red: #E0332C;
+      --plate-red-tint: #FDEBEA;
+      --plate-yellow: #F5B301;
+      --plate-yellow-tint: #FEF5E0;
+      --plate-green: #1E9E5A;
+      --plate-green-tint: #E6F5ED;
+      --bg: #F5F7F6;
+      --surface: #FFFFFF;
+      --fg: #131A24;
+      --muted: #6B7780;
+      --border: #DCE2DF;
+      --accent: #1156C7;
+      --font-display: 'Archivo', sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
+      --radius-sheet: 24px;
+      --radius-pill: 999px;
+      --motion: 200ms cubic-bezier(.32,.72,0,1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0C1119;
+      --surface: #131A24;
+      --fg: #EAEEEC;
+      --muted: #98A5A0;
+      --border: #2C3742;
+      --enamel-100: #1E2832;
+      --enamel-200: #2C3742;
+      --enamel-300: #4A555E;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      padding-bottom: 80px;
+      line-height: 1.5;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    ::selection {
+      background: var(--plate-blue);
+      color: #fff;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--plate-blue);
+      outline-offset: 2px;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .greeting {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--fg);
+    }
+
+    .goal-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: var(--plate-blue-tint);
+      color: var(--plate-blue);
+      width: fit-content;
+    }
+
+    .goal-chip[data-goal="CUT"] {
+      background: var(--plate-red-tint);
+      color: var(--plate-red);
+    }
+
+    .goal-chip[data-goal="MAINTAIN"] {
+      background: var(--plate-yellow-tint);
+      color: #8B6914;
+    }
+
+    [data-theme="dark"] .goal-chip[data-goal="MAINTAIN"] {
+      color: var(--plate-yellow);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .date-picker {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fg);
+      padding: 8px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: border-color var(--motion);
+    }
+
+    .date-picker:hover { border-color: var(--iron-500); }
+    .date-picker svg { width: 16px; height: 16px; color: var(--muted); }
+
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: background var(--motion);
+    }
+
+    .theme-toggle:hover { background: var(--enamel-100); }
+    .theme-toggle svg { width: 18px; height: 18px; color: var(--muted); }
+
+    /* ===== MAIN ===== */
+    .main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 1280px) {
+      .main { max-width: 1200px; padding: 24px 40px; }
+    }
+
+    /* ===== CARD BASE ===== */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+    }
+
+    .card-enamel {
+      position: relative;
+    }
+
+    .card-enamel::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius-card) - 2px);
+      pointer-events: none;
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    /* ===== HARI INI CARD ===== */
+    .today-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .calorie-display {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .calorie-big {
+      font-family: var(--font-mono);
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .calorie-label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .calorie-remaining {
+      text-align: right;
+    }
+
+    .calorie-remaining .label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .calorie-remaining .value {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--plate-green);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .calorie-remaining.over .value { color: var(--plate-red); }
+
+    /* ===== PLATE STACK ===== */
+    .plate-stack {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 32px;
+      margin-bottom: 16px;
+    }
+
+    .plate-stack-track {
+      flex: 1;
+      height: 8px;
+      background: var(--enamel-200);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plate-stack-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: var(--iron-700);
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(.32,.72,0,1);
+    }
+
+    .plate-stack-bar.over { background: var(--plate-red); }
+
+    .plate {
+      width: 12px;
+      height: 32px;
+      border-radius: 3px;
+      background: var(--iron-700);
+      transform-origin: center;
+      animation: plateIn 0.4s cubic-bezier(.32,.72,0,1) forwards;
+      opacity: 0;
+    }
+
+    .plate.red { background: var(--plate-red); }
+    .plate.blue { background: var(--plate-blue); }
+    .plate.yellow { background: var(--plate-yellow); }
+    .plate.green { background: var(--plate-green); }
+
+    @keyframes plateIn {
+      0% { transform: translateX(20px) scaleY(0.6); opacity: 0; }
+      60% { transform: translateX(-2px) scaleY(1.05); opacity: 1; }
+      100% { transform: translateX(0) scaleY(1); opacity: 1; }
+    }
+
+    .plate-stack-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+
+    /* ===== MACRO BARS ===== */
+    .macro-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .macro-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .macro-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      width: 52px;
+      flex-shrink: 0;
+    }
+
+    .macro-track {
+      flex: 1;
+      height: 6px;
+      background: var(--enamel-200);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .macro-bar {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--plate-green);
+      transition: width 0.5s ease;
+    }
+
+    .macro-bar.protein { background: var(--plate-blue); }
+    .macro-bar.carbs { background: var(--plate-yellow); }
+    .macro-bar.fat { background: var(--plate-red); }
+
+    .macro-value {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--fg);
+      width: 64px;
+      text-align: right;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .macro-unit {
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+
+    /* ===== STATUS ROW ===== */
+    .status-row {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: var(--plate-green-tint);
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      color: var(--plate-green);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-row.warning {
+      background: var(--plate-yellow-tint);
+      color: #8B6914;
+    }
+
+    .status-row.danger {
+      background: var(--plate-red-tint);
+      color: var(--plate-red);
+    }
+
+    .status-row.neutral {
+      background: var(--enamel-100);
+      color: var(--muted);
+    }
+
+    [data-theme="dark"] .status-row.warning { color: var(--plate-yellow); }
+    [data-theme="dark"] .status-row.danger { color: var(--plate-red); }
+
+    .status-row svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ===== FOOD LOG ===== */
+    .food-log-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .food-log-item:last-child { border-bottom: none; }
+
+    .food-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: var(--enamel-100);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .food-info { flex: 1; min-width: 0; }
+
+    .food-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--fg);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .food-meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .food-check-needed {
+      font-size: 10px;
+      padding: 2px 6px;
+      background: var(--plate-yellow-tint);
+      color: #8B6914;
+      border-radius: var(--radius-pill);
+    }
+
+    [data-theme="dark"] .food-check-needed { color: var(--plate-yellow); }
+
+    .food-kcal {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--fg);
+      text-align: right;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meal-group { margin-bottom: 16px; }
+
+    .meal-group:last-child { margin-bottom: 0; }
+
+    .meal-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--muted);
+    }
+
+    .empty-state-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      color: var(--enamel-300);
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font-body);
+      color: var(--fg);
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: background var(--motion);
+    }
+
+    .btn-secondary:hover { background: var(--enamel-100); }
+
+    /* ===== WEIGHT CARD ===== */
+    .weight-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .weight-current {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .weight-value {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .weight-unit {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .weight-delta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .weight-delta.up { color: var(--plate-green); }
+    .weight-delta.down { color: var(--plate-red); }
+
+    .weight-chart {
+      height: 120px;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .weight-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .weight-note {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ===== WEEKLY STATS ===== */
+    .weekly-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .weekly-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .stat-tile {
+      background: var(--enamel-50);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    [data-theme="dark"] .stat-tile {
+      background: var(--enamel-100);
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--plate-green);
+      margin-top: 4px;
+    }
+
+    .stat-sub.negative { color: var(--plate-red); }
+
+    .weekly-insight {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: var(--plate-blue-tint);
+      border-radius: var(--radius-card);
+      font-size: 13px;
+      color: var(--plate-blue);
+    }
+
+    [data-theme="dark"] .weekly-insight {
+      background: rgba(17, 86, 199, 0.15);
+      color: #93C5FD;
+    }
+
+    /* ===== SUBSCRIPTION CARD ===== */
+    .sub-card {
+      background: linear-gradient(135deg, var(--iron-900), var(--iron-700));
+      color: #fff;
+      border: none;
+      overflow: hidden;
+    }
+
+    .sub-card .card-label {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .sub-value {
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .sub-value strong {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .sub-pro {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sub-pro-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .sub-pro-list {
+      list-style: none;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sub-pro-list li::before {
+      content: '✓ ';
+      color: var(--plate-green);
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      color: #fff;
+      background: var(--iron-900);
+      border: none;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: background var(--motion);
+      min-height: 48px;
+    }
+
+    .btn-primary:hover { background: var(--iron-950); }
+
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: var(--radius-pill);
+      transition: color var(--motion);
+      min-width: 64px;
+    }
+
+    .nav-item svg { width: 20px; height: 20px; }
+
+    .nav-item.active { color: var(--fg); }
+    .nav-item.active svg { color: var(--fg); }
+
+    /* ===== HOW TO USE CARD (Day 1-3) ===== */
+    .how-to-card {
+      background: var(--plate-blue-tint);
+      border: 1px solid var(--plate-blue);
+    }
+
+    [data-theme="dark"] .how-to-card {
+      background: rgba(17, 86, 199, 0.15);
+    }
+
+    .how-to-card .card-label { color: var(--plate-blue); }
+
+    .how-to-example {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .chat-preview {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--fg);
+      max-width: 85%;
+    }
+
+    .chat-preview.outgoing {
+      background: var(--iron-900);
+      color: #fff;
+      margin-left: auto;
+    }
+
+    .chat-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ===== TARGET ADJUSTMENT (Day 15+) ===== */
+    .adjustment-card {
+      background: var(--plate-green-tint);
+      border: 1px solid var(--plate-green);
+    }
+
+    [data-theme="dark"] .adjustment-card {
+      background: rgba(30, 158, 90, 0.15);
+    }
+
+    .adjustment-card .card-label { color: var(--plate-green); }
+
+    .adjustment-comparison {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 12px 0;
+    }
+
+    .adjustment-from, .adjustment-to {
+      text-align: center;
+    }
+
+    .adjustment-arrow {
+      font-size: 20px;
+      color: var(--plate-green);
+    }
+
+    .adjustment-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .adjustment-value {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    /* ===== WAITLIST BANNER ===== */
+    .wa-banne {
+      background: var(--plate-yellow-tint);
+      border: 1px solid var(--plate-yellow);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: var(--radius-card);
+      margin-bottom: 16px;
+    }
+
+    .wa-banne svg { width: 20px; height: 20px; color: #8B6914; flex-shrink: 0; }
+
+    [data-theme="dark"] .wa-banne svg { color: var(--plate-yellow); }
+
+    .wa-banne p { font-size: 13px; color: #8B6914; flex: 1; }
+
+    [data-theme="dark"] .wa-banne p { color: var(--plate-yellow); }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--iron-900);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* ===== DESKTOP LAYOUT ===== */
+    @media (min-width: 1280px) {
+      .page-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .page-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding-top: 0;
+      }
+
+      .bottom-nav { display: none; }
+      body { padding-bottom: 0; }
+    }
+
+    /* ===== PRO PLAN CARD (for Pro users) ===== */
+    .pro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 8px;
+      background: linear-gradient(135deg, var(--iron-700), var(--iron-900));
+      color: #fff;
+      border-radius: var(--radius-pill);
+    }
+
+    .weekly-report {
+      background: var(--plate-blue-tint);
+      border: 1px dashed var(--plate-blue);
+      border-radius: var(--radius-card);
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    [data-theme="dark"] .weekly-report {
+      background: rgba(17, 86, 199, 0.15);
+    }
+
+    .weekly-report-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .weekly-report-header svg { width: 16px; height: 16px; color: var(--plate-blue); }
+
+    .weekly-report-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--plate-blue);
+    }
+
+    [data-theme="dark"] .weekly-report-title { color: #93C5FD; }
+
+    .weekly-report-body {
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <span class="greeting">Halo, Daffa</span>
+      <span class="goal-chip" data-goal="BULK">BULK</span>
+    </div>
+    <div class="header-right">
+      <button class="date-picker" aria-label="Pilih tanggal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>10 Agt</span>
+      </button>
+      <button class="theme-toggle" aria-label="Ganti tema" onclick="toggleTheme()">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-layout">
+    <main class="main">
+      <!-- WHATSAPP BANNER (if not connected) -->
+      <div class="wa-banne" id="waBanner">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <p>Sambungkan WhatsApp untuk mulai mencatat makanan</p>
+        <button class="btn-small">Sambungkan</button>
+      </div>
+
+      <!-- HOW TO USE (Day 1-3) -->
+      <div class="card how-to-card" id="howToCard">
+        <div class="card-label">Cara Pakai</div>
+        <div class="how-to-example">
+          <div class="chat-preview outgoing">Foto nasi padang</div>
+          <div class="chat-label">Kirim foto ke coach</div>
+        </div>
+        <div class="how-to-example">
+          <div class="chat-preview outgoing">protein gue kurang berapa?</div>
+          <div class="chat-label">Tanya ke coach</div>
+        </div>
+        <div class="how-to-example">
+          <div class="chat-preview outgoing">malam makan apa?</div>
+          <div class="chat-label">Minta rekomendasi</div>
+        </div>
+      </div>
+
+      <!-- KARTU 1: HARI INI -->
+      <div class="card card-enamel" data-od-id="today-card">
+        <div class="today-header">
+          <div>
+            <div class="card-label">Hari Ini</div>
+            <div class="calorie-display">
+              <span class="calorie-big" id="calorieBig">1.830</span>
+              <span class="calorie-label">dari <span id="calorieTarget">2.650</span> kkal</span>
+            </div>
+          </div>
+          <div class="calorie-remaining">
+            <div class="label">Sisa</div>
+            <div class="value" id="calorieRemaining">820</div>
+          </div>
+        </div>
+
+        <div class="plate-stack" id="plateStack">
+          <div class="plate-stack-track">
+            <div class="plate-stack-bar" id="plateStackBar"></div>
+          </div>
+          <span class="plate-stack-label">4 makanan</span>
+        </div>
+
+        <div class="macro-bars">
+          <div class="macro-row">
+            <span class="macro-label">Protein</span>
+            <div class="macro-track"><div class="macro-bar protein" style="width: 70%"></div></div>
+            <span class="macro-value">98<span class="macro-unit">/140g</span></span>
+          </div>
+          <div class="macro-row">
+            <span class="macro-label">Karbo</span>
+            <div class="macro-track"><div class="macro-bar carbs" style="width: 66%"></div></div>
+            <span class="macro-value">210<span class="macro-unit">/320g</span></span>
+          </div>
+          <div class="macro-row">
+            <span class="macro-label">Lemak</span>
+            <div class="macro-track"><div class="macro-bar fat" style="width: 77%"></div></div>
+            <span class="macro-value">58<span class="macro-unit">/75g</span></span>
+          </div>
+        </div>
+
+        <div class="status-row" id="statusRow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span id="statusText">Hampir pas. Sisa 220 kkal.</span>
+        </div>
+      </div>
+
+      <!-- KARTU 2: CATATAN HARI INI -->
+      <div class="card" data-od-id="food-log-card">
+        <div class="card-label">Catatan Hari Ini</div>
+        
+        <div class="meal-group">
+          <div class="meal-label">Sarapan</div>
+          <div class="food-log-item">
+            <img class="food-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23EAEEEC' width='48' height='48'/%3E%3C/svg%3E" alt="">
+            <div class="food-info">
+              <div class="food-name">Nasi goreng telur</div>
+              <div class="food-meta">1 porsi · 08.15</div>
+            </div>
+            <span class="food-kcal">485 <span class="macro-unit">kkal</span></span>
+          </div>
+        </div>
+
+        <div class="meal-group">
+          <div class="meal-label">Makan Siang</div>
+          <div class="food-log-item">
+            <img class="food-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23EAEEEC' width='48' height='48'/%3E%3C/svg%3E" alt="">
+            <div class="food-info">
+              <div class="food-name">Nasi Padang</div>
+              <div class="food-meta">1 porsi · 12.30</div>
+            </div>
+            <span class="food-kcal">870 <span class="macro-unit">kkal</span></span>
+          </div>
+          <div class="food-log-item">
+            <img class="food-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23EAEEEC' width='48' height='48'/%3E%3C/svg%3E" alt="">
+            <div class="food-info">
+              <div class="food-name">Kopi susu</div>
+              <div class="food-meta">1 gelas · 14.00</div>
+            </div>
+            <span class="food-kcal">120 <span class="macro-unit">kkal</span></span>
+          </div>
+        </div>
+
+        <div class="meal-group">
+          <div class="meal-label">Makan Malam</div>
+          <div class="food-log-item">
+            <img class="food-thumb" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23EAEEEC' width='48' height='48'/%3E%3C/svg%3E" alt="">
+            <div class="food-info">
+              <div class="food-name">Ayam geprek</div>
+              <div class="food-meta">1 porsi · 19.00</div>
+            </div>
+            <span class="food-kcal">355 <span class="macro-unit">kkal</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- KARTU 3: BERAT BADAN -->
+      <div class="card" data-od-id="weight-card">
+        <div class="card-label">Berat Badan</div>
+        <div class="weight-header">
+          <div class="weight-current">
+            <span class="weight-value" id="weightValue">72,4</span>
+            <span class="weight-unit">kg</span>
+          </div>
+          <div class="weight-delta up" id="weightDelta">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            +0,8 kg
+            <span style="color: var(--muted); font-size: 11px;">vs minggu lalu</span>
+          </div>
+        </div>
+        <div class="weight-chart">
+          <svg viewBox="0 0 280 100" preserveAspectRatio="none">
+            <!-- Target range band -->
+            <rect x="0" y="35" width="280" height="20" fill="var(--enamel-200)" opacity="0.5"/>
+            <!-- Trend line -->
+            <polyline points="0,70 40,65 80,60 120,55 160,50 200,48 240,45 280,42" fill="none" stroke="var(--fg)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Data points -->
+            <circle cx="0" cy="70" r="3" fill="var(--enamel-300)"/>
+            <circle cx="40" cy="65" r="3" fill="var(--enamel-300)"/>
+            <circle cx="80" cy="60" r="3" fill="var(--enamel-300)"/>
+            <circle cx="120" cy="55" r="3" fill="var(--enamel-300)"/>
+            <circle cx="160" cy="50" r="3" fill="var(--enamel-300)"/>
+            <circle cx="200" cy="48" r="3" fill="var(--enamel-300)"/>
+            <circle cx="240" cy="45" r="3" fill="var(--enamel-300)"/>
+            <circle cx="280" cy="42" r="4" fill="var(--fg)"/>
+          </svg>
+        </div>
+        <p class="weight-note">Berat naik-turun tiap hari. Yang penting garis trennya.</p>
+      </div>
+
+      <!-- KARTU 4: MINGGU INI -->
+      <div class="card" data-od-id="weekly-card">
+        <div class="card-label">Minggu Ini</div>
+        <div class="weekly-grid">
+          <div class="stat-tile">
+            <div class="stat-value">1.892</div>
+            <div class="stat-label">Rata-rata kkal</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-value">112<span style="font-size:14px;color:var(--muted)">g</span></div>
+            <div class="stat-label">Rata-rata protein</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-value">5<span style="font-size:14px;color:var(--muted)">/7</span></div>
+            <div class="stat-label">Hari tercatat</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-value" style="color: var(--plate-green)">+0,8</div>
+            <div class="stat-label">Perubahan berat</div>
+          </div>
+        </div>
+        <div class="weekly-insight">
+          Tren minggu ini naik. Kalau mau accelerate, tambah 200–300 kkal dari rata-rata.
+        </div>
+      </div>
+
+      <!-- SUBSCRIPTION CARD (Free users only) -->
+      <div class="card sub-card" id="subCard">
+        <div class="card-label">AI Body Coach Pro</div>
+        <div class="sub-value">
+          Kamu udah catat <strong>24 makanan</strong> bulan ini.
+        </div>
+        <div class="sub-pro">
+          <div class="sub-pro-title">Yang terbuka di Pro:</div>
+          <ul class="sub-pro-list">
+            <li>Catatan tanpa batas</li>
+            <li>Analisis foto lebih akurat</li>
+            <li>Rekomendasi makanan personal</li>
+            <li>Laporan mingguan lengkap</li>
+          </ul>
+        </div>
+        <button class="btn-primary" style="margin-top: 16px; width: 100%;">Lihat Pro — Rp39.000/bln</button>
+      </div>
+
+      <!-- TARGET ADJUSTMENT (Day 15+) -->
+      <div class="card adjustment-card" id="adjustmentCard" style="display: none;">
+        <div class="card-label">Penyesuaian Target</div>
+        <p style="font-size: 13px; color: var(--fg);">2 minggu terakhir berat naik lebih lambat dari perkiraan. Target dinaikkan:</p>
+        <div class="adjustment-comparison">
+          <div class="adjustment-from">
+            <div class="adjustment-label">Sebelum</div>
+            <div class="adjustment-value">2.650</div>
+            <div class="adjustment-label">kkal</div>
+          </div>
+          <div class="adjustment-arrow">→</div>
+          <div class="adjustment-to">
+            <div class="adjustment-label">Sesudah</div>
+            <div class="adjustment-value" style="color: var(--plate-green)">2.800</div>
+            <div class="adjustment-label">kkal</div>
+          </div>
+        </div>
+        <p style="font-size: 12px; color: var(--muted);">Perubahan ini berdasarkan pola makan dan berat kamu. Kalau tidak setuju, bisa adjust manual di pengaturan.</p>
+      </div>
+    </main>
+
+    <!-- DESKTOP SIDEBAR -->
+    <aside class="page-sidebar">
+      <div class="card">
+        <div class="card-label">Ringkasan Mingguan</div>
+        <div style="font-size: 13px; color: var(--muted); margin-bottom: 12px;">Senin, 4 Agt — Minggu, 10 Agt</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; font-size: 13px;">
+            <span style="color: var(--muted);">Rata-rata kalori</span>
+            <span style="font-family: var(--font-mono); font-weight: 500;">1.892 kkal</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 13px;">
+            <span style="color: var(--muted);">Rata-rata protein</span>
+            <span style="font-family: var(--font-mono); font-weight: 500;">112g</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 13px;">
+            <span style="color: var(--muted);">Hari tercatat</span>
+            <span style="font-family: var(--font-mono); font-weight: 500;">5 dari 7</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 13px;">
+            <span style="color: var(--muted);">Berat berubah</span>
+            <span style="font-family: var(--font-mono); font-weight: 500; color: var(--plate-green);">+0,8 kg</span>
+          </div>
+        </div>
+        <div class="weekly-report">
+          <div class="weekly-report-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span class="weekly-report-title">Laporan Mingguan</span>
+          </div>
+          <div class="weekly-report-body">
+            Minggu ini rata-rata kamu 1.892 kkal/hari — masih di bawah target 2.650 kkal untuk BULK. Tambah 300–400 kkal di waktu makan utama bisa bantu percepatan.
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a class="nav-item active" data-tab="today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Hari Ini
+    </a>
+    <a class="nav-item" data-tab="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Riwayat
+    </a>
+    <a class="nav-item" data-tab="progress">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Progress
+    </a>
+    <a class="nav-item" data-tab="account">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Akun
+    </a>
+  </nav>
+
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+      localStorage.setItem('theme', html.getAttribute('data-theme'));
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+
+    // Plate stack animation
+    const plates = [
+      { width: 14, delay: 0 },
+      { width: 10, delay: 120 },
+      { width: 8, delay: 240 },
+      { width: 6, delay: 360 }
+    ];
+
+    function animatePlateStack() {
+      const container = document.getElementById('plateStack');
+      const existingPlates = container.querySelectorAll('.plate');
+      existingPlates.forEach(p => p.remove());
+
+      const track = document.getElementById('plateStackBar');
+      const totalWidth = 69; // percentage of bar filled
+      track.style.width = totalWidth + '%';
+
+      plates.forEach((plate, i) => {
+        const el = document.createElement('div');
+        el.className = 'plate';
+        if (i === plates.length - 1 && totalWidth > 100) el.classList.add('red');
+        el.style.width = plate.width + 'px';
+        el.style.animationDelay = plate.delay + 'ms';
+        container.insertBefore(el, container.firstChild);
+      });
+    }
+
+    // Personalization matrix
+    function applyPersonalization() {
+      const goal = 'BULK'; // Would come from user data
+      const time = new Date().getHours();
+      const caloriePercent = 1830 / 2650 * 100;
+      const dayOfUse = 12; // Would come from user data
+
+      // Goal-based accent
+      const goalChip = document.querySelector('.goal-chip');
+      const accentColors = {
+        'BULK': { color: 'var(--plate-blue)', tint: 'var(--plate-blue-tint)' },
+        'CUT': { color: 'var(--plate-red)', tint: 'var(--plate-red-tint)' },
+        'MAINTAIN': { color: 'var(--plate-yellow)', tint: 'var(--plate-yellow-tint)' }
+      };
+
+      // Time-based status
+      let statusConfig = { class: '', text: '' };
+      
+      if (time >= 5 && time < 10) {
+        statusConfig = { class: 'neutral', text: 'Sarapan belum dicatat.' };
+      } else if (time >= 10 && time < 15) {
+        if (caloriePercent < 70) {
+          statusConfig = { class: '', text: 'Sisa 1.100 kkal untuk siang & malam.' };
+        } else if (caloriePercent < 100) {
+          statusConfig = { class: '', text: 'Hampir pas. Sisa 220 kkal.' };
+        }
+      } else if (time >= 15 && time < 19) {
+        statusConfig = { class: 'warning', text: 'Sisa 820 kkal. Cukup buat makan malam normal.' };
+      } else if (time >= 19 && time < 23) {
+        statusConfig = { class: '', text: 'Hari ini 69%. Besok normal lagi aja.' };
+      } else if (time >= 23) {
+        statusConfig = { class: '', text: 'Hari ini selesai. Mulai besok pagi!' };
+      }
+
+      // Status row
+      const statusRow = document.getElementById('statusRow');
+      const statusText = document.getElementById('statusText');
+      statusRow.className = 'status-row ' + statusConfig.class;
+      statusText.textContent = statusConfig.text;
+
+      // How to card (day 1-3)
+      const howToCard = document.getElementById('howToCard');
+      if (dayOfUse <= 3) {
+        howToCard.style.display = 'block';
+      } else {
+        howToCard.style.display = 'none';
+      }
+
+      // Adjustment card (day 15+)
+      const adjustmentCard = document.getElementById('adjustmentCard');
+      if (dayOfUse >= 15) {
+        adjustmentCard.style.display = 'block';
+      } else {
+        adjustmentCard.style.display = 'none';
+      }
+
+      // Pro card visibility (for Pro users)
+      const subCard = document.getElementById('subCard');
+      const isPro = false; // Would come from user data
+      if (isPro) {
+        subCard.style.display = 'none';
+      }
+    }
+
+    // Bottom nav interaction
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      animatePlateStack();
+      applyPersonalization();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Normalisasi akhir baris ke LF di repo dan di working copy.
+# Tanpa ini, Windows menulis CRLF dan `pnpm format:check` gagal karena
+# .prettierrc menetapkan endOfLine: "lf".
+* text=auto eol=lf
+
+# Biner — jangan disentuh.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Lockfile: hasilkan diff yang tidak berisik saat review.
+pnpm-lock.yaml linguist-generated=true -diff

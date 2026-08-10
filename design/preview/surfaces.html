@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Surfaces — AI Body Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --enamel-0: #FFFFFF;
+      --enamel-50: #F5F7F6;
+      --enamel-100: #EAEEEC;
+      --enamel-200: #DCE2DF;
+      --enamel-300: #C2CBC6;
+      --enamel-400: #98A5A0;
+      --iron-500: #6B7780;
+      --iron-600: #4A555E;
+      --iron-700: #2C3742;
+      --iron-900: #131A24;
+      --iron-950: #0C1119;
+      --plate-blue: #1156C7;
+      --plate-blue-tint: #E8F0FC;
+      --plate-red: #E0332C;
+      --plate-red-tint: #FDEBEA;
+      --plate-yellow: #F5B301;
+      --plate-yellow-tint: #FEF5E0;
+      --plate-green: #1E9E5A;
+      --plate-green-tint: #E6F5ED;
+      --bg: #F5F7F6;
+      --surface: #FFFFFF;
+      --fg: #131A24;
+      --muted: #6B7780;
+      --border: #DCE2DF;
+      --accent: #1156C7;
+      --font-display: 'Archivo', sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
+      --radius-sheet: 24px;
+      --radius-pill: 999px;
+      --motion: 200ms cubic-bezier(.32,.72,0,1);
+    }
+    [data-theme="dark"] {
+      --bg: #0C1119;
+      --surface: #131A24;
+      --fg: #EAEEEC;
+      --muted: #98A5A0;
+      --border: #2C3742;
+      --enamel-100: #1E2832;
+      --enamel-200: #2C3742;
+      --enamel-300: #4A555E;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 16px;
+      margin-top: 32px;
+    }
+    .section { margin-bottom: 40px; }
+    .specimen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .specimen-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .card-enamel {
+      position: relative;
+    }
+    .card-enamel::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius-card) - 2px);
+      pointer-events: none;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .theme-toggle:hover { background: var(--enamel-100); }
+    .surface-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .surface-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 16px;
+    }
+    .surface-item h3 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .surface-preview {
+      height: 60px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .surface-token {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark')">Toggle Dark</button>
+
+  <h1>Surfaces</h1>
+
+  <div class="section">
+    <h2>Surface Tokens</h2>
+    <div class="specimen">
+      <div class="specimen-label">Background, surface, foreground hierarchy</div>
+      <div class="surface-grid">
+        <div class="surface-item">
+          <h3>Page Background</h3>
+          <div class="surface-preview" style="background: var(--bg); border: 1px solid var(--border);"></div>
+          <div class="surface-token">--bg: #F5F7F6</div>
+        </div>
+        <div class="surface-item">
+          <h3>Card Surface</h3>
+          <div class="surface-preview" style="background: var(--surface); border: 1px solid var(--border);"></div>
+          <div class="surface-token">--surface: #FFFFFF</div>
+        </div>
+        <div class="surface-item">
+          <h3>Primary Text</h3>
+          <div class="surface-preview" style="background: var(--fg);"></div>
+          <div class="surface-token">--fg: #131A24</div>
+        </div>
+        <div class="surface-item">
+          <h3>Muted Text</h3>
+          <div class="surface-preview" style="background: var(--muted);"></div>
+          <div class="surface-token">--muted: #6B7780</div>
+        </div>
+        <div class="surface-item">
+          <h3>Border</h3>
+          <div class="surface-preview" style="background: var(--surface); border: 2px solid var(--border);"></div>
+          <div class="surface-token">--border: #DCE2DF</div>
+        </div>
+        <div class="surface-item">
+          <h3>Accent</h3>
+          <div class="surface-preview" style="background: var(--accent);"></div>
+          <div class="surface-token">--accent: #1156C7</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Card Variants</h2>
+    <div class="specimen">
+      <div class="specimen-label">Standard card — border, 16px radius, 20px padding</div>
+      <div class="card" style="max-width: 320px;">
+        <div class="card-label">Hari Ini</div>
+        <div style="font-family: var(--font-mono); font-size: 44px; font-weight: 700; font-variant-numeric: tabular-nums;">1.830</div>
+        <div style="font-size: 13px; color: var(--muted);">dari 2.650 kkal</div>
+      </div>
+    </div>
+
+    <div class="specimen">
+      <div class="specimen-label">Enamel card — double border inset at 4px</div>
+      <div class="card card-enamel" style="max-width: 320px; position: relative;">
+        <div class="card-label">Hari Ini</div>
+        <div style="font-family: var(--font-mono); font-size: 44px; font-weight: 700; font-variant-numeric: tabular-nums;">1.830</div>
+        <div style="font-size: 13px; color: var(--muted);">dari 2.650 kkal</div>
+      </div>
+    </div>
+
+    <div class="specimen">
+      <div class="specimen-label">Tinted card — informational backgrounds</div>
+      <div style="display: flex; flex-direction: column; gap: 12px; max-width: 320px;">
+        <div class="card" style="background: var(--plate-blue-tint); border-color: var(--plate-blue);">
+          <div class="card-label" style="color: var(--plate-blue);">Cara Pakai</div>
+          <p style="font-size: 14px;">Kirim foto ke coach untuk mulai mencatat makanan.</p>
+        </div>
+        <div class="card" style="background: var(--plate-green-tint); border-color: var(--plate-green);">
+          <div class="card-label" style="color: var(--plate-green);">Penyesuaian Target</div>
+          <p style="font-size: 14px;">Target dinaikkan 150 kkal berdasarkan pola makan kamu.</p>
+        </div>
+        <div class="card" style="background: var(--plate-yellow-tint); border-color: var(--plate-yellow);">
+          <div class="card-label" style="color: #8B6914;">Peringatan</div>
+          <p style="font-size: 14px;">Sisa 820 kkal untuk makan malam.</p>
+        </div>
+        <div class="card" style="background: var(--plate-red-tint); border-color: var(--plate-red);">
+          <div class="card-label" style="color: var(--plate-red);">Melebihi Target</div>
+          <p style="font-size: 14px;">150 kkal di atas target hari ini.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Pro Subscription Card</h2>
+    <div class="specimen">
+      <div class="specimen-label">Gradient dark surface — no border</div>
+      <div class="card" style="background: linear-gradient(135deg, var(--iron-900), var(--iron-700)); color: #fff; border: none; max-width: 320px;">
+        <div class="card-label" style="color: rgba(255,255,255,0.6);">AI Body Coach Pro</div>
+        <div style="font-size: 15px; margin-bottom: 12px;">
+          Kamu udah catat <strong style="font-family: var(--font-mono); font-size: 28px; font-weight: 700;">24 makanan</strong> bulan ini.
+        </div>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; margin-top: 16px;">
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Yang terbuka di Pro:</div>
+          <ul style="list-style: none; font-size: 12px; color: rgba(255,255,255,0.7); display: flex; flex-direction: column; gap: 6px;">
+            <li style="display: flex; align-items: center; gap: 6px;"><span style="color: var(--plate-green);">✓</span> Catatan tanpa batas</li>
+            <li style="display: flex; align-items: center; gap: 6px;"><span style="color: var(--plate-green);">✓</span> Analisis foto lebih akurat</li>
+            <li style="display: flex; align-items: center; gap: 6px;"><span style="color: var(--plate-green);">✓</span> Rekomendasi makanan personal</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Sticky Nav Surface</h2>
+    <div class="specimen">
+      <div class="specimen-label">Blur backdrop with semi-transparent background</div>
+      <div style="background: rgba(245, 247, 246, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 16px 20px; border-radius: var(--radius-card) var(--radius-card) 0 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-family: var(--font-display); font-weight: 800; font-size: 18px;">AI Body Coach</span>
+          <button style="height: 36px; padding: 0 16px; border-radius: 999px; background: var(--fg); color: #fff; border: none; font-size: 13px; font-weight: 600;">Mulai gratis</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Mobile Sheet</h2>
+    <div class="specimen">
+      <div class="specimen-label">24px radius for large sheets, modals</div>
+      <div style="max-width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sheet); padding: 24px;">
+        <div style="font-family: var(--font-display); font-weight: 700; font-size: 21px; margin-bottom: 12px;">Rencana bulk kamu</div>
+        <div style="display: flex; align-items: flex-end; gap: 16px; margin-bottom: 20px;">
+          <div>
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);">Sekarang</div>
+            <div style="font-family: var(--font-mono); font-weight: 700; font-size: 28px;">63,4<span style="font-size: 14px; font-weight: 500; color: var(--muted);"> kg</span></div>
+          </div>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.75"><path d="M4 12h14M13 7l5 5-5 5"/></svg>
+          <div>
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);">Target</div>
+            <div style="font-family: var(--font-mono); font-weight: 700; font-size: 28px;">70,0<span style="font-size: 14px; font-weight: 500; color: var(--muted);"> kg</span></div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: var(--plate-green);"></span>
+            <span style="font-size: 14px;">Protein: 0 / 140g</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: var(--plate-yellow);"></span>
+            <span style="font-size: 14px;">Karbo: 0 / 320g</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 8px; height: 8px; border-radius: 999px; background: var(--plate-blue);"></span>
+            <span style="font-size: 14px;">Lemak: 0 / 75g</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Dark Mode Surfaces</h2>
+    <div class="specimen" style="background: var(--enamel-100);">
+      <div class="specimen-label">Enamel background surfaces in dark mode</div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div style="background: var(--enamel-100); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-family: var(--font-mono); font-size: 12px; color: var(--fg);">enamel-100</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--muted);">#1E2832</div>
+        </div>
+        <div style="background: var(--enamel-200); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-family: var(--font-mono); font-size: 12px; color: var(--fg);">enamel-200</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--muted);">#2C3742</div>
+        </div>
+        <div style="background: var(--enamel-300); border-radius: 8px; padding: 12px; text-align: center;">
+          <div style="font-family: var(--font-mono); font-size: 12px; color: var(--fg);">enamel-300</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--muted);">#4A555E</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

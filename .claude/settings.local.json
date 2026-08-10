@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm -v)",
+      "Bash(git --version)",
+      "Bash(corepack --version)",
+      "Bash(npm -v)",
+      "Bash(mkdir -p docs design)",
+      "Bash(mv 02-technical-spec.md 03-design-system.md docs/)",
+      "Bash(mv Landing-Page.dc.html Onboarding.dc.html Dashboard.dc.html Rencana-_-WhatsApp.dc.html design/)",
+      "Bash(mv preview *)",
+      "Bash(corepack prepare *)",
+      "Bash(corepack enable *)",
+      "Bash(corepack pnpm *)",
+      "Bash(npm config *)",
+      "Bash(npm i *)"
+    ]
+  }
+}

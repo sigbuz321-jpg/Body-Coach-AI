@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Colors Primary — AI Body Coach</title>
+  <link rel="stylesheet" href="../colors_and_type.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    [data-theme="dark"] {
+      --bg: #0C1119;
+      --surface: #131A24;
+      --fg: #EAEEEC;
+      --muted: #98A5A0;
+      --border: #2C3742;
+      --enamel-100: #1E2832;
+      --enamel-200: #2C3742;
+      --enamel-300: #4A555E;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--fg);
+    }
+    .theme-toggle:hover { background: var(--enamel-100); }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 40px;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 16px;
+      margin-top: 40px;
+    }
+    .section { margin-bottom: 32px; }
+    .swatch-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .swatch-chip {
+      width: 96px;
+      height: 96px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .swatch-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .swatch-hex {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--enamel-400);
+    }
+    .semantic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .semantic-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 16px;
+    }
+    .semantic-card h3 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .semantic-preview {
+      height: 56px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .semantic-token {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .goal-chip-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .goal-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .pro-gradient-card {
+      background: linear-gradient(135deg, var(--iron-900), var(--iron-700));
+      border-radius: var(--radius-card);
+      padding: 24px;
+      color: #fff;
+    }
+    .pro-gradient-card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+    .pro-gradient-card .price {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? '' : 'dark')">Toggle Dark</button>
+
+  <h1>Colors Primary</h1>
+  <p class="subtitle">Core palette and semantic tokens derived from source evidence: Dashboard.dc.html, Onboarding.dc.html, Landing-Page.dc.html</p>
+
+  <div class="section">
+    <h2>Plate System — Goal Colors</h2>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="swatch-chip" style="background: var(--plate-blue);"></div>
+        <span class="swatch-name">plate-blue</span>
+        <span class="swatch-hex">#1156C7 — BULK</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: var(--plate-blue-tint); border-color: var(--plate-blue);"></div>
+        <span class="swatch-name">plate-blue-tint</span>
+        <span class="swatch-hex">#E8F0FC</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: var(--plate-red);"></div>
+        <span class="swatch-name">plate-red</span>
+        <span class="swatch-hex">#E0332C — CUT</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: var(--plate-red-tint); border-color: var(--plate-red);"></div>
+        <span class="swatch-name">plate-red-tint</span>
+        <span class="swatch-hex">#FDEBEA</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: var(--plate-yellow);"></div>
+        <span class="swatch-name">plate-yellow</span>
+        <span class="swatch-hex">#F5B301 — MAINTAIN</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: var(--plate-yellow-tint); border-color: var(--plate-yellow);"></div>
+        <span class="swatch-name">plate-yellow-tint</span>
+        <span class="swatch-hex">#FEF5E0</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: var(--plate-green);"></div>
+        <span class="swatch-name">plate-green</span>
+        <span class="swatch-hex">#1E9E5A — Success</span>
+      </div>
+      <div class="swatch">
+        <div class="swatch-chip" style="background: var(--plate-green-tint); border-color: var(--plate-green);"></div>
+        <span class="swatch-name">plate-green-tint</span>
+        <span class="swatch-hex">#E6F5ED</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Goal Chip Samples</h2>
+    <div class="goal-chip-row">
+      <span class="goal-chip" style="background: var(--plate-blue-tint); color: var(--plate-blue);">BULK</span>
+      <span class="goal-chip" style="background: var(--plate-red-tint); color: var(--plate-red);">CUT</span>
+      <span class="goal-chip" style="background: var(--plate-yellow-tint); color: #8B6914;">MAINTAIN</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Semantic Tokens</h2>
+    <div class="semantic-grid">
+      <div class="semantic-card">
+        <h3>Background</h3>
+        <div class="semantic-preview" style="background: var(--bg); border: 1px solid var(--border);"></div>
+        <div class="semantic-token">--bg · #F5F7F6</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Surface</h3>
+        <div class="semantic-preview" style="background: var(--surface); border: 1px solid var(--border);"></div>
+        <div class="semantic-token">--surface · #FFFFFF</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Foreground</h3>
+        <div class="semantic-preview" style="background: var(--fg);"></div>
+        <div class="semantic-token">--fg · #131A24</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Muted</h3>
+        <div class="semantic-preview" style="background: var(--muted);"></div>
+        <div class="semantic-token">--muted · #6B7780</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Border</h3>
+        <div class="semantic-preview" style="background: var(--surface); border: 2px solid var(--border);"></div>
+        <div class="semantic-token">--border · #DCE2DF</div>
+      </div>
+      <div class="semantic-card">
+        <h3>Accent</h3>
+        <div class="semantic-preview" style="background: var(--accent);"></div>
+        <div class="semantic-token">--accent · #1156C7</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Pro Gradient Card</h2>
+    <div class="pro-gradient-card" style="max-width: 280px;">
+      <h3>AI Body Coach Pro</h3>
+      <div class="price">Rp 79.000<span style="font-size: 14px; font-weight: 400; opacity: 0.7;">/bulan</span></div>
+    </div>
+  </div>
+</body>
+</html>

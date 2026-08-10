@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spacing & Radius — AI Body Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --enamel-0: #FFFFFF;
+      --enamel-50: #F5F7F6;
+      --enamel-100: #EAEEEC;
+      --enamel-200: #DCE2DF;
+      --enamel-300: #C2CBC6;
+      --enamel-400: #98A5A0;
+      --iron-500: #6B7780;
+      --iron-600: #4A555E;
+      --iron-700: #2C3742;
+      --iron-900: #131A24;
+      --iron-950: #0C1119;
+      --plate-blue: #1156C7;
+      --plate-blue-tint: #E8F0FC;
+      --plate-red: #E0332C;
+      --plate-red-tint: #FDEBEA;
+      --plate-yellow: #F5B301;
+      --plate-yellow-tint: #FEF5E0;
+      --plate-green: #1E9E5A;
+      --plate-green-tint: #E6F5ED;
+      --bg: #F5F7F6;
+      --surface: #FFFFFF;
+      --fg: #131A24;
+      --muted: #6B7780;
+      --border: #DCE2DF;
+      --accent: #1156C7;
+      --font-display: 'Archivo', sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
+      --radius-sheet: 24px;
+      --radius-pill: 999px;
+      --motion: 200ms cubic-bezier(.32,.72,0,1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 16px;
+      margin-top: 32px;
+    }
+    .section { margin-bottom: 40px; }
+    .specimen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .specimen-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .spacing-block {
+      background: var(--plate-blue);
+      opacity: 0.3;
+      flex-shrink: 0;
+    }
+    .spacing-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 60px;
+    }
+    .spacing-desc {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .radius-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .radius-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .radius-preview {
+      background: var(--plate-blue);
+      opacity: 0.8;
+    }
+    .radius-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .touch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 16px;
+    }
+    .touch-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <h1>Spacing & Radius</h1>
+
+  <div class="section">
+    <h2>Spacing Scale</h2>
+    <div class="specimen">
+      <div class="specimen-label">From 4px to 40px</div>
+      <div class="spacing-row">
+        <div class="spacing-block" style="width: 4px; height: 4px;"></div>
+        <span class="spacing-label">4px</span>
+        <span class="spacing-desc">Tight gaps, icon padding</span>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-block" style="width: 8px; height: 8px;"></div>
+        <span class="spacing-label">8px</span>
+        <span class="spacing-desc">Related element gaps</span>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-block" style="width: 12px; height: 12px;"></div>
+        <span class="spacing-label">12px</span>
+        <span class="spacing-desc">Inner padding, small margins</span>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-block" style="width: 16px; height: 16px;"></div>
+        <span class="spacing-label">16px</span>
+        <span class="spacing-desc">Card padding, section gaps</span>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-block" style="width: 20px; height: 20px;"></div>
+        <span class="spacing-label">20px</span>
+        <span class="spacing-desc">Screen padding</span>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-block" style="width: 24px; height: 24px;"></div>
+        <span class="spacing-label">24px</span>
+        <span class="spacing-desc">Section separation</span>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-block" style="width: 32px; height: 32px;"></div>
+        <span class="spacing-label">32px</span>
+        <span class="spacing-desc">Large section gaps</span>
+      </div>
+      <div class="spacing-row">
+        <div class="spacing-block" style="width: 40px; height: 40px;"></div>
+        <span class="spacing-label">40px</span>
+        <span class="spacing-desc">Hero sections, footer</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Radius Scale</h2>
+    <div class="specimen">
+      <div class="specimen-label">Three-tier radius system</div>
+      <div class="radius-grid">
+        <div class="radius-item">
+          <div class="radius-preview" style="width: 64px; height: 64px; border-radius: 16px;"></div>
+          <span class="radius-label">--radius-card<br>16px</span>
+        </div>
+        <div class="radius-item">
+          <div class="radius-preview" style="width: 64px; height: 64px; border-radius: 24px;"></div>
+          <span class="radius-label">--radius-sheet<br>24px</span>
+        </div>
+        <div class="radius-item">
+          <div class="radius-preview" style="width: 64px; height: 32px; border-radius: 999px;"></div>
+          <span class="radius-label">--radius-pill<br>999px</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Touch Targets</h2>
+    <div class="specimen">
+      <div class="specimen-label">Minimum 44px</div>
+      <div class="touch-grid">
+        <div class="touch-item" style="height: 36px;">36px small btn</div>
+        <div class="touch-item" style="height: 44px;">44px min</div>
+        <div class="touch-item" style="height: 48px;">48px primary</div>
+        <div class="touch-item" style="height: 52px;">52px CTA</div>
+        <div class="touch-item" style="height: 56px;">56px large</div>
+        <div class="touch-item" style="height: 64px;">64px stepper</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Card Padding</h2>
+    <div class="specimen">
+      <div class="specimen-label">--radius-card: 16px, padding: 20px</div>
+      <div style="background: var(--enamel-100); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 20px; max-width: 320px;">
+        <div style="font-weight: 600; margin-bottom: 8px;">Card Title</div>
+        <p style="font-size: 14px; color: var(--muted);">Card body content with standard 20px padding on all sides.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Motion Timing</h2>
+    <div class="specimen">
+      <div class="specimen-label">--motion: 200ms cubic-bezier(.32,.72,0,1)</div>
+      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <button style="height: 44px; padding: 0 20px; border-radius: var(--radius-pill); background: var(--fg); color: #fff; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: background var(--motion);" onmouseover="this.style.background='var(--iron-950)'" onmouseout="this.style.background='var(--fg)'">Hover me</button>
+        <button style="height: 44px; padding: 0 20px; border-radius: var(--radius-pill); background: transparent; color: var(--fg); border: 2px solid var(--border); font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color var(--motion), background var(--motion);" onmouseover="this.style.borderColor='var(--iron-400)'; this.style.background='var(--enamel-50)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent'">Secondary</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

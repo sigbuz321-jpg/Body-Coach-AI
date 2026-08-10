@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Components — AI Body Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --enamel-0: #FFFFFF;
+      --enamel-50: #F5F7F6;
+      --enamel-100: #EAEEEC;
+      --enamel-200: #DCE2DF;
+      --enamel-300: #C2CBC6;
+      --enamel-400: #98A5A0;
+      --iron-500: #6B7780;
+      --iron-600: #4A555E;
+      --iron-700: #2C3742;
+      --iron-900: #131A24;
+      --iron-950: #0C1119;
+      --plate-blue: #1156C7;
+      --plate-blue-tint: #E8F0FC;
+      --plate-red: #E0332C;
+      --plate-red-tint: #FDEBEA;
+      --plate-yellow: #F5B301;
+      --plate-yellow-tint: #FEF5E0;
+      --plate-green: #1E9E5A;
+      --plate-green-tint: #E6F5ED;
+      --bg: #F5F7F6;
+      --surface: #FFFFFF;
+      --fg: #131A24;
+      --muted: #6B7780;
+      --border: #DCE2DF;
+      --accent: #1156C7;
+      --font-display: 'Archivo', sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
+      --radius-sheet: 24px;
+      --radius-pill: 999px;
+      --motion: 200ms cubic-bezier(.32,.72,0,1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 16px;
+      margin-top: 32px;
+    }
+    .section { margin-bottom: 40px; }
+    .specimen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .specimen-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .component-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .btn-primary {
+      height: 52px;
+      padding: 0 24px;
+      border-radius: var(--radius-pill);
+      background: var(--fg);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background var(--motion);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary:hover { background: var(--iron-950); }
+    .btn-primary:disabled { background: var(--enamel-200); color: var(--enamel-400); cursor: not-allowed; }
+    .btn-secondary {
+      height: 52px;
+      padding: 0 24px;
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--fg);
+      font-size: 15px;
+      font-weight: 600;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-secondary:hover { border-color: var(--iron-400); background: var(--enamel-50); }
+    .btn-small {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: var(--radius-pill);
+      background: var(--iron-900);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+    }
+    .goal-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      height: 48px;
+      padding: 0 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .chip.selected { background: var(--fg); color: #fff; border-color: var(--fg); }
+    .chip:hover:not(.selected) { border-color: var(--iron-300); }
+    .pref-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .pref-chip.selected { background: var(--fg); color: #fff; border-color: var(--fg); }
+    .pref-chip:hover:not(.selected) { border-color: var(--iron-300); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 20px;
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .status-row {
+      padding: 12px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-row.success { background: var(--plate-green-tint); color: var(--plate-green); }
+    .status-row.warning { background: var(--plate-yellow-tint); color: #8B6914; }
+    .status-row.danger { background: var(--plate-red-tint); color: var(--plate-red); }
+    .status-row.neutral { background: var(--enamel-100); color: var(--muted); }
+    .stat-tile {
+      background: var(--enamel-50);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .food-log-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .food-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: var(--enamel-100);
+      flex-shrink: 0;
+    }
+    .food-info { flex: 1; min-width: 0; }
+    .food-name {
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .food-meta {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .food-kcal {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+    .macro-track {
+      height: 6px;
+      background: var(--enamel-200);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .macro-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    .macro-bar.protein { background: var(--plate-blue); }
+    .macro-bar.carbs { background: var(--plate-yellow); }
+    .macro-bar.fat { background: var(--plate-red); }
+    .macro-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .macro-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      width: 52px;
+      flex-shrink: 0;
+    }
+    .macro-value {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      width: 64px;
+      text-align: right;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .macro-unit {
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: 2px;
+    }
+    .bottom-nav {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      min-width: 64px;
+    }
+    .nav-item.active { color: var(--fg); }
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--enamel-300);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Components</h1>
+
+  <div class="section">
+    <h2>Buttons</h2>
+    <div class="specimen">
+      <div class="specimen-label">Primary — Solid dark, pill radius</div>
+      <div class="component-row">
+        <button class="btn-primary">Mulai gratis</button>
+        <button class="btn-primary" disabled>Disabled</button>
+        <button class="btn-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Dengan icon</button>
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="specimen-label">Secondary — Ghost with border</div>
+      <div class="component-row">
+        <button class="btn-secondary">Ubah data</button>
+        <button class="btn-secondary" disabled>Disabled</button>
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="specimen-label">Small button</div>
+      <div class="component-row">
+        <button class="btn-small">Sambungkan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Goal Chips</h2>
+    <div class="specimen">
+      <div class="specimen-label">Pill-shaped, uppercase label, goal-based color</div>
+      <div class="component-row">
+        <span class="goal-chip" style="background: var(--plate-blue-tint); color: var(--plate-blue);">BULK</span>
+        <span class="goal-chip" style="background: var(--plate-red-tint); color: var(--plate-red);">CUT</span>
+        <span class="goal-chip" style="background: var(--plate-yellow-tint); color: #8B6914;">MAINTAIN</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Selection Chips</h2>
+    <div class="specimen">
+      <div class="specimen-label">Single select (gym frequency)</div>
+      <div class="component-row">
+        <div class="chip">0</div>
+        <div class="chip">1</div>
+        <div class="chip selected">3</div>
+        <div class="chip">5</div>
+        <div class="chip">7</div>
+      </div>
+    </div>
+    <div class="specimen">
+      <div class="specimen-label">Multi select (food preferences)</div>
+      <div class="component-row">
+        <div class="pref-chip selected">Halal</div>
+        <div class="pref-chip">Tanpa babi</div>
+        <div class="pref-chip selected">Vegetarian</div>
+        <div class="pref-chip">Tanpa seafood</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Cards</h2>
+    <div class="specimen">
+      <div class="specimen-label">Standard card</div>
+      <div class="card" style="max-width: 320px;">
+        <div class="card-label">Hari Ini</div>
+        <div style="font-family: var(--font-mono); font-size: 44px; font-weight: 700; font-variant-numeric: tabular-nums;">1.830</div>
+        <div style="font-size: 13px; color: var(--muted);">dari 2.650 kkal</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Status Rows</h2>
+    <div class="specimen">
+      <div class="component-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+        <div class="status-row success">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Hampir pas. Sisa 220 kkal.
+        </div>
+        <div class="status-row warning">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Sisa 820 kkal. Cukup buat makan malam normal.
+        </div>
+        <div class="status-row danger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Melebihi target 150 kkal.
+        </div>
+        <div class="status-row neutral">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Sarapan belum dicatat.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Macro Bars</h2>
+    <div class="specimen">
+      <div class="specimen-label">6px track, color-coded by macro type</div>
+      <div style="display: flex; flex-direction: column; gap: 12px; max-width: 320px;">
+        <div class="macro-row">
+          <span class="macro-label">Protein</span>
+          <div class="macro-track" style="flex: 1;"><div class="macro-bar protein" style="width: 70%;"></div></div>
+          <span class="macro-value">98<span class="macro-unit">/140g</span></span>
+        </div>
+        <div class="macro-row">
+          <span class="macro-label">Karbo</span>
+          <div class="macro-track" style="flex: 1;"><div class="macro-bar carbs" style="width: 66%;"></div></div>
+          <span class="macro-value">210<span class="macro-unit">/320g</span></span>
+        </div>
+        <div class="macro-row">
+          <span class="macro-label">Lemak</span>
+          <div class="macro-track" style="flex: 1;"><div class="macro-bar fat" style="width: 77%;"></div></div>
+          <span class="macro-value">58<span class="macro-unit">/75g</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Food Log Item</h2>
+    <div class="specimen">
+      <div class="food-log-item">
+        <div class="food-thumb"></div>
+        <div class="food-info">
+          <div class="food-name">Nasi goreng telur</div>
+          <div class="food-meta">1 porsi · 08.15</div>
+        </div>
+        <span class="food-kcal">485 <span class="macro-unit">kkal</span></span>
+      </div>
+      <div class="food-log-item" style="border: none;">
+        <div class="food-thumb"></div>
+        <div class="food-info">
+          <div class="food-name">Ayam geprek</div>
+          <div class="food-meta">1 porsi · 19.00</div>
+        </div>
+        <span class="food-kcal">355 <span class="macro-unit">kkal</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Stat Tiles</h2>
+    <div class="specimen">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 400px;">
+        <div class="stat-tile">
+          <div class="stat-value">1.892</div>
+          <div class="stat-label">Rata-rata kkal</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-value">112<span style="font-size:14px;color:var(--muted)">g</span></div>
+          <div class="stat-label">Rata-rata protein</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-value">5<span style="font-size:14px;color:var(--muted)">/7</span></div>
+          <div class="stat-label">Hari tercatat</div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-value" style="color: var(--plate-green);">+0,8</div>
+          <div class="stat-label">Perubahan berat</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Bottom Navigation</h2>
+    <div class="specimen">
+      <div class="bottom-nav">
+        <div class="nav-item active">
+          <div class="nav-icon"></div>
+          <span>Hari Ini</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"></div>
+          <span>Riwayat</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"></div>
+          <span>Progress</span>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"></div>
+          <span>Akun</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

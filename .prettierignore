@@ -1,0 +1,14 @@
+node_modules
+.next
+.turbo
+dist
+pnpm-lock.yaml
+
+# Output desain — jangan diformat, ini artefak sumber, bukan kode produksi.
+design/
+
+# Dokumen rujukan ditulis tangan dengan format yang disengaja. Prettier
+# memformat ulang blok kode di dalam markdown dan merusak blok token CSS
+# di CLAUDE.md (yang memang sengaja bukan CSS valid). Jangan disentuh.
+*.md
+docs/

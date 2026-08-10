@@ -1,0 +1,19 @@
+{
+  "name": "@bodycoach/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bodycoach/ai": "workspace:*",
+    "@bodycoach/core": "workspace:*",
+    "@bodycoach/db": "workspace:*",
+    "@bodycoach/whatsapp": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "typescript": "^5.9.3"
+  }
+}

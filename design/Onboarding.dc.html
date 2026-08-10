@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Onboarding — AI Body Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --enamel-0: #FFFFFF;
+      --enamel-50: #F5F7F6;
+      --enamel-100: #EAEEEC;
+      --enamel-200: #DCE2DF;
+      --enamel-300: #C2CBC6;
+      --enamel-400: #98A5A0;
+      --iron-500: #6B7780;
+      --iron-600: #4A555E;
+      --iron-700: #2C3742;
+      --iron-900: #131A24;
+      --iron-950: #0C1119;
+      --plate-blue: #1156C7;
+      --plate-blue-tint: #E8F0FC;
+      --plate-red: #E0332C;
+      --plate-red-tint: #FDEBEA;
+      --plate-yellow: #F5B301;
+      --plate-yellow-tint: #FEF5E0;
+      --plate-green: #1E9E5A;
+      --plate-green-tint: #E6F5ED;
+      --bg: #F5F7F6;
+      --surface: #FFFFFF;
+      --fg: #131A24;
+      --muted: #6B7780;
+      --border: #DCE2DF;
+      --accent: #1156C7;
+      --font-display: 'Archivo', sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
+      --radius-sheet: 24px;
+      --radius-pill: 999px;
+      --motion: 200ms cubic-bezier(.32,.72,0,1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* PROGRESS BAR */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      background: var(--enamel-100);
+      height: 2px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--fg);
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      position: fixed;
+      top: 12px;
+      right: 20px;
+      z-index: 201;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* BACK BUTTON */
+    .back-btn {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      z-index: 201;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      border-radius: var(--radius-pill);
+      transition: background var(--motion);
+    }
+    .back-btn:hover { background: var(--enamel-100); }
+    .back-btn svg { width: 20px; height: 20px; }
+
+    /* SCREEN WRAPPER */
+    .screens {
+      position: relative;
+      width: 100%;
+      min-height: 100dvh;
+      padding-top: 48px;
+      padding-bottom: 100px;
+    }
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      min-height: calc(100dvh - 100px);
+      padding: 56px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transform: translateX(40px);
+      transition: opacity var(--motion), transform var(--motion);
+      pointer-events: none;
+    }
+    .screen.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+    .screen.exit-left {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+
+    /* SCREEN HEADER */
+    .screen-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 26px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      color: var(--fg);
+      margin-bottom: 8px;
+    }
+    .screen-sub {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    /* GOAL CARDS */
+    .goal-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .goal-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-card);
+      min-height: 96px;
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .goal-card:hover { border-color: var(--iron-300); }
+    .goal-card.selected {
+      border-width: 2px;
+    }
+    .goal-card.selected.bulk { border-color: var(--plate-blue); background: var(--plate-blue-tint); }
+    .goal-card.selected.cut { border-color: var(--plate-red); background: var(--plate-red-tint); }
+    .goal-card.selected.maintain { border-color: var(--plate-yellow); background: var(--plate-yellow-tint); }
+    .goal-card:not(.selected) { border-color: var(--border); }
+    .goal-icon { font-size: 28px; line-height: 1; }
+    .goal-text { flex: 1; }
+    .goal-title { font-weight: 600; font-size: 17px; color: var(--fg); }
+    .goal-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .goal-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .goal-card.selected .goal-check {
+      border-color: currentColor;
+      background: currentColor;
+    }
+    .goal-card.selected.bulk .goal-check { color: var(--plate-blue); }
+    .goal-card.selected.cut .goal-check { color: var(--plate-red); }
+    .goal-card.selected.maintain .goal-check { color: var(--plate-yellow); }
+    .goal-check svg { width: 14px; height: 14px; color: #fff; opacity: 0; }
+    .goal-card.selected .goal-check svg { opacity: 1; }
+
+    /* GENDER CARDS */
+    .gender-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .gender-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 24px 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-card);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .gender-card:hover { border-color: var(--iron-300); }
+    .gender-card.selected { border-color: var(--fg); background: var(--enamel-50); }
+    .gender-icon { font-size: 32px; }
+    .gender-title { font-weight: 600; font-size: 15px; color: var(--fg); }
+    .gender-sub { font-size: 12px; color: var(--muted); text-align: center; }
+
+    /* NUMBER STEPPER */
+    .stepper-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+    .stepper-value {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 64px;
+      line-height: 1;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+    .stepper-unit {
+      font-size: 18px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .stepper-btns {
+      display: flex;
+      gap: 16px;
+    }
+    .stepper-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: var(--fg);
+      transition: background var(--motion), border-color var(--motion);
+    }
+    .stepper-btn:hover { border-color: var(--iron-400); }
+    .stepper-btn:active { background: var(--enamel-100); }
+
+    /* SLIDER SCREEN */
+    .slider-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 32px;
+      padding-bottom: 40px;
+    }
+    .slider-value {
+      text-align: center;
+    }
+    .slider-number {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 56px;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+    .slider-unit {
+      font-size: 18px;
+      color: var(--muted);
+    }
+    .slider-track {
+      padding: 0 4px;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: var(--enamel-200);
+      border-radius: 4px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 32px;
+      height: 32px;
+      background: var(--fg);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 4px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 32px;
+      height: 32px;
+      background: var(--fg);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 4px solid var(--surface);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* TARGET WEIGHT JOURNEY */
+    .weight-journey {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 24px;
+    }
+    .journey-visual {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .journey-point {
+      text-align: center;
+    }
+    .journey-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .journey-weight {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+    .journey-arrow {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 16px;
+    }
+    .journey-line {
+      flex: 1;
+      height: 2px;
+      background: var(--enamel-200);
+    }
+    .journey-diff {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 16px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+    }
+    .journey-diff.positive { background: var(--plate-blue-tint); color: var(--plate-blue); }
+    .journey-diff.negative { background: var(--plate-red-tint); color: var(--plate-red); }
+    .journey-diff.neutral { background: var(--plate-yellow-tint); color: var(--plate-yellow); }
+    .journey-slider-wrap {
+      padding: 0 4px;
+    }
+    .journey-hint {
+      font-size: 13px;
+      color: var(--plate-blue);
+      background: var(--plate-blue-tint);
+      padding: 12px 16px;
+      border-radius: var(--radius-card);
+      margin-top: 8px;
+    }
+
+    /* ACTIVITY OPTIONS */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-card);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .activity-item:hover { border-color: var(--iron-300); }
+    .activity-item.selected { border-color: var(--fg); background: var(--enamel-50); }
+    .activity-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      transition: background var(--motion), border-color var(--motion);
+    }
+    .activity-item.selected .activity-dot {
+      background: var(--fg);
+      border-color: var(--fg);
+    }
+    .activity-text { flex: 1; }
+    .activity-title { font-weight: 600; font-size: 15px; color: var(--fg); }
+    .activity-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* GYM CHIPS */
+    .chips-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .chips-scroll::-webkit-scrollbar { display: none; }
+    .chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      height: 48px;
+      padding: 0 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+      flex-shrink: 0;
+    }
+    .chip:hover { border-color: var(--iron-300); }
+    .chip.selected { background: var(--fg); color: #fff; border-color: var(--fg); }
+    .chip-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+
+    /* FOOD PREFERENCES */
+    .pref-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pref-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .pref-chip:hover { border-color: var(--iron-300); }
+    .pref-chip.selected { background: var(--fg); color: #fff; border-color: var(--fg); }
+    .pref-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 16px;
+    }
+
+    /* BUDGET CHIPS */
+    .budget-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .budget-chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-card);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--fg);
+      cursor: pointer;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .budget-chip:hover { border-color: var(--iron-300); }
+    .budget-chip.selected { background: var(--fg); color: #fff; border-color: var(--fg); }
+    .budget-skip {
+      width: 100%;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .budget-skip-btn {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: underline;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 8px;
+    }
+
+    /* AGREEMENT */
+    .agreement-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .agreement-checkbox-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      cursor: pointer;
+    }
+    .agreement-checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      transition: background var(--motion), border-color var(--motion);
+    }
+    .agreement-checkbox.checked { background: var(--fg); border-color: var(--fg); }
+    .agreement-checkbox svg { width: 14px; height: 14px; color: #fff; opacity: 0; }
+    .agreement-checkbox.checked svg { opacity: 1; }
+    .agreement-text {
+      font-size: 14px;
+      color: var(--fg);
+      line-height: 1.5;
+    }
+    .agreement-link {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    /* CALCULATING SCREEN */
+    .calculating {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      text-align: center;
+    }
+    .calc-plate-stack {
+      position: relative;
+      width: 280px;
+      height: 48px;
+    }
+    .calc-bar {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: var(--enamel-200);
+      border-radius: 4px;
+      transform: translateY(-50%);
+    }
+    .calc-plate {
+      position: absolute;
+      top: 50%;
+      height: 36px;
+      background: var(--iron-700);
+      border-radius: 3px;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.2s, width 0.3s ease;
+    }
+    .calc-plate.loaded { opacity: 1; }
+    .calc-plate.over { background: var(--plate-red); }
+    .calc-text {
+      font-size: 17px;
+      color: var(--muted);
+      min-height: 28px;
+    }
+
+    /* GUARDRAIL SCREEN */
+    .guardrail {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 24px;
+      padding: 24px;
+    }
+    .guardrail-icon { font-size: 48px; }
+    .guardrail-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 24px;
+      color: var(--fg);
+    }
+    .guardrail-body {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 320px;
+      line-height: 1.6;
+    }
+    .guardrail-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 280px;
+      margin-top: 8px;
+    }
+
+    /* PRIMARY BUTTON */
+    .btn-primary {
+      height: 52px;
+      padding: 0 24px;
+      background: var(--fg);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--motion);
+      position: fixed;
+      bottom: 24px;
+      left: 20px;
+      right: 20px;
+      max-width: 400px;
+      margin: 0 auto;
+      width: calc(100% - 40px);
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .btn-primary:hover { background: var(--iron-950); }
+    .btn-primary:disabled {
+      background: var(--enamel-200);
+      color: var(--enamel-400);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    @media (min-width: 390px) {
+      .btn-primary { left: 50%; transform: translateX(-50%); width: calc(100% - 40px); }
+    }
+
+    /* SECONDARY BUTTON */
+    .btn-secondary {
+      height: 52px;
+      padding: 0 24px;
+      background: transparent;
+      color: var(--fg);
+      font-size: 15px;
+      font-weight: 600;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color var(--motion), background var(--motion);
+    }
+    .btn-secondary:hover { border-color: var(--iron-400); background: var(--enamel-50); }
+
+    /* DESKTOP */
+    @media (min-width: 768px) {
+      .container { max-width: 480px; margin: 0 auto; padding: 0 24px; }
+      .screen { padding: 72px 24px 24px; }
+      .screen-title { font-size: 32px; }
+      .btn-primary { max-width: 400px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 10%"></div>
+  </div>
+  <div class="progress-text" id="progressText">1 dari 10</div>
+
+  <!-- BACK BUTTON -->
+  <button class="back-btn" id="backBtn" aria-label="Kembali" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  </button>
+
+  <!-- SCREENS -->
+  <div class="screens" id="screens">
+
+    <!-- STEP 1: GOAL -->
+    <div class="screen active" id="screen-1" data-step="1">
+      <h1 class="screen-title">Apa yang mau kamu capai?</h1>
+      <div class="goal-cards" role="radiogroup" aria-label="Pilih goal">
+        <div class="goal-card bulk" data-value="bulk" tabindex="0" role="radio" aria-checked="false">
+          <span class="goal-icon">💪</span>
+          <div class="goal-text">
+            <div class="goal-title">BULK</div>
+            <div class="goal-desc">Naikin berat & massa otot</div>
+          </div>
+          <div class="goal-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
+        <div class="goal-card cut" data-value="cut" tabindex="0" role="radio" aria-checked="false">
+          <span class="goal-icon">🔥</span>
+          <div class="goal-text">
+            <div class="goal-title">CUT</div>
+            <div class="goal-desc">Turunin lemak, jaga otot</div>
+          </div>
+          <div class="goal-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
+        <div class="goal-card maintain" data-value="maintain" tabindex="0" role="radio" aria-checked="false">
+          <span class="goal-icon">⚖️</span>
+          <div class="goal-text">
+            <div class="goal-title">MAINTAIN</div>
+            <div class="goal-desc">Pertahankan berat sekarang</div>
+          </div>
+          <div class="goal-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: GENDER -->
+    <div class="screen" id="screen-2" data-step="2">
+      <h1 class="screen-title">Jenis kelamin kamu?</h1>
+      <p class="screen-sub">Dipakai untuk menghitung kebutuhan kalori.</p>
+      <div class="gender-cards" role="radiogroup" aria-label="Pilih jenis kelamin">
+        <div class="gender-card" data-value="male" tabindex="0" role="radio" aria-checked="false">
+          <span class="gender-icon">👨</span>
+          <div class="gender-title">Pria</div>
+          <div class="gender-sub">Dipakai untuk menghitung kebutuhan kalori.</div>
+        </div>
+        <div class="gender-card" data-value="female" tabindex="0" role="radio" aria-checked="false">
+          <span class="gender-icon">👩</span>
+          <div class="gender-title">Wanita</div>
+          <div class="gender-sub">Dipakai untuk menghitung kebutuhan kalori.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: AGE -->
+    <div class="screen" id="screen-3" data-step="3">
+      <h1 class="screen-title">Berapa umur kamu?</h1>
+      <div class="stepper-wrap">
+        <div>
+          <span class="stepper-value" id="ageValue">25</span>
+          <span class="stepper-unit">tahun</span>
+        </div>
+        <div class="stepper-btns">
+          <button class="stepper-btn" id="ageMinus" aria-label="Kurangi umur">−</button>
+          <button class="stepper-btn" id="agePlus" aria-label="Tambah umur">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: HEIGHT -->
+    <div class="screen" id="screen-4" data-step="4">
+      <h1 class="screen-title">Berapa tinggi kamu?</h1>
+      <div class="slider-wrap">
+        <div class="slider-value">
+          <span class="slider-number" id="heightValue">170</span>
+          <span class="slider-unit">cm</span>
+        </div>
+        <div class="slider-track">
+          <input type="range" id="heightSlider" min="120" max="220" value="170" aria-label="Tinggi badan">
+          <div class="slider-labels">
+            <span>120 cm</span>
+            <span>220 cm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: WEIGHT -->
+    <div class="screen" id="screen-5" data-step="5">
+      <h1 class="screen-title">Berat badan sekarang?</h1>
+      <div class="slider-wrap">
+        <div class="slider-value">
+          <span class="slider-number" id="weightValue">70.0</span>
+          <span class="slider-unit">kg</span>
+        </div>
+        <div class="slider-track">
+          <input type="range" id="weightSlider" min="30" max="200" step="0.1" value="70" aria-label="Berat badan">
+          <div class="slider-labels">
+            <span>30 kg</span>
+            <span>200 kg</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 6: TARGET WEIGHT -->
+    <div class="screen" id="screen-6" data-step="6">
+      <h1 class="screen-title">Berat target kamu?</h1>
+      <div class="weight-journey">
+        <div class="journey-visual">
+          <div class="journey-point">
+            <div class="journey-label">Sekarang</div>
+            <div class="journey-weight" id="journeyNow">70.0</div>
+          </div>
+          <div class="journey-arrow">
+            <div class="journey-line"></div>
+            <div class="journey-diff neutral" id="journeyDiff">0 kg</div>
+          </div>
+          <div class="journey-point">
+            <div class="journey-label">Target</div>
+            <div class="journey-weight" id="journeyTarget">70.0</div>
+          </div>
+        </div>
+        <div class="slider-track journey-slider-wrap">
+          <input type="range" id="targetSlider" min="30" max="200" step="0.1" value="70" aria-label="Berat target">
+          <div class="slider-labels">
+            <span>30 kg</span>
+            <span>200 kg</span>
+          </div>
+        </div>
+        <div class="journey-hint" id="journeyHint" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- STEP 7: ACTIVITY -->
+    <div class="screen" id="screen-7" data-step="7">
+      <h1 class="screen-title">Aktivitas harian di luar gym?</h1>
+      <div class="activity-list" role="radiogroup" aria-label="Pilih aktivitas harian">
+        <div class="activity-item" data-value="sedentary" tabindex="0" role="radio" aria-checked="false">
+          <div class="activity-dot"></div>
+          <div class="activity-text">
+            <div class="activity-title">Jarang gerak</div>
+            <div class="activity-sub">Kerja duduk seharian, jarang jalan kaki</div>
+          </div>
+        </div>
+        <div class="activity-item" data-value="light" tabindex="0" role="radio" aria-checked="false">
+          <div class="activity-dot"></div>
+          <div class="activity-text">
+            <div class="activity-title">Ringan</div>
+            <div class="activity-sub">Jalan kaki sesekali, kerja ringan</div>
+          </div>
+        </div>
+        <div class="activity-item" data-value="moderate" tabindex="0" role="radio" aria-checked="false">
+          <div class="activity-dot"></div>
+          <div class="activity-text">
+            <div class="activity-title">Sedang</div>
+            <div class="activity-sub">Banyak jalan, kerja yang melibatkan gerak</div>
+          </div>
+        </div>
+        <div class="activity-item" data-value="active" tabindex="0" role="radio" aria-checked="false">
+          <div class="activity-dot"></div>
+          <div class="activity-text">
+            <div class="activity-title">Aktif</div>
+            <div class="activity-sub">Sering berdiri, mengangkat barang berat</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 8: GYM -->
+    <div class="screen" id="screen-8" data-step="8">
+      <h1 class="screen-title">Berapa kali gym per minggu?</h1>
+      <div class="chips-scroll" role="radiogroup" aria-label="Pilih frekuensi gym" style="margin-top: 24px;">
+        <div class="chip" data-value="0" tabindex="0" role="radio" aria-checked="false">0</div>
+        <div class="chip" data-value="1" tabindex="0" role="radio" aria-checked="false">1</div>
+        <div class="chip" data-value="2" tabindex="0" role="radio" aria-checked="false">2</div>
+        <div class="chip" data-value="3" tabindex="0" role="radio" aria-checked="false">3</div>
+        <div class="chip" data-value="4" tabindex="0" role="radio" aria-checked="false">4</div>
+        <div class="chip" data-value="5" tabindex="0" role="radio" aria-checked="false">5</div>
+        <div class="chip" data-value="6" tabindex="0" role="radio" aria-checked="false">6</div>
+        <div class="chip" data-value="7" tabindex="0" role="radio" aria-checked="false">7</div>
+      </div>
+      <p class="chip-label">kali per minggu</p>
+    </div>
+
+    <!-- STEP 9: FOOD PREFERENCES -->
+    <div class="screen" id="screen-9" data-step="9">
+      <h1 class="screen-title">Preferensi makanan?</h1>
+      <p class="screen-sub">Boleh pilih lebih dari satu.</p>
+      <div class="pref-chips" role="group" aria-label="Pilih preferensi makanan">
+        <div class="pref-chip" data-value="halal" tabindex="0">
+          <span>Halal</span>
+        </div>
+        <div class="pref-chip" data-value="no-pork" tabindex="0">
+          <span>Tanpa babi</span>
+        </div>
+        <div class="pref-chip" data-value="vegetarian" tabindex="0">
+          <span>Vegetarian</span>
+        </div>
+        <div class="pref-chip" data-value="no-seafood" tabindex="0">
+          <span>Tanpa seafood</span>
+        </div>
+        <div class="pref-chip" data-value="no-dairy" tabindex="0">
+          <span>Tanpa susu</span>
+        </div>
+        <div class="pref-chip" data-value="none" tabindex="0">
+          <span>Tidak ada pantangan</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 10: BUDGET -->
+    <div class="screen" id="screen-10" data-step="10">
+      <h1 class="screen-title">Budget per makan?</h1>
+      <p class="screen-sub">Supaya rekomendasi makanannya masuk akal. Opsional.</p>
+      <div class="budget-chips" role="radiogroup" aria-label="Pilih budget per makan">
+        <div class="budget-chip" data-value="<15" tabindex="0" role="radio" aria-checked="false"><span>&lt;15rb</span></div>
+        <div class="budget-chip" data-value="15-30" tabindex="0" role="radio" aria-checked="false"><span>15–30rb</span></div>
+        <div class="budget-chip" data-value="30-50" tabindex="0" role="radio" aria-checked="false"><span>30–50rb</span></div>
+        <div class="budget-chip" data-value=">50" tabindex="0" role="radio" aria-checked="false"><span>&gt;50rb</span></div>
+      </div>
+      <button class="budget-skip" id="budgetSkip">
+        <span class="budget-skip-btn">Lewati</span>
+      </button>
+    </div>
+
+    <!-- AGREEMENT -->
+    <div class="screen" id="screen-agreement" data-step="agreement">
+      <h1 class="screen-title">Sebelum lanjut…</h1>
+      <div class="agreement-wrap">
+        <div class="agreement-checkbox-row" id="agreementToggle" tabindex="0" role="checkbox" aria-checked="false">
+          <div class="agreement-checkbox" id="agreementCheck">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+          <div class="agreement-text">
+            Saya setuju data tinggi, berat, dan kebiasaan makan saya diproses untuk membuat rekomendasi personal. <a href="#" class="agreement-link" onclick="event.preventDefault()">Kebijakan privasi</a>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALCULATING -->
+    <div class="screen" id="screen-calculating" data-step="calculating">
+      <div class="calculating">
+        <div class="calc-plate-stack" id="calcStack">
+          <div class="calc-bar"></div>
+          <div class="calc-plate" style="left:0;width:50px"></div>
+          <div class="calc-plate" style="left:54px;width:35px"></div>
+          <div class="calc-plate" style="left:93px;width:45px"></div>
+          <div class="calc-plate" style="left:142px;width:40px"></div>
+        </div>
+        <div class="calc-text" id="calcText" aria-live="polite">Menghitung kebutuhan kalori…</div>
+      </div>
+    </div>
+
+    <!-- GUARDRAIL -->
+    <div class="screen" id="screen-guardrail" data-step="guardrail">
+      <div class="guardrail">
+        <div class="guardrail-icon">⚠️</div>
+        <h1 class="guardrail-title">Target ini di bawah rentang berat sehat.</h1>
+        <p class="guardrail-body">Kami nggak bisa bikin rencana untuk target itu. Kalau kamu mau, kita bisa mulai dari menjaga berat sekarang — atau ngobrol dulu sama tenaga kesehatan.</p>
+        <div class="guardrail-btns">
+          <button class="btn-primary" id="guardrailChange">Ubah target</button>
+          <button class="btn-secondary" id="guardrailMaintain">Pilih Maintain</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NEXT BUTTON -->
+  <button class="btn-primary" id="nextBtn" disabled aria-label="Lanjut">Lanjut</button>
+
+  <script>
+    (function() {
+      let currentStep = 1;
+      const totalSteps = 10;
+      let state = {
+        goal: null,
+        gender: null,
+        age: 25,
+        height: 170,
+        weight: 70,
+        targetWeight: 70,
+        activity: null,
+        gym: null,
+        preferences: [],
+        budget: null,
+        agreed: false
+      };
+
+      const screens = document.querySelectorAll('.screen');
+      const nextBtn = document.getElementById('nextBtn');
+      const backBtn = document.getElementById('backBtn');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+
+      function updateProgress() {
+        if (currentStep <= totalSteps) {
+          progressFill.style.width = ((currentStep) / totalSteps * 100) + '%';
+          progressText.textContent = currentStep + ' dari ' + totalSteps;
+        } else {
+          progressFill.style.width = '100%';
+          progressText.textContent = '';
+        }
+        backBtn.style.display = (currentStep > 1 && currentStep !== 'calculating' && currentStep !== 'guardrail' && currentStep !== 'agreement') ? 'flex' : 'none';
+      }
+
+      function isStepComplete() {
+        switch(currentStep) {
+          case 1: return !!state.goal;
+          case 2: return !!state.gender;
+          case 3: return state.age >= 15 && state.age <= 100;
+          case 4: return state.height >= 120 && state.height <= 220;
+          case 5: return state.weight >= 30 && state.weight <= 200;
+          case 6: return true;
+          case 7: return !!state.activity;
+          case 8: return state.gym !== null;
+          case 9: return state.preferences.length > 0;
+          case 10: return true;
+          case 'agreement': return state.agreed;
+          default: return true;
+        }
+      }
+
+      function goToScreen(stepNum) {
+        screens.forEach(s => s.classList.remove('active', 'exit-left'));
+        const target = document.getElementById('screen-' + stepNum) || document.querySelector('.screen[data-step="' + stepNum + '"]');
+        if (!target) return;
+        target.classList.add('active');
+        currentStep = stepNum;
+        updateProgress();
+        nextBtn.disabled = !isStepComplete();
+
+        if (stepNum === 'calculating') {
+          nextBtn.style.display = 'none';
+          runCalculating();
+        } else if (stepNum === 'guardrail') {
+          nextBtn.style.display = 'none';
+          backBtn.style.display = 'none';
+        } else {
+          nextBtn.style.display = '';
+        }
+      }
+
+      function nextStep() {
+        if (!isStepComplete()) return;
+
+        if (currentStep === 10) {
+          goToScreen('agreement');
+          return;
+        }
+        if (currentStep === 'agreement') {
+          goToScreen('calculating');
+          return;
+        }
+
+        const num = typeof currentStep === 'number' ? currentStep : parseInt(currentStep);
+        if (num < totalSteps) {
+          goToScreen(num + 1);
+        }
+      }
+
+      backBtn.addEventListener('click', function() {
+        if (currentStep === 'agreement') {
+          goToScreen(10);
+          return;
+        }
+        const num = typeof currentStep === 'number' ? currentStep : parseInt(currentStep);
+        if (num > 1) {
+          goToScreen(num - 1);
+        }
+      });
+
+      nextBtn.addEventListener('click', nextStep);
+
+      // GOAL CARDS
+      document.querySelectorAll('.goal-card').forEach(card => {
+        card.addEventListener('click', function() {
+          document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('selected'));
+          this.classList.add('selected');
+          state.goal = this.dataset.value;
+          nextBtn.disabled = false;
+        });
+        card.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+      // GENDER CARDS
+      document.querySelectorAll('.gender-card').forEach(card => {
+        card.addEventListener('click', function() {
+          document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected'));
+          this.classList.add('selected');
+          state.gender = this.dataset.value;
+          nextBtn.disabled = false;
+        });
+        card.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+      // AGE STEPPER
+      const ageValue = document.getElementById('ageValue');
+      document.getElementById('ageMinus').addEventListener('click', function() {
+        if (state.age > 15) {
+          state.age--;
+          ageValue.textContent = state.age;
+          nextBtn.disabled = false;
+        }
+      });
+      document.getElementById('agePlus').addEventListener('click', function() {
+        if (state.age < 100) {
+          state.age++;
+          ageValue.textContent = state.age;
+          nextBtn.disabled = false;
+        }
+      });
+
+      // HEIGHT SLIDER
+      const heightSlider = document.getElementById('heightSlider');
+      const heightValue = document.getElementById('heightValue');
+      heightSlider.addEventListener('input', function() {
+        state.height = parseInt(this.value);
+        heightValue.textContent = state.height;
+        nextBtn.disabled = false;
+      });
+
+      // WEIGHT SLIDER
+      const weightSlider = document.getElementById('weightSlider');
+      const weightValue = document.getElementById('weightValue');
+      weightSlider.addEventListener('input', function() {
+        state.weight = parseFloat(this.value);
+        weightValue.textContent = state.weight.toFixed(1);
+        nextBtn.disabled = false;
+        document.getElementById('journeyNow').textContent = state.weight.toFixed(1);
+        updateJourney();
+      });
+
+      // TARGET WEIGHT
+      const targetSlider = document.getElementById('targetSlider');
+      const journeyTarget = document.getElementById('journeyTarget');
+      const journeyDiff = document.getElementById('journeyDiff');
+      const journeyHint = document.getElementById('journeyHint');
+
+      function updateJourney() {
+        const diff = state.targetWeight - state.weight;
+        journeyTarget.textContent = state.targetWeight.toFixed(1);
+        if (diff > 0) {
+          journeyDiff.textContent = '+' + diff.toFixed(1) + ' kg';
+          journeyDiff.className = 'journey-diff positive';
+        } else if (diff < 0) {
+          journeyDiff.textContent = diff.toFixed(1) + ' kg';
+          journeyDiff.className = 'journey-diff negative';
+        } else {
+          journeyDiff.textContent = '0 kg';
+          journeyDiff.className = 'journey-diff neutral';
+        }
+
+        // Check BMI guardrail
+        const heightM = state.height / 100;
+        const targetBMI = state.targetWeight / (heightM * heightM);
+        if (targetBMI < 18.5) {
+          journeyHint.style.display = 'block';
+          journeyHint.textContent = 'Target BMI kamu di bawah 18.5. Kami akan tanya ulang di akhir.';
+        } else {
+          journeyHint.style.display = 'none';
+        }
+
+        // Check goal mismatch
+        if (state.goal === 'bulk' && diff < 0) {
+          journeyHint.style.display = 'block';
+          journeyHint.textContent = 'Untuk BULK, target biasanya lebih tinggi dari berat sekarang.';
+          journeyHint.style.color = 'var(--plate-blue)';
+          journeyHint.style.background = 'var(--plate-blue-tint)';
+        } else if (state.goal === 'cut' && diff > 0) {
+          journeyHint.style.display = 'block';
+          journeyHint.textContent = 'Untuk CUT, target biasanya lebih rendah dari berat sekarang.';
+          journeyHint.style.color = 'var(--plate-red)';
+          journeyHint.style.background = 'var(--plate-red-tint)';
+        } else if (state.goal) {
+          journeyHint.style.color = 'var(--plate-blue)';
+          journeyHint.style.background = 'var(--plate-blue-tint)';
+        }
+      }
+
+      targetSlider.addEventListener('input', function() {
+        state.targetWeight = parseFloat(this.value);
+        updateJourney();
+        nextBtn.disabled = false;
+      });
+
+      // ACTIVITY
+      document.querySelectorAll('.activity-item').forEach(item => {
+        item.addEventListener('click', function() {
+          document.querySelectorAll('.activity-item').forEach(i => i.classList.remove('selected'));
+          this.classList.add('selected');
+          state.activity = this.dataset.value;
+          nextBtn.disabled = false;
+        });
+        item.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+      // GYM CHIPS
+      document.querySelectorAll('.chips-scroll .chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+          document.querySelectorAll('.chips-scroll .chip').forEach(c => c.classList.remove('selected'));
+          this.classList.add('selected');
+          state.gym = parseInt(this.dataset.value);
+          nextBtn.disabled = false;
+        });
+        chip.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+      // FOOD PREFERENCES
+      document.querySelectorAll('.pref-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+          const val = this.dataset.value;
+          if (val === 'none') {
+            document.querySelectorAll('.pref-chip').forEach(c => c.classList.remove('selected'));
+            state.preferences = ['none'];
+            this.classList.add('selected');
+          } else {
+            this.classList.toggle('selected');
+            document.querySelector('.pref-chip[data-value="none"]').classList.remove('selected');
+            state.preferences = Array.from(document.querySelectorAll('.pref-chip.selected')).map(c => c.dataset.value);
+            if (state.preferences.length === 0) state.preferences = [];
+          }
+          nextBtn.disabled = state.preferences.length === 0;
+        });
+        chip.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+      // BUDGET
+      document.querySelectorAll('.budget-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+          document.querySelectorAll('.budget-chip').forEach(c => c.classList.remove('selected'));
+          this.classList.add('selected');
+          state.budget = this.dataset.value;
+          nextBtn.disabled = false;
+        });
+        chip.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            this.click();
+          }
+        });
+      });
+
+      document.getElementById('budgetSkip').addEventListener('click', function() {
+        state.budget = null;
+        nextBtn.disabled = false;
+        document.querySelectorAll('.budget-chip').forEach(c => c.classList.remove('selected'));
+      });
+
+      // AGREEMENT
+      const agreementToggle = document.getElementById('agreementToggle');
+      const agreementCheck = document.getElementById('agreementCheck');
+      agreementToggle.addEventListener('click', function() {
+        state.agreed = !state.agreed;
+        agreementCheck.classList.toggle('checked', state.agreed);
+        agreementToggle.setAttribute('aria-checked', state.agreed);
+        nextBtn.disabled = !state.agreed;
+      });
+      agreementToggle.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.click();
+        }
+      });
+
+      // GUARDRAIL
+      document.getElementById('guardrailChange').addEventListener('click', function() {
+        goToScreen(6);
+        backBtn.style.display = 'flex';
+        nextBtn.style.display = '';
+      });
+      document.getElementById('guardrailMaintain').addEventListener('click', function() {
+        state.goal = 'maintain';
+        state.targetWeight = state.weight;
+        goToScreen('calculating');
+      });
+
+      // CALCULATING ANIMATION
+      function runCalculating() {
+        const plates = document.querySelectorAll('.calc-plate');
+        const calcText = document.getElementById('calcText');
+        const texts = ['Menghitung kebutuhan kalori…', 'Menyusun target protein…', 'Menyiapkan coach kamu…'];
+        let i = 0;
+
+        plates.forEach(p => p.classList.remove('loaded', 'over'));
+
+        function showNext() {
+          if (i < plates.length) {
+            setTimeout(function() {
+              plates[i].classList.add('loaded');
+              i++;
+              if (i < texts.length) {
+                calcText.textContent = texts[i];
+              }
+              showNext();
+            }, i === 0 ? 200 : 400);
+          } else {
+            setTimeout(function() {
+              // Would go to plan reveal here
+              calcText.textContent = 'Selesai!';
+            }, 600);
+          }
+        }
+        showNext();
+      }
+
+      // Check BMI when target is set
+      weightSlider.addEventListener('input', function() {
+        document.getElementById('journeyNow').textContent = state.weight.toFixed(1);
+        updateJourney();
+      });
+
+      updateProgress();
+    })();
+  </script>
+</body>
+</html>

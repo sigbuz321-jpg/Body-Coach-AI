@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#EAEEEC; font-family:'Plus Jakarta Sans',system-ui,sans-serif; color:#131A24; -webkit-font-smoothing:antialiased; }
+  * { box-sizing:border-box; }
+  a { color:#1156C7; text-decoration:none; }
+  a:hover { color:#0C1119; text-decoration:underline; }
+  button { font-family:inherit; }
+  :focus-visible { outline:2px solid #1156C7; outline-offset:2px; }
+  @keyframes dotpulse { 0%,100% { opacity:.25; transform:translateY(0); } 50% { opacity:1; transform:translateY(-2px); } }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+</helmet>
+
+<div style="display:flex; flex-wrap:wrap; gap:48px; padding:48px; align-items:flex-start; font-size:15px; line-height:23px">
+
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <div style="display:flex; flex-direction:column; gap:2px">
+      <div style="font-size:12px; line-height:16px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#6B7780">Layar A</div>
+      <div style="font-family:'Archivo',sans-serif; font-weight:700; font-size:21px; line-height:28px; letter-spacing:-0.02em">Rencana kamu</div>
+    </div>
+
+    <div style="width:390px; height:844px; background:#F5F7F6; border:1px solid #DCE2DF; border-radius:24px; overflow:hidden; display:flex; flex-direction:column">
+      <div style="flex:1; overflow:auto; padding:24px 20px 32px">
+
+        <div style="display:flex; flex-direction:column; gap:24px">
+
+          <div style="display:flex; flex-direction:column; gap:20px">
+            <div style="font-size:12px; line-height:16px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#6B7780">Rencana <span style="color:#1156C7">bulk</span> kamu</div>
+
+            <div style="display:flex; align-items:flex-end; gap:16px">
+              <div style="display:flex; flex-direction:column; gap:4px">
+                <div style="font-size:12px; line-height:16px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#98A5A0">Sekarang</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:700; font-size:28px; line-height:32px; color:#4A555E">63,4<span style="font-size:15px; font-weight:500; color:#6B7780"> kg</span></div>
+              </div>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="margin-bottom:4px; flex:none"><path d="M4 12h14M13 7l5 5-5 5" stroke="#98A5A0" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div style="display:flex; flex-direction:column; gap:4px">
+                <div style="font-size:12px; line-height:16px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#98A5A0">Target</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:700; font-size:28px; line-height:32px; color:#131A24">70,0<span style="font-size:15px; font-weight:500; color:#6B7780"> kg</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:relative; background:#FFFFFF; border:1px solid #DCE2DF; border-radius:16px; padding:24px 20px 20px">
+            <div style="position:absolute; inset:4px; border:1px solid #DCE2DF; border-radius:12px; pointer-events:none"></div>
+
+            <div style="position:relative; display:flex; flex-direction:column; gap:24px">
+
+              <div style="display:flex; flex-direction:column; gap:4px">
+                <div style="font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:700; font-size:44px; line-height:48px; letter-spacing:-0.01em">{{ kkalFormatted }}</div>
+                <div style="font-size:13px; line-height:20px; color:#6B7780">kkal per hari</div>
+              </div>
+
+              <div style="height:1px; background:#EAEEEC"></div>
+
+              <div style="display:flex; flex-direction:column; gap:16px">
+                <div style="font-size:12px; line-height:16px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#6B7780">Target makro harian</div>
+
+                <div style="display:flex; flex-direction:column; gap:6px">
+                  <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px">
+                    <div style="display:flex; align-items:center; gap:8px">
+                      <span style="width:8px; height:8px; border-radius:999px; background:#1E9E5A; flex:none"></span>
+                      <span style="font-size:15px; font-weight:500">Protein</span>
+                    </div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:700; font-size:18px; line-height:24px"><span style="color:#98A5A0">0</span><span style="color:#C2CBC6"> / </span>140<span style="font-size:13px; font-weight:500; color:#6B7780"> g</span></div>
+                  </div>
+                  <div style="height:8px; border-radius:999px; background:#E6F5ED; position:relative; overflow:hidden">
+                    <div style="position:absolute; right:0; top:0; bottom:0; width:2px; background:#C2CBC6"></div>
+                  </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:6px">
+                  <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px">
+                    <div style="display:flex; align-items:center; gap:8px">
+                      <span style="width:8px; height:8px; border-radius:999px; background:#F5B301; flex:none"></span>
+                      <span style="font-size:15px; font-weight:500">Karbo</span>
+                    </div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:700; font-size:18px; line-height:24px"><span style="color:#98A5A0">0</span><span style="color:#C2CBC6"> / </span>320<span style="font-size:13px; font-weight:500; color:#6B7780"> g</span></div>
+                  </div>
+                  <div style="height:8px; border-radius:999px; background:#FEF5E0; position:relative; overflow:hidden">
+                    <div style="position:absolute; right:0; top:0; bottom:0; width:2px; background:#C2CBC6"></div>
+                  </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:6px">
+                  <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px">
+                    <div style="display:flex; align-items:center; gap:8px">
+                      <span style="width:8px; height:8px; border-radius:999px; background:#1156C7; flex:none"></span>
+                      <span style="font-size:15px; font-weight:500">Lemak</span>
+                    </div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:700; font-size:18px; line-height:24px"><span style="color:#98A5A0">0</span><span style="color:#C2CBC6"> / </span>75<span style="font-size:13px; font-weight:500; color:#6B7780"> g</span></div>
+                  </div>
+                  <div style="height:8px; border-radius:999px; background:#E8F0FC; position:relative; overflow:hidden">
+                    <div style="position:absolute; right:0; top:0; bottom:0; width:2px; background:#C2CBC6"></div>
+                  </div>
+                </div>
+
+                <div style="font-size:13px; line-height:20px; color:#6B7780">Bar terisi setiap kamu catat makan di WhatsApp.</div>
+              </div>
+
+              <div style="height:1px; background:#EAEEEC"></div>
+
+              <div style="display:flex; flex-direction:column; gap:8px">
+                <div style="display:flex; align-items:center; gap:8px">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:none"><circle cx="12" cy="12" r="8.25" stroke="#4A555E" stroke-width="1.75"/><path d="M12 8v4.2l2.6 1.6" stroke="#4A555E" stroke-width="1.75" stroke-linecap="round"/></svg>
+                  <span style="font-size:17px; line-height:26px; font-weight:600">Perkiraan <span style="font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; font-weight:700">{{ estimasi }}</span> bulan</span>
+                </div>
+                <div style="font-size:13px; line-height:20px; color:#6B7780; text-wrap:pretty">Perkiraan berdasarkan kenaikan ±0,35% berat badan per minggu. Akan disesuaikan tiap minggu berdasarkan berat kamu.</div>
+              </div>
+
+            </div>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #DCE2DF; border-radius:16px; overflow:hidden">
+            <button type="button" onClick="{{ toggleAcc }}" style="width:100%; min-height:56px; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; background:transparent; border:0; cursor:pointer; text-align:left; font-size:15px; font-weight:600; color:#131A24">
+              <span>Dari mana angka ini?</span>
+              <span style="width:24px; height:24px; flex:none; display:flex; align-items:center; justify-content:center; transform:{{ accArrow }}; transition:transform 200ms cubic-bezier(.32,.72,0,1)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9.5l6 6 6-6" stroke="#6B7780" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+            <sc-if value="{{ accOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:0 20px 20px; display:flex; flex-direction:column; gap:12px; font-size:15px; line-height:23px; color:#4A555E">
+                <p style="margin:0; text-wrap:pretty">Kami mulai dari kebutuhan dasar tubuh kamu saat istirahat — dihitung dari tinggi, berat, dan umur.</p>
+                <p style="margin:0; text-wrap:pretty">Angka itu dikalikan dengan seberapa aktif hari-hari kamu dan berapa kali kamu latihan seminggu.</p>
+                <p style="margin:0; text-wrap:pretty">Terakhir kami tambah surplus kecil yang terkendali, secukupnya untuk menambah massa otot. Setiap minggu angkanya kami sesuaikan lagi dari berat kamu yang terbaru.</p>
+              </div>
+            </sc-if>
+          </div>
+
+        </div>
+      </div>
+
+      <div style="border-top:1px solid #DCE2DF; background:#FFFFFF; padding:12px 20px calc(16px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:4px">
+        <button type="button" style="height:52px; border-radius:999px; border:0; background:#131A24; color:#FFFFFF; font-size:16px; font-weight:600; cursor:pointer" style-hover="background:#0C1119">Lanjut ke coach</button>
+        <button type="button" style="height:48px; border-radius:999px; border:0; background:transparent; color:#4A555E; font-size:15px; font-weight:600; cursor:pointer" style-hover="background:#F5F7F6; color:#131A24">Ubah data saya</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:12px">
+    <div style="display:flex; flex-direction:column; gap:2px">
+      <div style="font-size:12px; line-height:16px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#6B7780">Layar B</div>
+      <div style="font-family:'Archivo',sans-serif; font-weight:700; font-size:21px; line-height:28px; letter-spacing:-0.02em">Sambungkan WhatsApp</div>
+      <div style="font-size:13px; line-height:20px; color:#6B7780">Ketuk tombolnya untuk lihat state menunggu.</div>
+    </div>
+
+    <div style="width:390px; height:844px; background:#F5F7F6; border:1px solid #DCE2DF; border-radius:24px; overflow:hidden; display:flex; flex-direction:column">
+      <sc-if value="{{ notWaiting }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1; overflow:auto; padding:32px 20px; display:flex; flex-direction:column; gap:32px">
+
+          <div style="display:flex; flex-direction:column; gap:12px">
+            <h1 style="margin:0; font-family:'Archivo',sans-serif; font-weight:800; font-size:32px; line-height:36px; letter-spacing:-0.02em">Coach kamu udah siap.</h1>
+            <p style="margin:0; font-size:17px; line-height:26px; color:#4A555E; text-wrap:pretty">Ketuk tombol di bawah. WhatsApp akan terbuka dengan pesan pembuka yang sudah terisi — tinggal kirim.</p>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #DCE2DF; border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:12px">
+            <div style="font-size:12px; line-height:16px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#6B7780">Pesan yang akan terkirim</div>
+            <div style="display:flex; align-items:center; gap:12px">
+              <div style="flex:1; background:#F5F7F6; border:1px solid #EAEEEC; border-radius:12px; padding:12px 16px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:18px; line-height:24px; letter-spacing:.02em">MULAI-8F2K9Q</div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#1E9E5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="font-size:13px; line-height:20px; color:#6B7780">Kode ini yang menyambungkan chat kamu ke rencana ini.</div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px">
+            <div style="font-size:12px; line-height:16px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:#6B7780">Coba kirim ini duluan</div>
+            <div style="display:flex; flex-direction:column; gap:8px">
+              <div style="min-height:48px; display:flex; align-items:center; gap:12px; background:#FFFFFF; border:1px solid #DCE2DF; border-radius:16px; padding:12px 16px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M20 12.5a7 7 0 0 1-7 7H9.5L5 22v-4.2A7 7 0 0 1 4 12.5v-.5a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v.5z" stroke="#98A5A0" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <span style="font-size:15px; line-height:23px">Tadi gue makan nasi ayam geprek.</span>
+              </div>
+              <div style="min-height:48px; display:flex; align-items:center; gap:12px; background:#FFFFFF; border:1px solid #DCE2DF; border-radius:16px; padding:12px 16px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><rect x="3" y="6.5" width="18" height="13" rx="3" stroke="#98A5A0" stroke-width="1.6"/><circle cx="12" cy="13" r="3.25" stroke="#98A5A0" stroke-width="1.6"/><path d="M9 6.5l1.2-2h3.6l1.2 2" stroke="#98A5A0" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <span style="font-size:15px; line-height:23px">Foto makanan kamu</span>
+              </div>
+              <div style="min-height:48px; display:flex; align-items:center; gap:12px; background:#FFFFFF; border:1px solid #DCE2DF; border-radius:16px; padding:12px 16px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex:none"><path d="M20 12.5a7 7 0 0 1-7 7H9.5L5 22v-4.2A7 7 0 0 1 4 12.5v-.5a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v.5z" stroke="#98A5A0" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <span style="font-size:15px; line-height:23px">Malam enaknya makan apa?</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="border-top:1px solid #DCE2DF; background:#FFFFFF; padding:12px 20px calc(16px + env(safe-area-inset-bottom))">
+          <button type="button" onClick="{{ startWaiting }}" style="width:100%; height:52px; border-radius:999px; border:0; background:#131A24; color:#FFFFFF; font-size:16px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px" style-hover="background:#0C1119">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 12.5a7 7 0 0 1-7 7H9.5L5 22v-4.2A7 7 0 0 1 4 12.5v-.5a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v.5z" stroke="#FFFFFF" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            <span>Buka WhatsApp</span>
+          </button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ waiting }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:40px 32px; text-align:center">
+          <div style="display:flex; align-items:center; gap:8px; height:24px">
+            <span style="width:8px; height:8px; border-radius:999px; background:#98A5A0; animation:dotpulse 1.2s ease-in-out infinite"></span>
+            <span style="width:8px; height:8px; border-radius:999px; background:#98A5A0; animation:dotpulse 1.2s ease-in-out .18s infinite"></span>
+            <span style="width:8px; height:8px; border-radius:999px; background:#98A5A0; animation:dotpulse 1.2s ease-in-out .36s infinite"></span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px">
+            <h2 style="margin:0; font-family:'Archivo',sans-serif; font-weight:700; font-size:26px; line-height:32px; letter-spacing:-0.02em">Menunggu pesan pertama kamu…</h2>
+            <p style="margin:0; font-size:15px; line-height:23px; color:#6B7780; text-wrap:pretty">Halaman ini akan lanjut sendiri begitu pesan kamu masuk.</p>
+          </div>
+          <div style="background:#FFFFFF; border:1px solid #DCE2DF; border-radius:16px; padding:12px 16px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px; line-height:23px; letter-spacing:.02em; color:#4A555E">MULAI-8F2K9Q</div>
+        </div>
+        <div style="border-top:1px solid #DCE2DF; background:#FFFFFF; padding:12px 20px calc(16px + env(safe-area-inset-bottom)); display:flex; justify-content:center">
+          <button type="button" onClick="{{ stopWaiting }}" style="min-height:48px; padding:0 20px; border-radius:999px; border:0; background:transparent; color:#4A555E; font-size:15px; font-weight:600; cursor:pointer" style-hover="background:#F5F7F6; color:#131A24">Lewati, lihat dashboard dulu</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:940,&quot;height&quot;:1000},&quot;kkalTarget&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:2650,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:1200,&quot;max&quot;:4500,&quot;step&quot;:50,&quot;unit&quot;:&quot;kkal&quot;,&quot;section&quot;:&quot;Rencana&quot;},&quot;estimasiBulan&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;6–8&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Rencana&quot;},&quot;accordionOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Rencana&quot;},&quot;waitingState&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;WhatsApp&quot;}}">
+class Component extends DCLogic {
+  state = { acc: false, waiting: null };
+  renderVals() {
+    const kkal = this.props.kkalTarget ?? 2650;
+    const accOpen = this.props.accordionOpen ? !this.state.acc : this.state.acc;
+    const waiting = this.state.waiting === null ? !!this.props.waitingState : this.state.waiting;
+    return {
+      kkalFormatted: kkal.toLocaleString('id-ID'),
+      estimasi: this.props.estimasiBulan ?? '6–8',
+      accOpen,
+      accArrow: accOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      toggleAcc: () => this.setState(s => ({ acc: !s.acc })),
+      waiting,
+      notWaiting: !waiting,
+      startWaiting: () => this.setState({ waiting: true }),
+      stopWaiting: () => this.setState({ waiting: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Typography — AI Body Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --enamel-0: #FFFFFF;
+      --enamel-50: #F5F7F6;
+      --enamel-100: #EAEEEC;
+      --enamel-200: #DCE2DF;
+      --enamel-300: #C2CBC6;
+      --enamel-400: #98A5A0;
+      --iron-500: #6B7780;
+      --iron-600: #4A555E;
+      --iron-700: #2C3742;
+      --iron-900: #131A24;
+      --iron-950: #0C1119;
+      --plate-blue: #1156C7;
+      --plate-blue-tint: #E8F0FC;
+      --plate-red: #E0332C;
+      --plate-red-tint: #FDEBEA;
+      --plate-yellow: #F5B301;
+      --plate-yellow-tint: #FEF5E0;
+      --plate-green: #1E9E5A;
+      --plate-green-tint: #E6F5ED;
+      --bg: #F5F7F6;
+      --surface: #FFFFFF;
+      --fg: #131A24;
+      --muted: #6B7780;
+      --border: #DCE2DF;
+      --accent: #1156C7;
+      --font-display: 'Archivo', sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-card: 16px;
+      --radius-sheet: 24px;
+      --radius-pill: 999px;
+      --motion: 200ms cubic-bezier(.32,.72,0,1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 32px;
+    }
+    .section { margin-bottom: 48px; }
+    .specimen {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .specimen-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .font-display { font-family: var(--font-display); }
+    .font-body { font-family: var(--font-body); }
+    .font-mono { font-family: var(--font-mono); }
+    .weight-400 { font-weight: 400; }
+    .weight-500 { font-weight: 500; }
+    .weight-600 { font-weight: 600; }
+    .weight-700 { font-weight: 700; }
+    .weight-800 { font-weight: 800; }
+    .size-hero {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 56px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    .size-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 32px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    .size-section {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 26px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    .size-card-title {
+      font-size: 17px;
+      font-weight: 600;
+    }
+    .size-body {
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+    .size-caption {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .size-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .size-mono-big {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 64px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .size-mono-medium {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 24px;
+      font-variant-numeric: tabular-nums;
+    }
+    .size-mono-small {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+    .type-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .type-row:last-child { border-bottom: none; }
+    .type-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .tabular { font-variant-numeric: tabular-nums; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 640px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .size-hero { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Typography</h1>
+
+  <div class="section">
+    <div class="specimen">
+      <div class="specimen-label">Hero Headline — Archivo 800</div>
+      <div class="size-hero">BULK ATAU CUT. TINGGAL CHAT.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="grid-2">
+      <div class="specimen">
+        <div class="specimen-label">Screen Title — Archivo 700</div>
+        <div class="size-title">Apa yang mau kamu capai?</div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Section Title — Archivo 700</div>
+        <div class="size-section">Coach yang ngerti tujuan lo.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="specimen">
+      <div class="specimen-label">Font Families</div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="font-display weight-700">Display — Archivo Bold 700</div>
+        <div class="font-display weight-800">Display — Archivo ExtraBold 800</div>
+        <div class="font-body weight-400">Body — Plus Jakarta Sans Regular 400</div>
+        <div class="font-body weight-500">Body — Plus Jakarta Sans Medium 500</div>
+        <div class="font-body weight-600">Body — Plus Jakarta Sans SemiBold 600</div>
+        <div class="font-mono weight-500">Mono — JetBrains Mono Medium 500</div>
+        <div class="font-mono weight-700">Mono — JetBrains Mono Bold 700</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="specimen">
+      <div class="specimen-label">Type Scale</div>
+      <div class="type-row">
+        <span class="size-hero">Hero 56px</span>
+        <span class="type-meta">Archivo 800, -0.02em</span>
+      </div>
+      <div class="type-row">
+        <span class="size-title">Title 32px</span>
+        <span class="type-meta">Archivo 700, -0.02em</span>
+      </div>
+      <div class="type-row">
+        <span class="size-section">Section 26px</span>
+        <span class="type-meta">Archivo 700, -0.02em</span>
+      </div>
+      <div class="type-row">
+        <span class="size-card-title">Card Title 17px</span>
+        <span class="type-meta">Plus Jakarta Sans 600</span>
+      </div>
+      <div class="type-row">
+        <span class="size-body">Body 15px — Untuk panduan nutrisi umum</span>
+        <span class="type-meta">Plus Jakarta Sans 400</span>
+      </div>
+      <div class="type-row">
+        <span class="size-caption">Caption 12px — secondary text</span>
+        <span class="type-meta">Plus Jakarta Sans 500</span>
+      </div>
+      <div class="type-row">
+        <span class="size-label">Label 11px Uppercase</span>
+        <span class="type-meta">Plus Jakarta Sans 600, 0.08em</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="grid-2">
+      <div class="specimen">
+        <div class="specimen-label">Mono Numeric — Big</div>
+        <div class="size-mono-big tabular">1.830</div>
+      </div>
+      <div class="specimen">
+        <div class="specimen-label">Mono Numeric — Medium</div>
+        <div class="size-mono-medium tabular">+0,8 kg</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="specimen">
+      <div class="specimen-label">Inline Text Styles</div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <p class="size-body">Regular body text with <strong>bold emphasis</strong> inline.</p>
+        <p class="size-body">Text with <a href="#" style="color: var(--accent);">accent link</a> inline.</p>
+        <p class="size-caption">Muted caption text for secondary information.</p>
+        <p class="size-label">Uppercase label for card headers and badges.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="specimen">
+      <div class="specimen-label">Chat Tone Examples (Indonesian Informal)</div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="padding: 12px 14px; border-radius: 16px; background: var(--fg); color: #fff; max-width: 85%; font-size: 14px;">Foto nasi padang</div>
+        <div style="padding: 12px 14px; border-radius: 16px; background: var(--fg); color: #fff; max-width: 85%; font-size: 14px;">protein gue kurang berapa?</div>
+        <div style="padding: 12px 14px; border-radius: 16px; background: var(--fg); color: #fff; max-width: 85%; font-size: 14px;">malam makan apa?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="specimen">
+      <div class="specimen-label">Goal Labels (Always Uppercase)</div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <span style="padding: 4px 10px; border-radius: 999px; background: var(--plate-blue-tint); color: var(--plate-blue); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;">BULK</span>
+        <span style="padding: 4px 10px; border-radius: 999px; background: var(--plate-red-tint); color: var(--plate-red); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;">CUT</span>
+        <span style="padding: 4px 10px; border-radius: 999px; background: var(--plate-yellow-tint); color: #8B6914; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;">MAINTAIN</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

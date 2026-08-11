@@ -15,6 +15,13 @@ export interface UserRow {
   deleted_at: Date | null;
 }
 
+export interface LinkTokenRow {
+  token: string;
+  user_id: string;
+  expires_at: Date;
+  used_at: Date | null;
+}
+
 export interface ProfileInput {
   userId: string;
   displayName: string | null;

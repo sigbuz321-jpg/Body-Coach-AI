@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { clearLastResult, readLastResult } from '../../../lib/lastResult';
+import { ROUTES } from '../../../lib/routes';
 
 /**
  * Layar Sambungkan WhatsApp. Mengikuti design/Rencana-_-WhatsApp.dc.html
@@ -55,7 +56,7 @@ export default function SambungkanPage() {
             Token pairing dibuat setelah onboarding selesai. Silakan mulai ulang.
           </p>
           <div className="ob-guard__btns">
-            <Button onClick={() => router.push('/onboarding')}>Mulai onboarding</Button>
+            <Button onClick={() => router.push(ROUTES.onboarding)}>Mulai onboarding</Button>
           </div>
         </div>
       </main>
@@ -75,7 +76,7 @@ export default function SambungkanPage() {
   function onLewati() {
     setWaiting(false);
     clearLastResult();
-    router.push('/');
+    router.push(ROUTES.home);
   }
 
   return (

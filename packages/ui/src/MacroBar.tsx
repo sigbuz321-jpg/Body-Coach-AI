@@ -11,6 +11,8 @@
  * (CLAUDE.md konflik no. 1).
  */
 
+import { formatInt } from './format';
+
 export type MacroKey = 'protein' | 'carbs' | 'fat';
 
 const MACRO_LABELS: Record<MacroKey, string> = {
@@ -50,9 +52,9 @@ export function MacroBar({ kind, value, target }: MacroBarProps) {
           <span>{MACRO_LABELS[kind]}</span>
         </div>
         <div className="bc-num bc-macro__value">
-          <span style={{ color: 'var(--enamel-400)' }}>{value}</span>
+          <span style={{ color: 'var(--enamel-400)' }}>{formatInt(value)}</span>
           <span style={{ color: 'var(--enamel-300)' }}> / </span>
-          <span>{target}</span>
+          <span>{formatInt(target)}</span>
           <span className="bc-macro__unit"> g</span>
         </div>
       </div>

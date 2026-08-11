@@ -7,7 +7,13 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 # ⇥ MULAI DARI SINI
 
 > Bagian ini untuk agen/pengembang yang baru masuk ke proyek ini.
-> Diperbarui 11 Agustus 2026. Commit terakhir: `499a66f`, sudah di `origin/main`.
+> Diperbarui 11 Agustus 2026. Commit terakhir: `b218722`, sudah di `origin/main`.
+>
+> **Perhatian: ada migration baru yang belum tentu sudah dijalankan.**
+> `0003_idempotency.sql` menambah tabel `idempotency_keys`. Jalankan
+> `pnpm db:migrate` sebelum menguji `POST /api/onboarding` — tanpa tabel itu,
+> jalur sukses mengembalikan 500 (jalur guardrail tetap jalan, karena tidak
+> menyentuh database sama sekali).
 
 ## Sudah selesai
 
@@ -16,7 +22,7 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 | M0 — Scaffolding & tooling | ✅ selesai | `4d7c3fe` |
 | M1 — Skema database & seed | ✅ selesai | `6ed1d3e` |
 | M2 — Nutrition engine & guardrail | ✅ selesai | `499a66f` |
-| M3 — Onboarding & plan reveal | ✅ selesai | `60b1b5c` |
+| M3 — Onboarding & plan reveal | ✅ selesai | `60b1b5c` (+ perbaikan, lihat bawah) |
 | M4 — Landing page | ⬅ **berikutnya** | — |
 
 Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.
@@ -51,6 +57,7 @@ Ini semua sudah pernah memakan waktu. Jangan diulang.
 7. **Prettier tidak menyentuh `*.md`, `docs/`, `design/`, dan `**/__snapshots__/`.** Bukan kelalaian: prettier pernah merusak blok token CSS di CLAUDE.md dan membuat snapshot JSON gagal cocok.
 8. **Pesan commit lewat file (`git commit -F`), bukan `-m`.** PowerShell memecah argumen pada tanda kutip ganda di dalam pesan.
 9. **`.env.local` di-gitignore, `.env.example` tidak.** Jangan pernah menaruh nilai asli di `.env.example`.
+10. **Next tidak memuat `.env.local` dari root monorepo.** File env-nya ada di root (dipakai bersama web, worker, migration, seed), sedangkan Next hanya membaca env file di direktori app-nya sendiri. Akibatnya `pnpm dev` jalan dan halaman render normal, tapi setiap endpoint yang menyentuh database gagal validasi env di `@bodycoach/db` — `DATABASE_URL` kosong. Sekarang script `dev`/`build`/`start` di `apps/web/package.json` memuatnya lewat `node --env-file-if-exists=../../.env.local` sebelum memanggil `next`. **`loadEnvConfig` di `next.config.ts` tidak cukup** — sudah dicoba, route handler berjalan di proses terpisah yang tidak mewarisi `process.env` hasil pemuatan di config (dan `import.meta.url` di next.config menunjuk ke lokasi transpile sementara, bukan `apps/web`).
 
 ## Yang berbeda dari teks milestone di bawah
 
@@ -75,13 +82,74 @@ Teks M0–M2 di bawah sengaja dibiarkan apa adanya sebagai catatan rencana awal.
 - [ ] **Status CI di GitHub belum pernah diperiksa.** Repo privat dan `gh` belum login di mesin ini.
 - [ ] **ER diagram `docs/01-system-design.md` §5 menyebut tabel `conversations`** yang tidak ada di §3; `messages` menempel langsung ke `users`. §3 yang dipakai. Rapikan salah satunya.
 
-## Berikutnya: M3
+## Perbaikan M3 setelah review (11 Agustus 2026)
 
-Baca bagian M3 di bawah. Tiga hal yang mudah terlewat:
+M3 lolos semua gerbang CI tapi **belum pernah dijalankan di browser**. Empat bug
+di bawah semuanya mati dalam 30 detik pemakaian manual. Pelajarannya bukan soal
+kodenya — `format:check`, `typecheck`, `lint`, `test`, dan `build` hijau bukan
+bukti bahwa produknya jalan.
 
-1. **Terapkan keputusan konflik CLAUDE.md**: warna makro **Protein hijau / Karbo kuning / Lemak biru** (versi plan reveal, bukan versi Dashboard), dan tambahkan token `--iron-300: #A7B3AD`, `--iron-400: #87948E`, `--plate-yellow-ink: #8B6914`.
-2. **`design/Rencana-_-WhatsApp.dc.html` tidak bisa dijalankan** — formatnya Claude Design (`<x-dc>`, `<sc-if>`, binding `{{ }}`, butuh `./support.js` yang tidak ada). Baca sebagai spesifikasi, bangun ulang sebagai React. `Onboarding.dc.html` HTML biasa dan bisa dibuka di browser.
-3. **Engine sudah siap dipakai** — `import { computeTargets, validateGoal, evaluateProfile, estimateTimeline } from '@bodycoach/core'`. Layar guardrail memakai hasil `evaluateProfile`; varian `blocked` secara struktural tidak membawa angka apa pun, jadi tidak ada yang bisa bocor ke layar. Repository database yang relevan sudah ada di `@bodycoach/db`: `createUser`, `upsertProfile`, `appendTargetVersion`, `getTargetOn`.
+| # | Bug | Perbaikan |
+| --- | --- | --- |
+| 1 | `router.push('/onboarding/rencana')` → **404**. `(onboarding)` adalah route group; segmen dalam kurung tidak masuk URL, jadi halamannya dilayani di `/rencana`. Alur mati tepat setelah rencana tersimpan. | Semua path pindah ke konstanta `apps/web/lib/routes.ts`, dijaga `routes.test.ts` yang mencocokkannya dengan `page.tsx` yang benar-benar ada. |
+| 2 | Token pairing yang dikembalikan ke klien **bukan** token yang di-`INSERT` — hasil `insertToken()` dibuang di jalur sukses. Pairing M5 mustahil berhasil. | `createUniqueLinkToken` di `@bodycoach/db` mengembalikan baris hasil INSERT; route memakai `row.token`. Tabrakan ditangani `SAVEPOINT` (retry tanpa savepoint hanya menghasilkan "current transaction is aborted"). |
+| 3 | `StepCalculating` memakai `useState(() => …)` sebagai pengganti `useEffect`: timer dimulai saat render, cleanup-nya jadi nilai state dan tidak pernah dipanggil. | Pindah ke `useEffect`. Prop `onDone` yang tidak pernah berfungsi dihapus — yang mengakhiri layar itu respons server. |
+| 4 | Tombol **"Pilih Maintain"** di layar guardrail mengirim ulang state lama (stale closure di `setTimeout`), jadi diblokir guardrail yang sama lagi. | `submit(state)` menerima state sebagai argumen; `onChooseMaintain` membentuk state barunya lalu mengirimnya langsung. |
+
+Ikutan yang diperbaiki bersamaan:
+
+- **`Idempotency-Key` sekarang benar-benar dipakai.** Sebelumnya hanya dicek
+  panjangnya lalu dibuang, padahal komentarnya mengklaim sebaliknya — retry
+  menggandakan user, profile, target, dan token. Migration `0003_idempotency.sql`
+  menambah tabel `idempotency_keys`; klaim dan respons commit dalam transaksi
+  yang sama, jadi kegagalan di tengah melepas kuncinya kembali.
+- **`estimateTimeline` tidak lagi ditulis ulang di UI.** Versi lokal di
+  `rencana/page.tsx` mengeraskan konstanta `TIMELINE_SPREAD` dan mengembalikan
+  `{0,0}` untuk maintain — persis yang membuat kartu rencana menampilkan
+  "Perkiraan 0 minggu". Sekarang dihitung engine di server dan dikirim sebagai
+  `plan.timeline` (`null` untuk maintain). AD-1 berlaku juga untuk angka durasi.
+- **`getPool().end()` di handler error dihapus.** Satu kegagalan DB menutup pool
+  bersama untuk seluruh proses; request berikutnya mati dengan "cannot use a
+  pool after end".
+- **Pesan Postgres mentah tidak lagi sampai ke pengguna** — detail ke log server,
+  pengguna dapat kalimat yang memberi jalan keluar.
+- **Consent data kesehatan divalidasi server-side** (`z.literal(true)`).
+  Sebelumnya server menulis `consent_health_data_at` tanpa syarat dan klien tidak
+  pernah mengirim flag-nya.
+- **Posisi langkah ikut dipulihkan setelah refresh** (dijepit ke langkah pertama
+  yang belum terjawab), bukan cuma jawabannya.
+- **`toFixed` manual di `PlanCard` diganti `formatWeeklyRate`**; `MacroBar`
+  memakai `formatInt`. Aturan "semua angka lewat helper `id-ID` terpusat".
+- **Test naik dari 83 ke 105.** Yang baru: 15 test kontrak untuk
+  `POST /api/onboarding` (dengan `@bodycoach/db` di-mock, engine tidak di-mock),
+  6 test rute, 1 test consent. `vitest.config.ts` sebelumnya tidak memindai
+  `apps/web/app/` sama sekali — seluruh API route diam-diam tidak pernah dites.
+
+Sekalian ditemukan saat verifikasi live: **Next tidak pernah membaca `.env.local`
+di root monorepo**, jadi jalur sukses `POST /api/onboarding` mustahil berhasil
+lewat `pnpm dev` sejak awal. Lihat jebakan lingkungan no. 10.
+
+**Bukti verifikasi live** (dev server + Supabase nyata, bukan mock):
+
+- `GET /onboarding`, `/rencana`, `/sambungkan` → **200**; `/onboarding/rencana`
+  dan `/onboarding/sambungkan` → **404** (path yang dipakai kode lama).
+- Guardrail: wanita 170cm 48kg target 45kg → `{"kind":"blocked","reason":"cut_underweight"}`,
+  tanpa satu digit pun, tanpa menyentuh database.
+- Sukses: pria 175cm 70→78kg bulk → `kcal 2990, P126 K435 L83, 0,245 kg/minggu,
+  timeline 28–44 minggu`, `linkToken MULAI-7VFXVC`.
+- Token itu **ada di `link_tokens`** (1 baris, user yang sama) — inilah yang
+  dulu tidak pernah cocok.
+- Replay dengan `Idempotency-Key` sama → respons identik, dan di database tetap
+  **1 user, 1 `target_versions`, 1 token**.
+- `profiles.consent_health_data_at` terisi; `target_versions.reason = onboarding`,
+  `effective_from = 2026-08-11` WIB.
+
+**Sisa satu langkah manual:** klik-melalui alur 10 langkah di browser pada
+viewport 390px (DoD "tanpa scroll horizontal" dan "seluruh alur tanpa mouse"
+belum diverifikasi ulang setelah perubahan ini). Ada juga satu baris data uji di
+database dari verifikasi di atas — hapus dengan menghapus user pemilik token
+`MULAI-7VFXVC` bila mengganggu (cascade akan ikut membersihkan profil, target,
+dan tokennya).
 
 ---
 

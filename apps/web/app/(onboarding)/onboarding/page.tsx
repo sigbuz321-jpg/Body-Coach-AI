@@ -2,15 +2,17 @@
 
 import { Button, ProgressBar } from '@bodycoach/ui';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { writeLastResult, type OnboardingPlan } from '../../../lib/lastResult';
 import {
   buildSubmitPayload,
   INITIAL_ONBOARDING_STATE,
   SESSION_KEY,
+  STEP_SESSION_KEY,
   type OnboardingState,
-  type OnboardingSubmitPayload,
 } from '../../../lib/onboarding';
+import { ROUTES } from '../../../lib/routes';
 import { useSessionState } from '../../../lib/useSessionState';
 import {
   StepActivity,
@@ -64,8 +66,16 @@ function isStepComplete(step: number, state: OnboardingState): boolean {
   }
 }
 
-function buildPayload(state: OnboardingState): OnboardingSubmitPayload | null {
-  return buildSubmitPayload(state);
+/**
+ * Langkah pertama yang belum terisi. Dipakai untuk membatasi pemulihan setelah
+ * refresh: kembali ke langkah 7 hanya masuk akal kalau langkah 1–6 memang sudah
+ * dijawab.
+ */
+function firstIncompleteStep(state: OnboardingState): number {
+  for (let step = 1; step <= TOTAL_STEPS; step++) {
+    if (!isStepComplete(step, state)) return step;
+  }
+  return TOTAL_STEPS;
 }
 
 /**
@@ -85,16 +95,33 @@ export default function OnboardingPage() {
     set: setState,
     hydrated,
   } = useSessionState<OnboardingState>(SESSION_KEY, INITIAL_ONBOARDING_STATE);
+  const {
+    value: nav,
+    set: setNav,
+    hydrated: navHydrated,
+  } = useSessionState<{ step: number }>(STEP_SESSION_KEY, { step: 1 });
+
   const [stage, setStage] = useState<Stage>({ kind: 'wizard', step: 1 });
   const [agreed, setAgreed] = useState(false);
+  const [restored, setRestored] = useState(false);
 
-  // Setelah hidrasi, kalau user ada di langkah > 1, kembali ke langkah 1.
-  // Ini mencegah URL panjang dan inkonsistensi.
+  /**
+   * Satu kunci idempotensi per "submission". Retry setelah error memakai kunci
+   * yang sama supaya penulisan yang sudah separuh berhasil di server tidak
+   * digandakan; begitu pengguna mengubah datanya, kunci dibuang.
+   */
+  const idempotencyKey = useRef<string | null>(null);
+
+  // Memulihkan posisi langkah setelah refresh. Jawaban dipulihkan oleh
+  // useSessionState; tanpa ini pengguna tetap dilempar kembali ke langkah 1.
   useEffect(() => {
-    if (!hydrated) return;
-    if (stage.kind !== 'wizard') return;
-    // Tidak ada efek — initial step adalah 1.
-  }, [hydrated, stage.kind]);
+    if (!hydrated || !navHydrated || restored) return;
+    setRestored(true);
+    const saved = Math.round(nav.step);
+    if (!Number.isFinite(saved) || saved <= 1) return;
+    const step = Math.min(saved, TOTAL_STEPS, firstIncompleteStep(state));
+    if (step > 1) setStage({ kind: 'wizard', step });
+  }, [hydrated, navHydrated, restored, nav.step, state]);
 
   const currentStep = stage.kind === 'wizard' ? stage.step : TOTAL_STEPS;
   const canAdvance =
@@ -107,8 +134,18 @@ export default function OnboardingPage() {
   const update = useCallback(
     (patch: Partial<OnboardingState>) => {
       setState((prev) => ({ ...prev, ...patch }));
+      // Data berubah -> submission berikutnya adalah submission yang berbeda.
+      idempotencyKey.current = null;
     },
     [setState],
+  );
+
+  const goToStep = useCallback(
+    (step: number) => {
+      setStage({ kind: 'wizard', step });
+      setNav({ step });
+    },
+    [setNav],
   );
 
   function next() {
@@ -118,49 +155,58 @@ export default function OnboardingPage() {
         setStage({ kind: 'agreement' });
         return;
       }
-      setStage({ kind: 'wizard', step: stage.step + 1 });
+      goToStep(stage.step + 1);
       return;
     }
     if (stage.kind === 'agreement') {
-      void submit();
+      void submit(state);
     }
   }
 
   function back() {
     if (stage.kind === 'agreement') {
-      setStage({ kind: 'wizard', step: TOTAL_STEPS });
+      goToStep(TOTAL_STEPS);
       return;
     }
     if (stage.kind === 'wizard' && stage.step > 1) {
-      setStage({ kind: 'wizard', step: stage.step - 1 });
+      goToStep(stage.step - 1);
     }
   }
 
-  async function submit() {
-    const payload = buildPayload(state);
+  /**
+   * `submitState` diterima sebagai argumen, bukan dibaca dari closure.
+   * "Pilih Maintain" mengubah state lalu langsung submit di tick yang sama —
+   * membaca `state` dari closure di sana berarti mengirim goal yang lama dan
+   * diblokir lagi oleh guardrail yang sama.
+   */
+  async function submit(submitState: OnboardingState) {
+    const payload = buildSubmitPayload(submitState, agreed);
     if (!payload) {
-      setStage({ kind: 'error', message: 'Data belum lengkap. Coba ulangi dari awal.' });
+      setStage({ kind: 'error', message: 'Data kamu belum lengkap. Coba ulangi dari awal.' });
       return;
     }
     setStage({ kind: 'submitting' });
     try {
-      const idempotencyKey = crypto.randomUUID();
+      idempotencyKey.current ??= crypto.randomUUID();
       const res = await fetch('/api/onboarding', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Idempotency-Key': idempotencyKey,
+          'Idempotency-Key': idempotencyKey.current,
         },
         body: JSON.stringify(payload),
       });
       const json = (await res.json()) as
-        | { kind: 'ready'; plan: unknown; linkToken: string }
+        | { kind: 'ready'; plan: OnboardingPlan; linkToken: string }
         | { kind: 'blocked'; reason: string }
         | { error: string };
       if (!res.ok || 'error' in json) {
         setStage({
           kind: 'error',
-          message: 'error' in json ? json.error : `HTTP ${res.status}`,
+          message:
+            'error' in json
+              ? json.error
+              : 'Rencana kamu belum tersimpan. Coba tekan tombolnya sekali lagi.',
         });
         return;
       }
@@ -169,40 +215,38 @@ export default function OnboardingPage() {
         setStage({ kind: 'guardrail', reason: title });
         return;
       }
-      // Sukses: bersihkan session dan arahkan ke rencana.
+      // Sukses: simpan hasil, bersihkan state wizard, lalu ke halaman rencana.
+      writeLastResult({ plan: json.plan, linkToken: json.linkToken });
       try {
         window.sessionStorage.removeItem(SESSION_KEY);
+        window.sessionStorage.removeItem(STEP_SESSION_KEY);
       } catch {
-        // Abaikan.
+        // Abaikan — navigasi tetap dilanjutkan.
       }
-      try {
-        window.sessionStorage.setItem(
-          'bodycoach.lastResult.v1',
-          JSON.stringify({ plan: json.plan, linkToken: json.linkToken }),
-        );
-      } catch {
-        // Abaikan.
-      }
-      router.push('/onboarding/rencana');
-    } catch (err) {
+      router.push(ROUTES.rencana);
+    } catch {
       setStage({
         kind: 'error',
-        message: err instanceof Error ? err.message : 'Tidak bisa terhubung ke server.',
+        message: 'Nggak bisa terhubung ke server. Cek koneksi kamu, lalu coba lagi.',
       });
     }
   }
 
   function onChangeTarget() {
-    setStage({ kind: 'wizard', step: 6 });
+    goToStep(6);
   }
 
   function onChooseMaintain() {
-    update({ goal: 'maintain', targetWeightKg: state.weightKg ?? state.targetWeightKg ?? 70 });
-    setStage({ kind: 'submitting' });
-    // Hindari duplikasi submit — panggil submit langsung setelah state.
-    setTimeout(() => {
-      void submit();
-    }, 0);
+    // State baru dibentuk lebih dulu, lalu dikirim langsung — tidak menunggu
+    // re-render React.
+    const maintained: OnboardingState = {
+      ...state,
+      goal: 'maintain',
+      targetWeightKg: state.weightKg ?? state.targetWeightKg,
+    };
+    setState(maintained);
+    idempotencyKey.current = null;
+    void submit(maintained);
   }
 
   const showProgress = stage.kind === 'wizard';
@@ -259,7 +303,7 @@ export default function OnboardingPage() {
 
         {stage.kind === 'submitting' ? (
           <div className="ob-stage ob-stage--active" key="submitting">
-            <StepCalculating onDone={() => undefined} />
+            <StepCalculating />
           </div>
         ) : null}
 
@@ -282,7 +326,10 @@ export default function OnboardingPage() {
               <h1 className="ob-guard__title">Ada masalah.</h1>
               <p className="ob-guard__body">{stage.message}</p>
               <div className="ob-guard__btns">
-                <Button onClick={() => setStage({ kind: 'wizard', step: 1 })}>Coba lagi</Button>
+                <Button onClick={() => setStage({ kind: 'agreement' })}>Coba lagi</Button>
+                <Button variant="secondary" onClick={() => goToStep(1)}>
+                  Ubah data saya
+                </Button>
               </div>
             </div>
           </div>

@@ -1,12 +1,16 @@
 import {
   appendTargetVersion,
+  claimIdempotencyKey,
+  createUniqueLinkToken,
   createUser,
-  getPool,
+  findIdempotencyResponse,
+  storeIdempotencyResponse,
   upsertProfile,
   withTransaction,
 } from '@bodycoach/db';
 import {
   computeTargets,
+  estimateTimeline,
   evaluateProfile,
   type ActivityLevel,
   type Goal,
@@ -15,7 +19,7 @@ import {
 } from '@bodycoach/core';
 import { z } from 'zod';
 import { NextResponse } from 'next/server';
-import { randomBytes } from 'node:crypto';
+import { randomInt } from 'node:crypto';
 
 import type { FoodPreference, OnboardingSubmitPayload } from '../../../lib/onboarding';
 
@@ -25,15 +29,19 @@ import type { FoodPreference, OnboardingSubmitPayload } from '../../../lib/onboa
  * Alur:
  * 1. Validasi body dengan Zod (boundary parsing).
  * 2. Bentuk domain `Profile` dari payload.
- * 3. Panggil `evaluateProfile` (engine). Varian `blocked` tidak menulis apa pun
- *    ke DB dan mengembalikan `{ kind: 'blocked', reason }` — klien menampilkan
- *    layar guardrail tanpa angka.
- * 4. Varian `ready`: buat `user` (idempoten pada email bila ada) → upsert
- *    `profiles` → append `target_versions` v1 dengan `effective_from = hari ini
- *    di Asia/Jakarta` → buat `link_tokens` (MULAI-XXXX).
- * 5. Idempotency-Key dipakai agar replay dari klien yang retry tidak
- *    menggandakan user atau target.
+ * 3. Panggil `evaluateProfile` (engine) SEBELUM menyentuh database. Varian
+ *    `blocked` tidak menulis apa pun dan mengembalikan `{ kind: 'blocked',
+ *    reason }` — klien menampilkan layar guardrail tanpa angka.
+ * 4. Varian `ready`: klaim Idempotency-Key → buat `user` → upsert `profiles` →
+ *    append `target_versions` v1 dengan `effective_from = hari ini di
+ *    Asia/Jakarta` → buat `link_tokens` → simpan respons ke kunci idempotensi.
+ *    Semuanya dalam satu transaksi.
+ *
+ * Semua angka gizi berasal dari engine (`computeTargets`, `estimateTimeline`),
+ * tidak ada yang dihitung ulang di klien.
  */
+
+const ENDPOINT = 'POST /api/onboarding';
 
 const PREFERENCES = ['halal', 'no_pork', 'no_seafood', 'vegetarian', 'no_dairy', 'none'] as const;
 
@@ -49,7 +57,29 @@ const PayloadSchema = z.object({
   preferences: z.array(z.enum(PREFERENCES)).max(PREFERENCES.length),
   budgetPerMealIdr: z.number().int().min(0).max(1_000_000).nullable(),
   displayName: z.string().max(80).nullable(),
+  // Consent data kesehatan wajib eksplisit. `literal(true)` berarti request
+  // tanpa centang ditolak di boundary — server tidak pernah menyimpulkan
+  // consent dari fakta bahwa request-nya terkirim.
+  consentHealthData: z.literal(true),
 });
+
+/** Bentuk respons sukses. Disimpan apa adanya ke kunci idempotensi. */
+interface ReadyResponse {
+  readonly kind: 'ready';
+  readonly plan: {
+    readonly goal: Goal;
+    readonly currentWeightKg: number;
+    readonly targetWeightKg: number;
+    readonly kcal: number;
+    readonly proteinG: number;
+    readonly carbsG: number;
+    readonly fatG: number;
+    readonly weeklyKg: number;
+    readonly timeline: { readonly minWeeks: number; readonly maxWeeks: number } | null;
+    readonly engineVersion: string;
+  };
+  readonly linkToken: string;
+}
 
 function todayInJakarta(): string {
   // ISO date Asia/Jakarta. `timeZone: 'Asia/Jakarta'` memastikan WIB dipakai,
@@ -67,13 +97,13 @@ function todayInJakarta(): string {
 }
 
 function newLinkToken(): string {
-  // 6 karakter base32 — gampang diketik manual saat pairing M5.
+  // 6 karakter base32 tanpa karakter ambigu (0/O, 1/I) — gampang diketik
+  // manual saat pairing M5. `randomInt` menghindari modulo bias yang membuat
+  // huruf awal alfabet lebih sering muncul.
   const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const bytes = randomBytes(6);
   let out = 'MULAI-';
   for (let i = 0; i < 6; i++) {
-    const byte = bytes[i] ?? 0;
-    out += alphabet[byte % alphabet.length];
+    out += alphabet[randomInt(alphabet.length)];
   }
   return out;
 }
@@ -99,9 +129,9 @@ function toProfile(p: OnboardingSubmitPayload): Profile {
 
 export async function POST(req: Request) {
   const idempotencyKey = req.headers.get('Idempotency-Key');
-  if (!idempotencyKey || idempotencyKey.length < 8) {
+  if (!idempotencyKey || idempotencyKey.length < 8 || idempotencyKey.length > 200) {
     return NextResponse.json(
-      { error: 'Idempotency-Key wajib diisi (>= 8 karakter).' },
+      { error: 'Idempotency-Key wajib diisi (8–200 karakter).' },
       { status: 400 },
     );
   }
@@ -121,27 +151,41 @@ export async function POST(req: Request) {
     );
   }
   const payload = parsed.data;
+  const profile = toProfile(payload);
 
-  // Jalankan engine lebih dulu: tidak ada angka yang boleh ditulis sebelum
-  // guardrail memastikan profil aman.
-  const plan = evaluateProfile(toProfile(payload));
+  // Jalankan engine lebih dulu: tidak ada angka yang boleh ditulis — dan tidak
+  // ada kunci idempotensi yang boleh terpakai — sebelum guardrail memastikan
+  // profil aman. Jalur ini sama sekali tidak menyentuh database.
+  const plan = evaluateProfile(profile);
   if (plan.kind === 'blocked') {
     // PENTING: tidak ada field numerik di respons ini. Klien tidak punya
-    // tempat untuk menampilkannya. (AD: angka dari engine saja.)
+    // tempat untuk menampilkannya. (AD-1: angka dari engine saja.)
     return NextResponse.json({ kind: 'blocked', reason: plan.guardrail.reason }, { status: 200 });
   }
 
   // Hitung target di server. `currentYear` dipakai eksplisit (lihat core).
-  const targets = computeTargets(
-    { ...toProfile(payload), conservativeMode: plan.conservative },
-    new Date().getFullYear(),
-  );
+  const conservativeProfile: Profile = { ...profile, conservativeMode: plan.conservative };
+  const targets = computeTargets(conservativeProfile, new Date().getFullYear());
+  // Perkiraan durasi juga dari engine — `null` untuk maintain / laju nol,
+  // supaya layar rencana tidak pernah menampilkan "0 minggu".
+  const timeline = estimateTimeline(conservativeProfile, targets.weeklyKg);
 
   const effectiveFrom = todayInJakarta();
-  const linkToken = newLinkToken();
 
   try {
-    const result = await withTransaction(async (client) => {
+    const outcome = await withTransaction(async (client) => {
+      // Klaim di awal transaksi. Request duplikat yang datang bersamaan
+      // menunggu di row lock ini, lalu membaca respons yang sudah commit.
+      const claimed = await claimIdempotencyKey(client, ENDPOINT, idempotencyKey);
+      if (!claimed) {
+        const stored = await findIdempotencyResponse<ReadyResponse>(
+          client,
+          ENDPOINT,
+          idempotencyKey,
+        );
+        return { replayed: stored, body: null };
+      }
+
       const user = await createUser(client, { email: null });
       await upsertProfile(client, {
         userId: user.id,
@@ -160,7 +204,7 @@ export async function POST(req: Request) {
         conservativeMode: plan.conservative,
         consentHealthDataAt: new Date(),
       });
-      const target = await appendTargetVersion(client, {
+      await appendTargetVersion(client, {
         userId: user.id,
         effectiveFrom,
         goal: payload.goal,
@@ -174,30 +218,14 @@ export async function POST(req: Request) {
         reason: 'onboarding',
         engineVersion: targets.engineVersion,
       });
-      // Token pair harus unik. `link_tokens.token` adalah PK, jadi duplikat
-      // akan throw — kalau ini terjadi, ulangi sekali (sangat langka).
-      const insertToken = async (): Promise<string> => {
-        const candidate = newLinkToken();
-        await client.query(
-          `INSERT INTO link_tokens (token, user_id, expires_at)
-           VALUES ($1, $2, now() + interval '24 hours')`,
-          [candidate, user.id],
-        );
-        return candidate;
-      };
-      let token = linkToken;
-      try {
-        await insertToken();
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : '';
-        if (!/duplicate key/i.test(msg) && !/unique constraint/i.test(msg)) throw err;
-        token = await insertToken();
-      }
-      return { userId: user.id, targetId: target.id, token };
-    });
+      // Token yang dikembalikan ke klien HARUS token yang tersimpan di DB —
+      // dibaca dari baris hasil INSERT, bukan dari variabel terpisah.
+      const linkToken = await createUniqueLinkToken(client, {
+        userId: user.id,
+        generate: newLinkToken,
+      });
 
-    return NextResponse.json(
-      {
+      const body: ReadyResponse = {
         kind: 'ready',
         plan: {
           goal: payload.goal,
@@ -208,20 +236,36 @@ export async function POST(req: Request) {
           carbsG: targets.carbsG,
           fatG: targets.fatG,
           weeklyKg: targets.weeklyKg,
+          timeline:
+            timeline === null ? null : { minWeeks: timeline.minWeeks, maxWeeks: timeline.maxWeeks },
           engineVersion: targets.engineVersion,
         },
-        linkToken: result.token,
-      },
-      { status: 200 },
-    );
+        linkToken: linkToken.token,
+      };
+      await storeIdempotencyResponse(client, ENDPOINT, idempotencyKey, body);
+      return { replayed: null, body };
+    });
+
+    if (outcome.replayed !== null) {
+      return NextResponse.json(outcome.replayed, { status: 200 });
+    }
+    if (!outcome.body) {
+      // Kunci sudah diklaim tapi responsnya kosong. Tidak mungkin terjadi
+      // lewat jalur di atas (klaim dan respons commit bersama), tapi kalau
+      // sampai terjadi, jangan diam-diam mengulang mutasinya.
+      return NextResponse.json(
+        { error: 'Permintaan dengan kunci yang sama sedang diproses. Coba lagi sebentar.' },
+        { status: 409 },
+      );
+    }
+    return NextResponse.json(outcome.body, { status: 200 });
   } catch (err) {
+    // Detail teknis hanya ke log server. Yang sampai ke pengguna adalah
+    // kalimat yang menjelaskan dan memberi jalan keluar (aturan copy
+    // CLAUDE.md), bukan pesan Postgres mentah.
     console.error('[onboarding] gagal menulis DB:', err);
-    // Tutup pool agar koneksi gagal tidak menggantung.
-    await getPool()
-      .end()
-      .catch(() => undefined);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : 'Gagal membuat profil.' },
+      { error: 'Rencana kamu belum tersimpan. Coba tekan tombolnya sekali lagi.' },
       { status: 500 },
     );
   }

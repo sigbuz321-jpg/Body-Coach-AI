@@ -1,4 +1,4 @@
-import { formatInt, formatKg, formatWeekRange } from './format';
+import { formatInt, formatKg, formatWeeklyRate, formatWeekRange } from './format';
 import { MacroBar } from './MacroBar';
 
 export interface PlanCardProps {
@@ -45,9 +45,9 @@ export function PlanCard({
       ? formatWeekRange(timelineMinWeeks, timelineMaxWeeks)
       : null;
 
-  const rateSign = weeklyKg > 0 ? '+' : weeklyKg < 0 ? '−' : '';
-  const weeklyAbs = Math.abs(weeklyKg).toFixed(2).replace('.', ',');
-  const rateText = `${rateSign}${weeklyAbs} kg/minggu`;
+  // Lewat helper terpusat, bukan toFixed manual: pemisah desimal `id-ID` dan
+  // tanda minus tipografis ditentukan di satu tempat (aturan CLAUDE.md).
+  const rateText = formatWeeklyRate(weeklyKg);
 
   return (
     <section className="bc-plan" aria-label="Rencana nutrisi kamu">

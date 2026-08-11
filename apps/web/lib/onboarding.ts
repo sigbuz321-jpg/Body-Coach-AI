@@ -45,6 +45,13 @@ export const INITIAL_ONBOARDING_STATE: OnboardingState = {
 export const SESSION_KEY = 'bodycoach.onboarding.v1';
 
 /**
+ * Posisi langkah disimpan terpisah dari jawaban. Jawaban adalah data domain
+ * yang dikirim ke server; nomor langkah cuma posisi kursor di UI — mencampur
+ * keduanya membuat payload API membawa field yang tidak ada artinya di server.
+ */
+export const STEP_SESSION_KEY = 'bodycoach.onboarding.step.v1';
+
+/**
  * Payload yang dikirim ke API. Hanya kolom-kolom yang diperlukan server;
  * field internal (seperti displayName) tidak ikut.
  */
@@ -60,6 +67,12 @@ export interface OnboardingSubmitPayload {
   readonly preferences: readonly FoodPreference[];
   readonly budgetPerMealIdr: number | null;
   readonly displayName: string | null;
+  /**
+   * Selalu `true`. Tipe literal, bukan boolean: payload tanpa consent bukan
+   * payload yang "consent-nya false", melainkan payload yang tidak boleh
+   * terbentuk sama sekali. Server memvalidasinya ulang dengan `z.literal(true)`.
+   */
+  readonly consentHealthData: true;
 }
 
 /**
@@ -83,11 +96,19 @@ export function budgetToIdr(b: BudgetPerMeal): number | null {
 }
 
 /**
- * Membangun payload dari state wizard. Mengembalikan `null` bila input
- * belum lengkap — klien menyebut ini untuk menentukan apakah tombol
- * "Buat rencana saya" boleh aktif.
+ * Membangun payload dari state wizard. Mengembalikan `null` bila input belum
+ * lengkap atau consent data kesehatan belum dicentang — klien memakai ini
+ * untuk menentukan apakah tombol "Buat rencana saya" boleh aktif.
+ *
+ * `consentHealthData` sengaja parameter terpisah, bukan field di
+ * `OnboardingState`: consent bukan jawaban wizard yang boleh dipulihkan dari
+ * sessionStorage bersama jawaban lain. Refresh halaman berarti mencentang lagi.
  */
-export function buildSubmitPayload(state: OnboardingState): OnboardingSubmitPayload | null {
+export function buildSubmitPayload(
+  state: OnboardingState,
+  consentHealthData: boolean,
+): OnboardingSubmitPayload | null {
+  if (!consentHealthData) return null;
   if (
     state.goal === null ||
     state.sex === null ||
@@ -112,5 +133,6 @@ export function buildSubmitPayload(state: OnboardingState): OnboardingSubmitPayl
     preferences: state.preferences,
     budgetPerMealIdr: budgetToIdr(state.budget),
     displayName: state.displayName,
+    consentHealthData: true,
   };
 }

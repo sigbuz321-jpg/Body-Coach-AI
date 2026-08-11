@@ -8,6 +8,9 @@ export default defineConfig({
     include: [
       '{apps,packages,tooling}/*/src/**/*.test.{ts,tsx}',
       'apps/web/lib/**/*.test.{ts,tsx}',
+      // Route handler Next tinggal di app/, bukan src/. Tanpa baris ini
+      // `pnpm test` diam-diam melewati seluruh API route.
+      'apps/web/app/**/*.test.{ts,tsx}',
     ],
     passWithNoTests: true,
     coverage: {

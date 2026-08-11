@@ -2,7 +2,7 @@
 
 import { Button, Chip, GoalCard, type GoalValue, Slider, Stepper } from '@bodycoach/ui';
 import type { ActivityLevel, Goal } from '@bodycoach/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { BudgetPerMeal, FoodPreference, OnboardingState } from '../../../../lib/onboarding';
 
@@ -424,38 +424,35 @@ export function StepAgreement({
   );
 }
 
-/**
- * Layar calculating — animasi plat + teks berputar. Dipanggil saat submit
- * disetujui. Animasi menggunakan CSS keyframes di globals; selesai
- * mengarahkan ke halaman rencana atau guardrail.
- */
-export function StepCalculating({ onDone }: { onDone: () => void }) {
-  const [text, setText] = useState('Menghitung kebutuhan kalori…');
-  const [progress, setProgress] = useState(0);
+const CALCULATING_MESSAGES = [
+  'Menghitung kebutuhan kalori…',
+  'Menyusun target protein…',
+  'Menyiapkan coach kamu…',
+] as const;
 
-  useState(() => {
-    const messages = [
-      'Menghitung kebutuhan kalori…',
-      'Menyusun target protein…',
-      'Menyiapkan coach kamu…',
-    ];
-    let i = 0;
+/**
+ * Layar calculating — animasi plat + teks berputar selama request POST
+ * /api/onboarding berjalan. Yang mengakhiri layar ini adalah respons server
+ * (halaman induk mengganti stage), bukan timer di sini.
+ *
+ * Timer dijalankan di `useEffect`, bukan di initializer `useState`: initializer
+ * dieksekusi saat render, nilai kembaliannya menjadi state alih-alih fungsi
+ * cleanup, dan intervalnya tidak pernah dibersihkan.
+ */
+export function StepCalculating() {
+  // `progress` menggerakkan empat plat; teksnya cuma tiga, jadi indeksnya
+  // dijepit di pesan terakhir.
+  const [progress, setProgress] = useState(0);
+  const text =
+    CALCULATING_MESSAGES[Math.min(progress, CALCULATING_MESSAGES.length - 1)] ??
+    CALCULATING_MESSAGES[0];
+
+  useEffect(() => {
     const id = setInterval(() => {
-      i += 1;
-      setProgress(i);
-      if (i < messages.length) {
-        setText(messages[i] ?? messages[messages.length - 1] ?? '');
-      }
+      setProgress((p) => Math.min(p + 1, 4));
     }, 700);
-    const finish = setTimeout(() => {
-      clearInterval(id);
-      onDone();
-    }, 2400);
-    return () => {
-      clearInterval(id);
-      clearTimeout(finish);
-    };
-  });
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div className="ob-calc">

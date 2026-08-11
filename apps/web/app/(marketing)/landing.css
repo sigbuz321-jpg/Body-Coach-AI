@@ -1,0 +1,724 @@
+/*
+ * Landing page (M4) — tata letak khusus halaman ini.
+ *
+ * Awalan `lp-`. Komponen yang dipakai ulang di layar lain (PlateStack,
+ * FoodCard, PricingCard, Faq) memakai awalan `bc-` dan gayanya ada di
+ * packages/ui/src/styles.css, bukan di sini.
+ *
+ * Semua nilai berasal dari token di packages/ui/src/tokens.css. Tidak ada
+ * warna atau ukuran yang ditulis langsung kecuali yang memang tidak punya
+ * token (lebar maksimum kontainer, tinggi nav).
+ */
+
+.lp-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+@media (min-width: 768px) {
+  .lp-container {
+    padding: 0 48px;
+  }
+}
+
+/* ── Tombol ───────────────────────────────────────────────────────────── */
+
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background var(--motion),
+    color var(--motion);
+}
+
+.lp-btn:hover {
+  text-decoration: none;
+}
+
+.lp-btn--primary {
+  height: 52px;
+  padding: 0 28px;
+  font-size: 16px;
+  background: var(--fg);
+  color: var(--enamel-0);
+}
+
+.lp-btn--primary:hover {
+  background: var(--iron-950);
+}
+
+.lp-btn--secondary {
+  height: 44px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--iron-600);
+}
+
+.lp-btn--secondary:hover {
+  background: var(--enamel-100);
+  color: var(--fg);
+}
+
+.lp-btn--grow {
+  flex: 1;
+}
+
+.lp-btn--plan {
+  width: 100%;
+  height: 48px;
+  font-size: 15px;
+}
+
+.lp-btn--plan-solid {
+  background: var(--fg);
+  color: var(--enamel-0);
+}
+
+.lp-btn--plan-solid:hover {
+  background: var(--iron-950);
+}
+
+.lp-btn--plan-ghost {
+  background: var(--enamel-100);
+  color: var(--fg);
+}
+
+.lp-btn--plan-ghost:hover {
+  background: var(--enamel-200);
+}
+
+/* ── Nav ──────────────────────────────────────────────────────────────── */
+
+.lp-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.lp-nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.lp-nav__logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.lp-nav__cta {
+  height: 36px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--fg);
+  color: var(--enamel-0);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--motion);
+}
+
+.lp-nav__cta:hover {
+  background: var(--iron-950);
+  text-decoration: none;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+
+.lp-hero {
+  padding: 96px 0 56px;
+  background: var(--bg);
+}
+
+.lp-hero__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.lp-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lp-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.lp-hero__headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 40px;
+  line-height: 44px;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.lp-hero__sub {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--iron-600);
+  max-width: 44ch;
+}
+
+.lp-hero__ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.lp-hero__micro {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.lp-hero__plates {
+  padding-top: 24px;
+}
+
+@media (min-width: 480px) {
+  .lp-hero__ctas {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .lp-hero__headline {
+    font-size: 56px;
+    line-height: 61px;
+  }
+
+  .lp-hero__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 48px;
+  }
+
+  .lp-hero__content {
+    max-width: 520px;
+  }
+
+  .lp-hero__plates {
+    flex: 1;
+    max-width: 480px;
+  }
+}
+
+/* ── Section ──────────────────────────────────────────────────────────── */
+
+.lp-section {
+  padding: 56px 0;
+}
+
+.lp-section--bg {
+  background: var(--bg);
+}
+
+.lp-section--surface {
+  background: var(--surface);
+}
+
+@media (min-width: 768px) {
+  .lp-section {
+    padding: 80px 0;
+  }
+}
+
+.lp-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .lp-title {
+    font-size: 32px;
+    line-height: 38px;
+  }
+}
+
+.lp-sub {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--iron-600);
+  margin-bottom: 32px;
+}
+
+.lp-note {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--iron-600);
+  max-width: 52ch;
+  margin-bottom: 24px;
+}
+
+/* ── Demo chat ────────────────────────────────────────────────────────── */
+
+.lp-chat {
+  margin-top: 24px;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.lp-chat__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--enamel-50);
+  border-bottom: 1px solid var(--border);
+}
+
+.lp-chat__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--iron-700);
+  color: var(--enamel-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lp-chat__name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.lp-chat__tag {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.lp-chat__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lp-chat__bubble {
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 85%;
+}
+
+.lp-chat__bubble--out {
+  align-self: flex-end;
+  background: var(--fg);
+  color: var(--enamel-0);
+  border-bottom-right-radius: 4px;
+}
+
+.lp-chat__bubble--in {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+
+/*
+ * Placeholder foto digambar dengan CSS, bukan <img> ke data URI seperti di
+ * file desain. Tidak ada request, tidak ada layout shift, dan tidak ada aset
+ * palsu yang ikut terkirim ke produksi.
+ */
+.lp-chat__photo {
+  width: 200px;
+  height: 140px;
+  border-radius: var(--radius-xs);
+  background: var(--enamel-100);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--enamel-400);
+}
+
+.lp-chat__photo-sub {
+  font-size: 11px;
+  color: var(--enamel-300);
+}
+
+.lp-chat__response {
+  background: var(--enamel-50);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lp-chat__text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg);
+}
+
+.lp-chat__chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--enamel-100);
+  color: var(--iron-600);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.lp-chat__chip-kcal {
+  color: var(--iron-700);
+  font-weight: 700;
+}
+
+.lp-chat__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.lp-chat__btn {
+  height: 32px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.lp-chat__btn--primary {
+  background: var(--fg);
+  color: var(--enamel-0);
+}
+
+.lp-chat__btn--secondary {
+  background: var(--enamel-100);
+  color: var(--iron-600);
+}
+
+.lp-chat__label {
+  padding: 8px 16px;
+  background: var(--enamel-50);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  line-height: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* ── Cara kerja ───────────────────────────────────────────────────────── */
+
+.lp-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .lp-steps {
+    flex-direction: row;
+    gap: 32px;
+  }
+}
+
+.lp-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lp-step__number {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.lp-step__title {
+  font-size: 17px;
+  line-height: 26px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.lp-step__desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--iron-600);
+}
+
+/* ── Grid makanan ─────────────────────────────────────────────────────── */
+
+.lp-foods {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .lp-foods {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .lp-foods {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* ── Bulk vs Cut ──────────────────────────────────────────────────────── */
+
+.lp-goals {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .lp-goals {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+
+.lp-goal {
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lp-goal--bulk {
+  background: var(--plate-blue);
+}
+
+.lp-goal--cut {
+  background: var(--plate-red);
+}
+
+.lp-goal__label {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgb(255 255 255 / 70%);
+}
+
+.lp-goal__problem {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--enamel-0);
+}
+
+.lp-goal__solution {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgb(255 255 255 / 85%);
+}
+
+/* ── Harga ────────────────────────────────────────────────────────────── */
+
+.lp-pricing {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  max-width: 600px;
+}
+
+@media (min-width: 640px) {
+  .lp-pricing {
+    grid-template-columns: 1fr 1fr;
+    max-width: none;
+  }
+}
+
+.lp-save {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--plate-green-tint);
+  color: var(--plate-green);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.lp-save__note {
+  margin-left: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+
+.lp-footer {
+  background: var(--enamel-100);
+  border-top: 1px solid var(--border);
+  padding: 40px 0 96px;
+}
+
+@media (min-width: 768px) {
+  .lp-footer {
+    padding-bottom: 40px;
+  }
+}
+
+.lp-footer__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 640px) {
+  .lp-footer__inner {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+.lp-footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lp-footer__logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.lp-footer__tagline {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.lp-footer__links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.lp-footer__link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color var(--motion);
+}
+
+.lp-footer__link:hover {
+  color: var(--fg);
+}
+
+.lp-footer__disclaimer {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--enamel-200);
+  max-width: 60ch;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--enamel-400);
+}
+
+/* ── Bilah CTA mobile ─────────────────────────────────────────────────── */
+
+.lp-mobilebar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  display: flex;
+  gap: 12px;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 768px) {
+  .lp-mobilebar {
+    display: none;
+  }
+}
+
+/* ── Halaman dokumen (privasi, ketentuan, kontak) ─────────────────────── */
+
+.lp-doc {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 96px 20px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lp-doc__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 32px;
+  line-height: 36px;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+
+.lp-doc__body {
+  font-size: 15px;
+  line-height: 23px;
+  color: var(--iron-600);
+}

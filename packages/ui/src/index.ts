@@ -25,6 +25,12 @@ export type { ButtonProps, ButtonVariant } from './Button';
 export { Chip } from './Chip';
 export type { ChipProps } from './Chip';
 
+export { Faq } from './Faq';
+export type { FaqItem, FaqProps } from './Faq';
+
+export { FoodCard } from './FoodCard';
+export type { FoodCardProps } from './FoodCard';
+
 export { GoalCard } from './GoalCard';
 export type { GoalCardProps, GoalValue } from './GoalCard';
 
@@ -35,6 +41,12 @@ export { PlanCard } from './PlanCard';
 export type { PlanCardProps } from './PlanCard';
 
 export { PlanExplainer } from './PlanExplainer';
+
+export { PlateStack } from './PlateStack';
+export type { PlateStackProps } from './PlateStack';
+
+export { PricingCard } from './PricingCard';
+export type { PricingCardProps } from './PricingCard';
 
 export { ProgressBar } from './ProgressBar';
 export type { ProgressBarProps } from './ProgressBar';
@@ -48,6 +60,7 @@ export type { StepperProps } from './Stepper';
 export {
   formatDecimal2,
   formatEstimate,
+  formatIdr,
   formatInt,
   formatKg,
   formatWeight,

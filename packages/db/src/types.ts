@@ -90,6 +90,20 @@ export interface FoodMatch extends FoodItemRow {
   similarity: number;
 }
 
+/**
+ * Makanan + porsi defaultnya. Kolom numeric dikembalikan driver sebagai string
+ * (presisi arbitrer tidak muat di `number` tanpa kehilangan), jadi konversi
+ * dilakukan sekali di lapisan pemanggil, bukan diam-diam di sini.
+ */
+export interface FoodWithPortion {
+  name_id: string;
+  kcal_per_100g: string;
+  protein_per_100g: string;
+  verified: boolean;
+  portion_label: string;
+  portion_grams: string;
+}
+
 export interface FoodPortionRow {
   id: string;
   food_item_id: string;

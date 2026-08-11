@@ -63,10 +63,17 @@
   /* Motion */
   --motion: 200ms cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* Typography */
-  --font-display: 'Archivo', sans-serif;
-  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /*
+   * Typography.
+   *
+   * `--font-*-loaded` disuntikkan oleh `next/font/google` di apps/web
+   * (self-hosted, tanpa request ke origin ketiga). Nama keluarga literal
+   * tetap dipertahankan sebagai fallback supaya file preview di design/ dan
+   * konsumen lain tetap tampil benar tanpa Next.
+   */
+  --font-display: var(--font-display-loaded, 'Archivo'), sans-serif;
+  --font-body: var(--font-body-loaded, 'Plus Jakarta Sans'), system-ui, sans-serif;
+  --font-mono: var(--font-mono-loaded, 'JetBrains Mono'), ui-monospace, monospace;
 
   /* Type scale (mobile / desktop) */
   --fs-hero: 56px;

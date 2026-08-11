@@ -135,9 +135,11 @@ Pengguna yang sama melihat protein hijau di layar rencana lalu protein biru di d
 
 **2. Harga berbeda antar file.** `preview/colors-primary.html` menampilkan **Rp 79.000/bulan**; landing dan dashboard menampilkan **Rp39.000**. PRD menetapkan Rp39.000.
 **Keputusan: Rp39.000.** Angka di colors-primary adalah sisa eksplorasi, abaikan. Harga hanya boleh berasal dari satu konstanta di kode, jangan di-hardcode per layar.
+✅ **Diterapkan di M4** — `PRICING` di `packages/core/src/pricing.ts`. "Hemat 36%" juga dihitung dari konstanta itu, bukan ditulis tangan.
 
 **3. Karakter asing di copy landing.** Di section goal: `"Setiap orang beda目标, strateginya beda."` — ada dua karakter Han (目标) yang bocor.
 **Keputusan: ganti menjadi** `"Setiap orang beda tujuan, strateginya beda."`
+✅ **Diterapkan di M4.** Ditemukan satu lagi jenis yang sama saat port: jawaban FAQ akurasi berbunyi `"estimasi następnyanya makin tepat"` — kata Polandia yang bocor. Diperbaiki jadi `"estimasi berikutnya makin tepat"`. Kalau menemukan file desain lain, **pindai dulu karakter/kata non-Indonesia sebelum menyalin copy-nya**.
 
 **4. Variabel CSS tidak terdefinisi.** `--iron-400` dan `--iron-300` dipakai di hover tombol sekunder dan chip (`components.html`, `components-buttons.html`) tapi tidak pernah dideklarasikan — hover-nya diam-diam tidak berfungsi.
 **Keputusan: tambahkan** `--iron-300:#A7B3AD` dan `--iron-400:#87948E`. Saat ini hanya dipakai untuk border, jadi aman; verifikasi kontras dulu kalau nanti dipakai untuk teks.
@@ -149,6 +151,7 @@ Pengguna yang sama melihat protein hijau di layar rencana lalu protein biru di d
 **7. Typo class.** `.wa-banne` di Dashboard (kurang huruf "r"). Perbaiki saat port ke React.
 
 **8. Angka kalori makanan di landing adalah placeholder.** Nasi Padang ±870, Ayam Geprek ±430, dst. Angka-angka ini **harus** dibuat sama dengan isi Indonesian Food Database, atau hal pertama yang dilakukan calon pengguna adalah menangkap produk kamu salah hitung. Render dari DB, jangan hardcode di landing.
+✅ **Diterapkan di M4** — `apps/web/lib/landingFoods.ts`, termasuk angka di percakapan contoh. Nilai nyata jauh berbeda dari placeholder (Nasi Padang ±735, bukan ±870). Kartu "Warteg" diganti "Rendang daging sapi": warteg itu jenis warung, bukan hidangan, jadi tidak ada barisnya di database dan tidak punya angka yang bisa dipertanggungjawabkan.
 
 **Masih terbuka, butuh keputusan pemilik produk**
 

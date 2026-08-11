@@ -346,7 +346,8 @@ Trace satu pesan end-to-end dengan `correlation_id = message_id`.
 
 Event analitik minimum (nama event = `noun.verb`):
 ```
-landing.viewed · onboarding.started · onboarding.step_completed{step}
+landing.viewed · landing.cta_clicked{placement} · onboarding.started
+onboarding.step_completed{step}
 onboarding.completed · plan.viewed · whatsapp.linked
 food.logged{source: text|photo} · food.corrected · weight.updated
 coach.question_asked · recommendation.requested · recommendation.followed

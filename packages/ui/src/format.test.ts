@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatDecimal2,
   formatEstimate,
+  formatIdr,
   formatInt,
   formatKg,
   formatWeight,
@@ -11,6 +12,14 @@ import {
 } from './format';
 
 describe('format angka id-ID', () => {
+  it('formatIdr menempelkan Rp tanpa spasi dan tanpa desimal', () => {
+    expect(formatIdr(0)).toBe('Rp0');
+    expect(formatIdr(39_000)).toBe('Rp39.000');
+    expect(formatIdr(299_000)).toBe('Rp299.000');
+    // Tidak boleh ada NBSP atau "IDR" seperti keluaran Intl currency.
+    expect(formatIdr(39_000)).not.toMatch(/IDR|\s/);
+  });
+
   it('formatInt memakai pemisah ribuan dengan titik', () => {
     expect(formatInt(0)).toBe('0');
     expect(formatInt(1234)).toBe('1.234');

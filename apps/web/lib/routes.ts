@@ -16,6 +16,9 @@ export const ROUTES = {
   onboarding: '/onboarding',
   rencana: '/rencana',
   sambungkan: '/sambungkan',
+  privasi: '/privasi',
+  ketentuan: '/ketentuan',
+  kontak: '/kontak',
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

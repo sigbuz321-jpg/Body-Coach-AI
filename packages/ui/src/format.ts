@@ -57,6 +57,18 @@ export function formatWeeklyRate(rateKg: number): string {
   return `${sign}${intDecimal2.format(Math.abs(rateKg))} kg/minggu`;
 }
 
+/**
+ * Rupiah tanpa desimal: `39000 -> "Rp39.000"`, `0 -> "Rp0"`.
+ *
+ * Tanpa spasi setelah "Rp" — mengikuti penulisan di landing dan dashboard.
+ * `Intl` dengan `currency: 'IDR'` menghasilkan "Rp 39.000" (dengan NBSP) di
+ * sebagian runtime dan "IDR 39.000" di sebagian lain, jadi simbolnya
+ * ditempelkan sendiri di atas pemformatan angka biasa.
+ */
+export function formatIdr(amount: number): string {
+  return `Rp${intWhole.format(amount)}`;
+}
+
 /** Berat sebagai "63,4 kg". */
 export function formatWeight(kg: number): string {
   return `${intDecimal1.format(kg)} kg`;

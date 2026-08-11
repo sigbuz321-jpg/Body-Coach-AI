@@ -1,6 +1,6 @@
 import type { Pool, PoolClient } from 'pg';
 
-import type { FoodItemRow, FoodMatch, FoodPortionRow } from '../types';
+import type { FoodItemRow, FoodMatch, FoodPortionRow, FoodWithPortion } from '../types';
 
 type Q = Pool | PoolClient;
 
@@ -79,4 +79,42 @@ export async function getDefaultPortion(db: Q, foodItemId: string): Promise<Food
     [foodItemId],
   );
   return rows[0] ?? null;
+}
+
+/**
+ * Makanan beserta porsi defaultnya, diambil per `name_id` dan dikembalikan
+ * **mengikuti urutan nama yang diminta** (`ORDER BY array_position`).
+ *
+ * Dipakai landing page: angka kalori di kartu makanan wajib dirender dari
+ * database, bukan ditulis di markup. Angka di file desain (`±870 kkal` untuk
+ * Nasi Padang) adalah placeholder — kalau dibiarkan, hal pertama yang
+ * dilakukan calon pengguna adalah menangkap produk ini salah hitung
+ * (CLAUDE.md konflik no. 8).
+ *
+ * Pencocokan lewat `name_id`, bukan slug: slug hanya ada di CSV seed sebagai
+ * kunci relasi antar file, tidak pernah masuk ke skema (§3). `seed.ts` juga
+ * mengidentifikasi baris lewat `name_id`, jadi keduanya konsisten.
+ *
+ * Nama yang tidak ada di database tidak menghasilkan baris. Pemanggil yang
+ * butuh jaminan kelengkapan harus memeriksa panjang hasilnya sendiri.
+ */
+export async function listFoodsWithDefaultPortion(
+  db: Q,
+  nameIds: readonly string[],
+): Promise<FoodWithPortion[]> {
+  if (nameIds.length === 0) return [];
+  const { rows } = await db.query<FoodWithPortion>(
+    `SELECT fi.name_id,
+            fi.kcal_per_100g,
+            fi.protein_per_100g,
+            fi.verified,
+            fp.label AS portion_label,
+            fp.grams AS portion_grams
+       FROM food_items fi
+       JOIN food_portions fp ON fp.food_item_id = fi.id AND fp.is_default
+      WHERE fi.name_id = ANY($1::text[])
+      ORDER BY array_position($1::text[], fi.name_id)`,
+    [[...nameIds]],
+  );
+  return rows;
 }

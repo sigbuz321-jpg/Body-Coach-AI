@@ -23,7 +23,8 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 | M1 — Skema database & seed | ✅ selesai | `6ed1d3e` |
 | M2 — Nutrition engine & guardrail | ✅ selesai | `499a66f` |
 | M3 — Onboarding & plan reveal | ✅ selesai | `60b1b5c` + perbaikan `31c9f2f` |
-| M4 — Landing page | ⬅ **berikutnya** | — |
+| M4 — Landing page | ✅ selesai | belum di-commit |
+| M5 — Webhook WhatsApp & pairing | ⬅ **berikutnya** | — |
 
 Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.
 
@@ -75,7 +76,9 @@ Teks M0–M2 di bawah sengaja dibiarkan apa adanya sebagai catatan rencana awal.
 
 ## Utang yang belum dibayar
 
-- [ ] **Nilai gizi 50 makanan masih `source=manual`, `verified=false`.** Konsisten secara internal (seed menolak baris yang makronya tidak menjelaskan kalorinya) tapi **belum dicocokkan dengan TKPI**. Ini fondasi L1 Truth. Wajib diverifikasi sebelum pengguna nyata.
+- [ ] **Nilai gizi 50 makanan masih `source=manual`, `verified=false`.** Konsisten secara internal (seed menolak baris yang makronya tidak menjelaskan kalorinya) tapi **belum dicocokkan dengan TKPI**. Ini fondasi L1 Truth. Wajib diverifikasi sebelum pengguna nyata. **Sejak M4 angka-angka ini tampil di halaman publik** — landing merender dua belas di antaranya. Prioritasnya naik: yang belum terverifikasi kini jadi klaim ke calon pengguna, bukan lagi data internal.
+- [ ] **Isi Kebijakan Privasi, Syarat & Ketentuan, dan Hubungi kami belum ditulis.** Halamannya ada (`/privasi`, `/ketentuan`, `/kontak`) dan menyatakan dokumennya sedang disiapkan. Produk yang memproses data kesehatan tidak boleh dibuka untuk umum tanpa kebijakan privasi yang nyata.
+- [ ] **Skor Lighthouse landing belum pernah diukur.** Target DoD M4: performance ≥ 90, accessibility ≥ 95, LCP < 2,5 detik di 4G. Butuh Chrome; tidak tersedia di mesin ini.
 - [ ] **`docs/02-technical-spec.md` §4.4 salah di dua vektor uji BMR.** Pria 25th 70kg 175cm = **1674** (§4.4 menulis 1673, itu pembulatan ke bawah padahal §4.2 memakai `Math.round`). Wanita 25th 55kg 160cm = **1264** (§4.4 menulis 1257; selisih 7 kkal tidak dapat dijelaskan pembulatan). Rumus §4.2 yang dipakai kode. Perbaiki dokumennya.
 - [ ] **Index `ivfflat` dibangun saat tabel kosong**, jadi klasternya tidak berguna. Wajib `REINDEX` setelah embedding terisi di M6.
 - [ ] **`DATABASE_CA_CERT_PATH` belum diset** (lihat jebakan no. 5).
@@ -321,7 +324,35 @@ apps/web/app/(onboarding)/rencana/page.tsx
 
 ---
 
-## M4 — Landing page
+## M4 — Landing page ✅ SELESAI
+
+> **Bukti DoD** (dev server + Supabase nyata):
+>
+> - 134 test lulus (naik dari 105). Baru: `pricing.test.ts` (4), `landingFoods.test.ts` (14), `formatIdr` (1), rute bertambah 3.
+> - `format:check`, `typecheck` (7 paket), `lint`, `test`, `build` — semua hijau.
+> - Rute 200: `/`, `/onboarding`, `/rencana`, `/sambungkan`, `/privasi`, `/ketentuan`, `/kontak`.
+> - Kartu makanan dirender dari database: Nasi Padang ±735, Ayam geprek ±342, Rendang daging sapi ±174, Mie ayam ±508, Bakso ±350, Nasi goreng ±372, Mie instan goreng ±438, Soto ayam ±245, Gado-gado ±420, Martabak manis ±1.024, Es kopi susu ±163, Sate ayam ±500. Bandingkan dengan placeholder desain (Nasi Padang ±870) — selisihnya besar, dan inilah alasan aturannya ada.
+> - Percakapan contoh juga dari database: "Estimasi ±735 kkal, 28g protein", bukan "±870 kkal, 38g protein" seperti di markup desain.
+> - Harga dari `PRICING`: Rp0 / Rp39.000 / Rp299.000, "Hemat 36%" dihitung.
+> - `<html lang="id">`, disclaimer wellness ada di footer, Open Graph lengkap termasuk kartu berbagi 1200x630 yang di-generate (`/opengraph-image`, 200, image/png).
+> - Tidak ada request ke fonts.googleapis.com — ketiga font di-self-host lewat `next/font`.
+> - `目标` dan `następ` nol kemunculan di HTML hasil render.
+>
+> **Belum terverifikasi, butuh browser sungguhan:** skor Lighthouse mobile (performance ≥ 90, accessibility ≥ 95) dan LCP < 2,5 detik di 4G tersimulasi. Tidak ada Chrome/Lighthouse di mesin ini. Struktur halaman sudah dibuat untuk itu (font self-hosted, tanpa gambar eksternal, tanpa JS pihak ketiga, komponen klien hanya CTA + accordion), tapi angkanya tetap **klaim yang belum diukur**. Ukur sebelum merilis.
+>
+> **Penyimpangan dari file desain** (dilaporkan, bukan dikoreksi diam-diam):
+>
+> - **Semua CTA "Mulai gratis" menuju `/onboarding`**, bukan anchor `#harga` seperti di desain. DoD menetapkan demikian; pengguna yang sudah memutuskan tidak perlu dipaksa lewat tabel harga.
+> - **Kartu "Warteg" diganti "Rendang daging sapi".** Warteg itu jenis warung, bukan hidangan — tidak ada barisnya di food database, jadi tidak ada angka yang bisa dipertanggungjawabkan. Kalimat pengantar section tetap menyebut warteg.
+> - **FAQ dibangun ulang dengan `aria-expanded`/`aria-controls`** dan animasi `grid-template-rows: 0fr→1fr`. Versi desain memakai `onclick` inline tanpa atribut ARIA, dan `max-height: 300px` yang memotong jawaban panjang tanpa peringatan.
+> - **Font di-self-host lewat `next/font/google`**, bukan `<link>` ke fonts.googleapis.com. Stylesheet pihak ketiga itu render-blocking, dan halaman ini punya anggaran LCP.
+> - **Placeholder foto di percakapan contoh digambar dengan CSS**, bukan `<img>` ke data URI SVG. Tidak ada aset palsu yang ikut ke produksi.
+> - **Tiga tautan footer (`href="#"` di desain) menjadi halaman nyata** `/privasi`, `/ketentuan`, `/kontak` yang menyatakan dokumennya sedang disiapkan. Menautkan ke rute yang tidak ada menghasilkan 404 — persis bug yang baru diperbaiki di M3. Isi dokumennya keputusan pemilik produk, bukan sesuatu yang boleh dikarang di sini.
+> - **Kartu berbagi memakai font default `ImageResponse`, bukan Archivo.** Menyuntikkan Archivo berarti mengambil file font saat build. Akibatnya judul di kartu tampil lebih tipis dari brand aslinya — perbaiki dengan mem-vendor file font kalau kartunya dianggap penting.
+>
+> **Bug tambahan di file desain yang ikut diperbaiki:** `class="chip-kkal"` di percakapan contoh tidak pernah cocok dengan CSS `.chip-kcal`, jadi gaya angka kalorinya diam-diam tidak berlaku (sejenis `.wa-banne` di konflik no. 7).
+>
+> **Jebakan yang ditemukan saat verifikasi:** `listFoodsWithDefaultPortion` mencocokkan lewat `name_id`, dan `name_id` untuk rendang adalah **"Rendang daging sapi"**, bukan "Rendang". Nama yang salah ketik tidak melempar error — ia hanya menghilangkan satu kartu tanpa suara. Sekarang dijaga `landingFoods.test.ts`, yang mencocokkan daftar nama langsung ke `data/seeds/food/foods.csv` tanpa perlu database.
 
 **Sumber desain:** `design/Landing-Page.dc.html`
 

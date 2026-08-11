@@ -7,7 +7,7 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 # ⇥ MULAI DARI SINI
 
 > Bagian ini untuk agen/pengembang yang baru masuk ke proyek ini.
-> Diperbarui 11 Agustus 2026. Commit terakhir: `31c9f2f`, sudah di `origin/main`.
+> Diperbarui 11 Agustus 2026. Commit terakhir: `42418a3`, sudah di `origin/main`.
 >
 > **Perhatian: ada migration baru yang belum tentu sudah dijalankan.**
 > `0003_idempotency.sql` menambah tabel `idempotency_keys`. Jalankan
@@ -23,7 +23,7 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 | M1 — Skema database & seed | ✅ selesai | `6ed1d3e` |
 | M2 — Nutrition engine & guardrail | ✅ selesai | `499a66f` |
 | M3 — Onboarding & plan reveal | ✅ selesai | `60b1b5c` + perbaikan `31c9f2f` |
-| M4 — Landing page | ✅ selesai | belum di-commit |
+| M4 — Landing page | ✅ selesai | `42418a3` |
 | M5 — Webhook WhatsApp & pairing | ⬅ **berikutnya** | — |
 
 Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.

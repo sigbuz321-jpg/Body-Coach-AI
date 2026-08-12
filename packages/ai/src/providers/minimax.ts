@@ -83,6 +83,31 @@ function isRetryableStatus(status: number): boolean {
   return status === 408 || status === 429 || status >= 500;
 }
 
+/**
+ * Pesan error yang bisa langsung ditindaklanjuti.
+ *
+ * Tanpa ini, kegagalan paling umum saat integrasi baru — saldo akun habis —
+ * muncul sebagai gumpalan JSON yang harus dibaca manual. Dua kondisi di bawah
+ * punya jalan keluar yang berbeda dan tidak boleh tertukar: saldo habis butuh
+ * top-up, kunci salah butuh kunci baru.
+ */
+function explainHttpError(status: number, body: string): string {
+  const lower = body.toLowerCase();
+  if (status === 402 || lower.includes('insufficient_balance') || lower.includes('1008')) {
+    return (
+      'MiniMax menolak: saldo akun habis (402/1008). Isi ulang kredit di ' +
+      'platform.minimax.io sebelum coach atau analisis foto bisa dipakai.'
+    );
+  }
+  if (status === 401 || status === 403) {
+    return `MiniMax menolak kunci API (${status}). Periksa AI_PROVIDER_KEY di .env.local.`;
+  }
+  if (status === 429) {
+    return 'MiniMax membatasi laju permintaan (429). Worker akan mencoba lagi.';
+  }
+  return `MiniMax ${status}: ${body.slice(0, 300)}`;
+}
+
 function toOpenAiContent(content: string | readonly ContentPart[]): unknown {
   if (typeof content === 'string') return content;
   return content.map((part) =>
@@ -183,7 +208,7 @@ export function createMiniMaxProvider(opts: MiniMaxOptions): AiProvider {
     const text = await res.text();
     if (!res.ok) {
       throw new AiProviderError(
-        `MiniMax ${res.status}: ${text.slice(0, 300)}`,
+        explainHttpError(res.status, text),
         res.status,
         isRetryableStatus(res.status),
         'minimax',

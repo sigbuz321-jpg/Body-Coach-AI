@@ -164,6 +164,30 @@ describe('penanganan error', () => {
     });
   });
 
+  it('402 saldo habis: pesan yang bisa ditindaklanjuti, tidak diulang', async () => {
+    // Persis yang terjadi saat integrasi pertama 12 Agustus 2026: kunci valid,
+    // saldo nol. Tanpa penjelasan ini, yang terlihat cuma gumpalan JSON.
+    const p = provider(
+      stubFetch(
+        {
+          type: 'error',
+          error: { type: 'insufficient_balance_error', message: 'insufficient balance (1008)' },
+        },
+        402,
+      ),
+    );
+    await expect(p.chat({ messages: [] })).rejects.toMatchObject({
+      retryable: false,
+      status: 402,
+    });
+    await expect(p.chat({ messages: [] })).rejects.toThrow(/saldo akun habis/);
+  });
+
+  it('401 menyebut AI_PROVIDER_KEY, bukan JSON mentah', async () => {
+    const p = provider(stubFetch({ error: 'bad key' }, 401));
+    await expect(p.chat({ messages: [] })).rejects.toThrow(/AI_PROVIDER_KEY/);
+  });
+
   it('401 tidak layak dicoba ulang', async () => {
     const p = provider(stubFetch({ error: 'bad key' }, 401));
     await expect(p.chat({ messages: [] })).rejects.toMatchObject({

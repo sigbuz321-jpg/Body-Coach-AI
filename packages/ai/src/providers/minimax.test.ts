@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createMiniMaxProvider, EXPECTED_EMBEDDING_DIMENSIONS } from './minimax';
+import { createMiniMaxProvider, EXPECTED_EMBEDDING_DIMENSIONS, stripReasoning } from './minimax';
 import { AiProviderError } from './types';
 
 /**
@@ -241,5 +241,53 @@ describe('embed', () => {
   it('menolak dimensi yang tidak cocok dengan kolom vector(1536)', async () => {
     const p = provider(stubFetch({ data: [{ embedding: [0.1, 0.2, 0.3] }] }));
     await expect(p.embed(['nasi'])).rejects.toThrow(/dimensi embedding 3/);
+  });
+
+  it('mengirim `texts`, bukan `input`', async () => {
+    // Satu-satunya tempat MiniMax menyimpang dari bentuk OpenAI, dan
+    // penyimpangannya diam: `input` dibalas HTTP 200 dengan base_resp 2013.
+    const captured: Captured[] = [];
+    const vec = Array.from({ length: EXPECTED_EMBEDDING_DIMENSIONS }, () => 0.01);
+    const p = provider(stubFetch({ data: [{ embedding: vec }] }, 200, captured));
+    await p.embed(['nasi padang']);
+
+    expect(captured[0]?.body['texts']).toEqual(['nasi padang']);
+    expect(captured[0]?.body).not.toHaveProperty('input');
+  });
+});
+
+describe('stripReasoning', () => {
+  /**
+   * `MiniMax-M3` adalah model penalar. Ketiga bentuk di bawah terlihat
+   * sungguhan saat verifikasi live 13 Agustus 2026, pada model yang sama.
+   */
+  it('membuang blok think yang tertutup', () => {
+    expect(stripReasoning('<think>ini monolog</think>\n\nSisa lo ±820 kkal.')).toBe(
+      'Sisa lo ±820 kkal.',
+    );
+  });
+
+  it('membuang blok think yang terpotong di tengah', () => {
+    // finish_reason: 'length' — model kehabisan token sebelum menutup tagnya.
+    expect(stripReasoning('<think>The user is asking about the capital city')).toBe('');
+  });
+
+  it('membuang tag penutup yatim', () => {
+    // Balasan coach nyata pertama yang diterima isinya persis ini.
+    expect(stripReasoning('</think>')).toBe('');
+    expect(stripReasoning('</think>\nAyam sama telur udah nutup kok.')).toBe(
+      'Ayam sama telur udah nutup kok.',
+    );
+  });
+
+  it('membiarkan balasan biasa apa adanya', () => {
+    const teks = 'Protein lo masih kurang 42g. 150g ayam + 2 telur udah nutup kok.';
+    expect(stripReasoning(teks)).toBe(teks);
+  });
+
+  it('menganggap content kosong dan null sebagai string kosong', () => {
+    expect(stripReasoning(null)).toBe('');
+    expect(stripReasoning(undefined)).toBe('');
+    expect(stripReasoning('   ')).toBe('');
   });
 });

@@ -11,7 +11,11 @@
 
 export const AI_PACKAGE = '@bodycoach/ai' as const;
 
-export { createMiniMaxProvider, EXPECTED_EMBEDDING_DIMENSIONS } from './providers/minimax';
+export {
+  createMiniMaxProvider,
+  EXPECTED_EMBEDDING_DIMENSIONS,
+  stripReasoning,
+} from './providers/minimax';
 export type { MiniMaxOptions } from './providers/minimax';
 
 export { AiProviderError } from './providers/types';

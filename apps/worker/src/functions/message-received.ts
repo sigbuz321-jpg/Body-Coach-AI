@@ -458,6 +458,17 @@ async function jawabPertanyaan(sesi: Sesi, teks: string): Promise<MessageOutcome
     }
   }
 
+  // Balasan kosong bukan balasan. Ini bisa terjadi pada model penalar yang
+  // kehabisan token di tengah monolognya: setelah blok `<think>` dibuang,
+  // yang tersisa nol karakter. Tanpa penjagaan ini, pengguna menerima pesan
+  // kosong — dan verifikasi angka meloloskannya, karena teks tanpa angka
+  // memang tidak punya klaim untuk dicocokkan.
+  if (jawaban.text.trim().length === 0) {
+    console.warn('[message.received] coach balas kosong', hashWaId(job.waId));
+    await balas(userId, catatanMedis + renderDeterministicTemplate(ctx));
+    return { kind: 'answered', fallback: true };
+  }
+
   const verifikasi = verifyCoachNumbers(jawaban.text, truthFromContext(ctx));
   if (!verifikasi.ok) {
     // §6.4: fallback ke template deterministik, bukan retry. Mengulang ke model

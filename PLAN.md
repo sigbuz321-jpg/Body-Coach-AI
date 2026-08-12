@@ -117,7 +117,9 @@ Teks M0–M2 di bawah sengaja dibiarkan apa adanya sebagai catatan rencana awal.
 
 Ditambahkan di M5:
 
-- [ ] **Kredit MiniMax habis (402/1008).** Jalur coach LLM belum pernah berhasil dipanggil sekali pun — yang terverifikasi live justru fallback-nya. Sampai kredit diisi, produk berjalan dengan balasan template deterministik: benar dan berguna, tapi bukan yang dijual.
+- [ ] **`WA_ACCESS_TOKEN` sudah kedaluwarsa.** Graph API membalas 401 `OAuthException 190/463`: _"Session has expired on Monday, 10-Aug-26"_. Itu token sementara 24 jam dari halaman Getting Started. Yang dibutuhkan adalah **System User token permanen** (Business Settings → Users → System Users → Generate token, pilih aplikasi dan izin `whatsapp_business_messaging` + `whatsapp_business_management`). Sampai diganti, worker bisa memproses pesan tapi **tidak satu balasan pun terkirim**.
+- [ ] **Coach tidak pernah menyelesaikan jawabannya — belum ada loop tool.** Diverifikasi 13 Agustus dengan kredit MiniMax yang sudah terisi: untuk "malam ini enaknya makan apa ya?", model **selalu** membalas dengan tool call (`get_daily_status` + `recommend_meal`) dan teks kosong, persis seperti yang diperintahkan `coach.v1`. Worker hanya mengeksekusi `escalate_concern` dan `log_food`, jadi sisanya jatuh ke template deterministik. Akibatnya jalur coach **selalu** fallback. Ini menyentuh langsung hal yang dijual produk ini ("AI tahu apa yang harus kamu lakukan berikutnya"), jadi seharusnya jadi pekerjaan pertama setelah M5. Yang perlu diputuskan sekaligus: tool mana yang dieksekusi, berapa putaran maksimum, dan bagaimana angka hasil tool masuk ke daftar kebenaran §6.4 — `recommend_meal` khususnya menuntut kandidat makanan datang dari food database, bukan dari ingatan model, kalau AD-1 mau tetap utuh.
+- [ ] **`embo-01` menolak dengan `1002 rate limit exceeded (RPM)` terus-menerus.** Empat percobaan berjarak 20 detik, semuanya ditolak, padahal `chat` di akun dan kunci yang sama jalan normal. Jadi ini bukan burst — kemungkinan model embedding-nya belum aktif untuk akun ini atau namanya berbeda di platform internasional. **Memblokir tahap 3 food resolver (M6).** Bentuk requestnya sendiri sudah diperbaiki (`texts`, bukan `input`).
 - [ ] **Belum ada `vercel.json` dengan cron ke `/api/worker/drain`.** Tanpa itu antrean tidak pernah dikuras di produksi dan tidak ada balasan yang terkirim. Latensi balasan = jeda cron; Vercel Hobby hanya mengizinkan cron harian, jadi ini juga keputusan paket. Untuk sekarang endpointnya bisa dipanggil manual dengan `Authorization: Bearer $WORKER_DRAIN_SECRET`.
 - [ ] **Batas Free belum ditegakkan.** `LIMITS.free.foodLogsPerDay = 3` (§9) belum diperiksa di mana pun; `countLogsOnDate` sudah ada tapi belum dipanggil. Pengguna Free saat ini mencatat tanpa batas.
 - [ ] **`ai_usage` belum diisi dari jalur coach.** Biaya per pesan tidak tercatat, jadi `cost.guard` (§8) tidak punya bahan dan cap harian `AI_DAILY_COST_CAP_IDR` belum berarti apa-apa.
@@ -446,16 +448,29 @@ apps/web/app/(onboarding)/rencana/page.tsx
 > - **Foto dijawab jujur** ("belum bisa gue baca, nyusul"), bukan didiamkan.
 >   Analisis foto adalah M7.
 >
-> **Yang belum bisa diverifikasi, dan kenapa**
+> **Yang ditemukan setelah kredensial diisi (13 Agustus, sore)**
 >
-> - **Jalur coach LLM tidak pernah berhasil dipanggil**: MiniMax membalas
->   402/1008 — **saldo akun habis**. Yang justru terverifikasi live adalah
->   fallback-nya: provider mati → balasan template deterministik dengan angka
->   engine, pengguna tetap terjawab. Isi ulang kredit di platform.minimax.io
->   sebelum menganggap coach jalan.
-> - **Belum pernah menyentuh Meta.** `WA_APP_SECRET` masih kosong; verifikasi di
->   atas memakai secret lokal. Handshake GET dan pengiriman nyata ke Graph API
->   belum pernah dijalankan sekali pun.
+> Kredit MiniMax terisi dan `WA_APP_SECRET` diisi, jadi jalur yang tadinya
+> mustahil diuji akhirnya dijalankan. Tiga hal muncul, dua sudah diperbaiki:
+>
+> - **`MiniMax-M3` membocorkan monolognya ke balasan.** Balasan nyata pertama
+>   berbunyi `"<think>\nThe user is asking about the capital city of..."`. Tanpa
+>   pembersihan, isi kepala model terkirim ke WhatsApp apa adanya. Diperbaiki
+>   (`stripReasoning`), termasuk bentuk ketiga yang paling menipu: `content`
+>   berisi **hanya** `"</think>"` yatim, karena penalarannya pindah ke
+>   `reasoning_content`. Ikutan: balasan kosong sekarang diperlakukan sebagai
+>   "tidak ada jawaban" — verifikasi angka meloloskannya begitu saja, karena
+>   teks tanpa angka memang tidak punya klaim untuk dicocokkan.
+> - **Endpoint embedding memakai `texts`, bukan `input`.** Satu-satunya tempat
+>   MiniMax menyimpang dari bentuk OpenAI, dan menyimpangnya diam: HTTP 200
+>   dengan `base_resp 2013 invalid params`. Diperbaiki.
+> - **Coach tidak pernah menyelesaikan jawabannya.** Model membalas dengan tool
+>   call, bukan kalimat — lihat utang di atas. Ini yang belum diperbaiki, dan
+>   yang paling berarti bagi produk.
+>
+> **Yang tetap belum bisa diverifikasi:** belum pernah menyentuh Meta.
+> `WA_ACCESS_TOKEN` kedaluwarsa (401), jadi handshake GET dan pengiriman nyata
+> ke Graph API masih nol kali dijalankan.
 >
 > **Keputusan yang sudah diambil (12 Agustus 2026)**
 >

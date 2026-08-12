@@ -565,6 +565,41 @@ describe('jalur coach', () => {
     expect(rekam.outbound[0]?.body).toContain('820'); // angka engine
   });
 
+  it('balasan kosong diperlakukan sebagai tidak ada jawaban', async () => {
+    // Terjadi sungguhan pada model penalar: setelah blok `<think>` dibuang,
+    // yang tersisa nol karakter. Verifikasi angka meloloskannya — teks tanpa
+    // angka memang tidak punya klaim — jadi penjaganya harus terpisah.
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: { text: '   ', toolCalls: [] },
+    });
+
+    const hasil = await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
+
+    expect(hasil).toEqual({ kind: 'answered', fallback: true });
+    expect(rekam.outbound[0]?.body).toContain('820');
+  });
+
+  it('tool call yang belum ditangani tidak menghasilkan pesan kosong', async () => {
+    // `recommend_meal` dan `get_daily_status` belum dieksekusi worker, dan
+    // model membalasnya tanpa teks. Pengguna tetap harus dapat jawaban.
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: {
+        text: '',
+        toolCalls: [
+          { name: 'get_daily_status', arguments: {} },
+          { name: 'recommend_meal', arguments: { meal_slot: 'makan_malam' } },
+        ],
+      },
+    });
+
+    const hasil = await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
+
+    expect(hasil).toEqual({ kind: 'answered', fallback: true });
+    expect(rekam.outbound[0]?.body.trim().length).toBeGreaterThan(20);
+  });
+
   it('tetap menjawab dengan angka engine saat provider mati', async () => {
     const { deps, rekam } = harness({
       resolve: [unresolved('x')],

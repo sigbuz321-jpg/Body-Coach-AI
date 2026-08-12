@@ -58,6 +58,8 @@ interface OpenAiToolCall {
 interface OpenAiChoice {
   message?: {
     content?: string | null;
+    /** Sebagian model penalar memisahkan monolognya ke field sendiri. */
+    reasoning_content?: string | null;
     tool_calls?: OpenAiToolCall[];
   };
   finish_reason?: string;
@@ -137,6 +139,43 @@ function toOpenAiMessage(m: ChatMessage): Record<string, unknown> {
     }));
   }
   return base;
+}
+
+/**
+ * `MiniMax-M3` adalah model penalar: monolog internalnya ikut di
+ * `message.content`, dibungkus `<think>…</think>`.
+ *
+ * Ditemukan saat verifikasi live 13 Agustus 2026. Tanpa pembersihan ini,
+ * pengguna WhatsApp menerima isi kepala model apa adanya — termasuk keraguan,
+ * angka yang sedang dicoba-coba, dan bahasa Inggris. Balasan pertama yang
+ * diterima saat verifikasi berbunyi persis begini:
+ *
+ *   "<think>\nThe user is asking about the capital city of Indonesia…"
+ *
+ * Tiga bentuk, ketiganya terlihat sungguhan pada model yang sama:
+ *
+ * 1. Blok tertutup `<think>…</think>` di dalam `content`.
+ * 2. Blok yang TIDAK tertutup — `finish_reason: 'length'` memotongnya di
+ *    tengah penalaran.
+ * 3. Hanya `</think>` yatim, tanpa pembuka. Itu yang muncul ketika MiniMax
+ *    menaruh penalarannya di `reasoning_content` tapi menyisakan tag
+ *    penutupnya di `content`. Balasan coach nyata pertama yang kami terima
+ *    isinya persis satu string: `"</think>"`.
+ *
+ * Sisanya bisa jadi string kosong, dan pemanggil wajib memperlakukan itu
+ * sebagai "tidak ada jawaban", bukan sebagai jawaban kosong.
+ */
+const THINK_TERTUTUP = /<think>[\s\S]*?<\/think>/gi;
+const THINK_MENGGANTUNG = /<think>[\s\S]*$/i;
+const TAG_YATIM = /<\/?think>/gi;
+
+export function stripReasoning(raw: string | null | undefined): string {
+  if (!raw) return '';
+  return raw
+    .replace(THINK_TERTUTUP, '')
+    .replace(THINK_MENGGANTUNG, '')
+    .replace(TAG_YATIM, '')
+    .trim();
 }
 
 /**
@@ -260,7 +299,9 @@ export function createMiniMaxProvider(opts: MiniMaxOptions): AiProvider {
       const choice = data.choices?.[0];
 
       return {
-        text: choice?.message?.content ?? '',
+        // `reasoning_content` sengaja tidak ikut: itu monolog model, bukan
+        // balasan untuk pengguna.
+        text: stripReasoning(choice?.message?.content),
         toolCalls: parseToolCalls(choice?.message?.tool_calls),
         usage: {
           promptTokens: data.usage?.prompt_tokens ?? 0,
@@ -277,7 +318,11 @@ export function createMiniMaxProvider(opts: MiniMaxOptions): AiProvider {
       }
       const data = await post<OpenAiEmbedBody>('/embeddings', {
         model: embedModel,
-        input: [...texts],
+        // `texts`, BUKAN `input`. Ini satu-satunya tempat MiniMax menyimpang
+        // dari bentuk OpenAI, dan penyimpangannya diam: request dengan `input`
+        // dibalas HTTP 200 dengan `base_resp 2013 invalid params, binding:
+        // expr_path=texts`. Ditemukan saat verifikasi live 13 Agustus 2026.
+        texts: [...texts],
         // MiniMax memisahkan embedding untuk dokumen dan untuk kueri.
         // Keduanya harus konsisten; di sini semua diperlakukan sebagai dokumen
         // supaya vektor yang tersimpan dan vektor pencarian hidup di ruang

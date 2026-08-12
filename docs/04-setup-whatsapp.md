@@ -55,11 +55,20 @@ WhatsApp Account-nya.
 
 Ini yang ditanyakan tim WA.
 
-| Kolom di Meta    | Isi                                                    |
-| ---------------- | ------------------------------------------------------ |
-| **Callback URL** | `https://<domain-produksi>/api/webhooks/whatsapp`      |
-| **Verify token** | nilai `WA_WEBHOOK_VERIFY_TOKEN` (ada di `.env.local`)  |
-| **Fields**       | centang **`messages`** saja                            |
+| Kolom di Meta    | Isi                                                                 |
+| ---------------- | ------------------------------------------------------------------- |
+| **Callback URL** | `https://body-coach-ai-web.vercel.app/api/webhooks/whatsapp`         |
+| **Verify token** | nilai `WA_WEBHOOK_VERIFY_TOKEN` (ada di `.env.local`)               |
+| **Fields**       | centang **`messages`** saja                                          |
+
+> **Salin URL-nya persis, tanpa garis miring di ujung.** URL berakhiran `/`
+> dibalas **308 redirect**, dan Meta tidak mengikuti redirect saat verifikasi —
+> gagalnya muncul sebagai pesan generik yang tidak menyebut sebabnya. Domain
+> saja tanpa path dibalas 200 tapi isinya HTML, bukan challenge, dan gagal
+> dengan pesan yang sama.
+>
+> Endpoint ini **sudah diverifikasi hidup di produksi** pada 13 Agustus 2026:
+> token benar → 200 dengan body `12345`, token salah → 403.
 
 Tempatnya: Meta App Dashboard → **WhatsApp** → **Configuration** → Webhook →
 Edit.

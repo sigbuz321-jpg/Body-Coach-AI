@@ -60,6 +60,25 @@ nama nomor mana pun tanpa melewati Meta.
 
 ## Deploy ke Vercel
 
+> **Terverifikasi hidup di produksi 13 Agustus 2026** —
+> `https://body-coach-ai-web.vercel.app`. Diperiksa dari luar, bukan dari mesin
+> pengembang:
+>
+> | Uji | Hasil |
+> | --- | --- |
+> | `GET /api/webhooks/whatsapp` token benar | **200**, `text/plain`, body persis `12345` |
+> | token salah | **403** |
+> | `POST` tanpa `X-Hub-Signature-256` | **401** — berarti `WA_APP_SECRET` terisi di Vercel |
+> | `GET /api/worker/drain` tanpa auth | **401** — berarti rahasianya terisi |
+> | `POST /api/dev/wa-simulator` | **404** — simulator memang mati di produksi |
+>
+> **Jebakan yang menjatuhkan verifikasi Meta:** URL dengan **garis miring di
+> ujung** (`…/whatsapp/`) dibalas **308 redirect**, dan Meta tidak mengikuti
+> redirect saat verifikasi. Domain saja tanpa path dibalas 200 tapi isinya HTML,
+> bukan challenge. Keduanya menghasilkan pesan generik "URL callback atau token
+> verifikasi tidak dapat divalidasi" yang tidak menyebut sebabnya. Salin URL-nya
+> **tanpa garis miring di ujung**.
+
 Belum ada `vercel.json` di repo, dan itu disengaja: pengaturannya bergantung
 pada **Root Directory** yang dipilih di dashboard, dan menebaknya menghasilkan
 build yang gagal dengan pesan yang menyesatkan.

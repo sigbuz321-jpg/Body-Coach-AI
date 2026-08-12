@@ -13,6 +13,7 @@
     "@bodycoach/core": "workspace:*",
     "@bodycoach/db": "workspace:*",
     "@bodycoach/ui": "workspace:*",
+    "@bodycoach/whatsapp": "workspace:*",
     "next": "^15.5.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

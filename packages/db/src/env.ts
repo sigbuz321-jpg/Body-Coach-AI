@@ -25,3 +25,26 @@ export function databaseUrl(): string {
 export function directUrl(): string {
   return postgresUrl.parse(process.env['DIRECT_URL'] ?? '');
 }
+
+/**
+ * Upstash Redis REST. `REDIS_URL` harus berupa endpoint HTTPS
+ * (`https://<nama>.upstash.io`), bukan `redis://` — klien di `redis.ts`
+ * memakai REST supaya bisa dipakai dari fungsi serverless yang tidak bisa
+ * memelihara koneksi TCP antar invokasi.
+ */
+const upstashUrl = z
+  .string()
+  .min(1)
+  .refine((v) => v.startsWith('https://'), {
+    message: 'harus endpoint REST Upstash (https://...), bukan redis://',
+  });
+
+export function redisEnv(): { url: string; token: string } {
+  return {
+    url: upstashUrl.parse(process.env['REDIS_URL'] ?? ''),
+    token: z
+      .string()
+      .min(1)
+      .parse(process.env['REDIS_TOKEN'] ?? ''),
+  };
+}

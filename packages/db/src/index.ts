@@ -8,5 +8,6 @@
 export const DB_PACKAGE = '@bodycoach/db' as const;
 
 export { closePool, getPool, withDirectClient, withTransaction } from './client';
+export * from './redis';
 export * from './repositories';
 export type * from './types';

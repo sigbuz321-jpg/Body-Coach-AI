@@ -24,7 +24,7 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 | M2 — Nutrition engine & guardrail | ✅ selesai | `499a66f` |
 | M3 — Onboarding & plan reveal | ✅ selesai | `60b1b5c` + perbaikan `31c9f2f` |
 | M4 — Landing page | ✅ selesai | `42418a3` |
-| M5 — Webhook WhatsApp & pairing | 🚧 sebagian () | — |
+| M5 — Webhook WhatsApp & pairing | 🚧 sebagian | `0366267` |
 
 Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.
 

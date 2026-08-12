@@ -7,7 +7,7 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 # ⇥ MULAI DARI SINI
 
 > Bagian ini untuk agen/pengembang yang baru masuk ke proyek ini.
-> Diperbarui 11 Agustus 2026. Commit terakhir: `42418a3`, sudah di `origin/main`.
+> Diperbarui 11 Agustus 2026. Commit terakhir: `0366267`, sudah di `origin/main`.
 >
 > **Perhatian: ada migration baru yang belum tentu sudah dijalankan.**
 > `0003_idempotency.sql` menambah tabel `idempotency_keys`. Jalankan
@@ -24,7 +24,7 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 | M2 — Nutrition engine & guardrail | ✅ selesai | `499a66f` |
 | M3 — Onboarding & plan reveal | ✅ selesai | `60b1b5c` + perbaikan `31c9f2f` |
 | M4 — Landing page | ✅ selesai | `42418a3` |
-| M5 — Webhook WhatsApp & pairing | ⬅ **berikutnya** | — |
+| M5 — Webhook WhatsApp & pairing | 🚧 sebagian () | — |
 
 Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.
 
@@ -370,7 +370,47 @@ apps/web/app/(onboarding)/rencana/page.tsx
 
 ---
 
-## M5 — Webhook WhatsApp, queue, pairing, text logging
+## M5 — Webhook WhatsApp, queue, pairing, text logging 🚧 SEDANG DIKERJAKAN
+
+> **Keputusan yang sudah diambil (12 Agustus 2026)**
+>
+> - **Provider AI: MiniMax.** Model `MiniMax-M3` lewat antarmuka
+>   OpenAI-compatible di `https://api.minimax.io/v1`. Satu model menangani teks
+>   **dan** gambar, jadi coach (M5) dan analisis foto (M6) berbagi provider yang
+>   sama — tidak perlu vendor vision terpisah. Embedding: `embo-01`.
+> - **Tanpa SDK vendor**, hanya `fetch`. Empat bentuk request yang stabil tidak
+>   sepadan dengan ratusan kilobyte dependensi.
+> - **Deploy ke Vercel** untuk URL webhook. Meta butuh HTTPS publik; `APP_URL`
+>   lokal tidak bisa dijangkau. Semua env var harus dipindah ke Vercel.
+>
+> **Sudah selesai** (`0366267`):
+>
+> - `packages/ai/providers/{types,minimax}.ts` — antarmuka netral vendor +
+>   implementasi MiniMax. Dua jebakan sudah ditangani: MiniMax bisa membalas
+>   HTTP 200 dengan kegagalan di `base_resp` (tanpa pemeriksaan, error kuota
+>   terbaca sebagai balasan kosong), dan tool call bisa datang dengan JSON
+>   cacat (yang cacat dibuang, sisanya dipakai).
+> - `packages/ai/prompts/coach.v1.ts` — system prompt + 7 tool, persis §6.1–6.2.
+> - `packages/ai/factory.ts` — pemilihan provider dari env, dibaca malas.
+> - `packages/whatsapp/` — signature (HMAC atas body mentah, `timingSafeEqual`),
+>   client Graph v21, builder interaktif dengan batas Meta, keempat template,
+>   `extractMessages`.
+> - 174 test lulus; tidak satu pun butuh kunci API.
+>
+> **Belum dikerjakan:**
+>
+> - `packages/core/coach/` — perakit `user_context_block` deterministik,
+>   verifikasi angka (§6.4), deteksi bahasa gangguan makan.
+> - Repository `food_logs`, `food_log_items`, `messages`, `weight_entries`.
+> - Dedup Redis (SETNX) + antrean; `apps/worker/functions/message-received.ts`.
+> - `apps/web/app/api/webhooks/whatsapp/route.ts` (GET handshake + POST).
+> - `apps/web/app/api/dev/wa-simulator/route.ts`.
+> - Food resolver tahap 1–2 (alias + trigram) yang dibutuhkan text logging.
+>
+> **Blokir yang butuh kamu:** `WA_APP_SECRET`, `WA_WEBHOOK_VERIFY_TOKEN`, dan
+> `AI_PROVIDER_KEY` masih kosong di `.env.local`. Kode bisa dibangun dan dites
+> penuh tanpa ketiganya (itu gunanya simulator), tapi **tidak bisa diverifikasi
+> terhadap Meta maupun MiniMax yang sebenarnya** sampai terisi.
 
 **Tujuan:** pengguna bisa menautkan WhatsApp dan mencatat makanan lewat teks.
 

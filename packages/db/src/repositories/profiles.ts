@@ -1,8 +1,21 @@
 import type { Pool, PoolClient } from 'pg';
 
-import type { ProfileInput } from '../types';
+import type { ProfileInput, ProfileRow } from '../types';
 
 type Q = Pool | PoolClient;
+
+/**
+ * Profil pengguna apa adanya dari database.
+ *
+ * Kolom numeric dikembalikan driver sebagai string; konversi ke `number`
+ * dilakukan pemanggil, bukan diam-diam di sini (alasannya di `types.ts`).
+ */
+export async function getProfile(db: Q, userId: string): Promise<ProfileRow | null> {
+  const { rows } = await db.query<ProfileRow>('SELECT * FROM profiles WHERE user_id = $1', [
+    userId,
+  ]);
+  return rows[0] ?? null;
+}
 
 export async function upsertProfile(db: Q, p: ProfileInput): Promise<void> {
   await db.query(

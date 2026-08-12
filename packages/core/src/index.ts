@@ -16,3 +16,4 @@ export * from './food';
 export * from './format';
 export * from './nutrition';
 export * from './pricing';
+export * from './time';

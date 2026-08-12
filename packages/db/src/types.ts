@@ -40,6 +40,25 @@ export interface ProfileInput {
   consentHealthDataAt: Date | null;
 }
 
+export interface ProfileRow {
+  user_id: string;
+  display_name: string | null;
+  sex: Sex;
+  birth_year: number;
+  height_cm: string;
+  start_weight_kg: string;
+  target_weight_kg: string;
+  goal: Goal;
+  activity: ActivityLevel;
+  gym_per_week: number;
+  food_prefs: string[];
+  budget_per_meal: number | null;
+  medical_flags: string[];
+  conservative_mode: boolean;
+  consent_health_data_at: Date | null;
+  updated_at: Date;
+}
+
 export interface TargetVersionInput {
   userId: string;
   effectiveFrom: string; // ISO date, YYYY-MM-DD

@@ -75,6 +75,32 @@ export async function addFoodLogItems(
   }
 }
 
+export type FoodLogStatus = 'pending' | 'confirmed' | 'discarded';
+
+/**
+ * Memindahkan status sebuah log.
+ *
+ * `user_id` ikut jadi syarat, bukan hanya `id`: id log dibawa di dalam id
+ * tombol WhatsApp, dan tombol adalah masukan dari luar. Tanpa syarat ini,
+ * siapa pun yang bisa menebak sebuah uuid bisa membatalkan log orang lain.
+ *
+ * Transisi hanya berlaku dari `pending`. Menekan "Catat" dua kali — Meta
+ * me-retry, atau pengguna menekan tombol lama di riwayat chat — tidak boleh
+ * memindahkan log yang sudah dibatalkan kembali menjadi tercatat.
+ */
+export async function setFoodLogStatus(
+  db: Q,
+  input: { logId: string; userId: string; status: FoodLogStatus },
+): Promise<FoodLogRow | null> {
+  const { rows } = await db.query<FoodLogRow>(
+    `UPDATE food_logs SET status = $3
+      WHERE id = $1 AND user_id = $2 AND status = 'pending'
+      RETURNING *`,
+    [input.logId, input.userId, input.status],
+  );
+  return rows[0] ?? null;
+}
+
 /**
  * Total konsumsi satu hari, dihitung langsung dari `food_log_items`.
  *
@@ -167,6 +193,19 @@ export async function upsertWeight(
 export interface WeightPoint {
   readonly local_date: string;
   readonly weight_kg: string;
+}
+
+/** Entri berat terakhir, kapan pun tercatatnya. `null` bila belum pernah. */
+export async function getLatestWeight(db: Q, userId: string): Promise<WeightPoint | null> {
+  const { rows } = await db.query<WeightPoint>(
+    `SELECT local_date, weight_kg
+       FROM weight_entries
+      WHERE user_id = $1
+      ORDER BY local_date DESC
+      LIMIT 1`,
+    [userId],
+  );
+  return rows[0] ?? null;
 }
 
 /** Entri berat sejak tanggal tertentu, urut lama ke baru. */

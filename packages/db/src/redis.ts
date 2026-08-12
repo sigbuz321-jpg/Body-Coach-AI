@@ -89,7 +89,59 @@ export async function dequeueMessage(): Promise<MessageJob | null> {
   return JSON.parse(raw) as MessageJob;
 }
 
+/**
+ * Mengembalikan job ke antrean.
+ *
+ * `LPUSH` menaruhnya di ujung yang paling terakhir diambil, bukan ujung yang
+ * langsung dipop lagi. Kalau job yang ditunda dikembalikan ke posisi berikutnya,
+ * worker hanya akan mengambilnya kembali seketika dan berputar di tempat selama
+ * kunci penggunanya masih dipegang instance lain.
+ */
+export async function requeueMessage(job: MessageJob): Promise<void> {
+  await command(['LPUSH', QUEUE_MESSAGE_RECEIVED, JSON.stringify(job)]);
+}
+
 /** Panjang antrean. Dipakai simulator dan pemantauan. */
 export async function queueLength(): Promise<number> {
   return command<number>(['LLEN', QUEUE_MESSAGE_RECEIVED]);
+}
+
+/**
+ * Kunci per pengguna — "concurrency key = userId" (§7).
+ *
+ * Tiga pesan beruntun dari satu pengguna harus diproses berurutan. Tanpa ini,
+ * dua job membaca total harian yang sama lalu masing-masing membalas dengan
+ * sisa target yang mengabaikan makanan di job satunya, dan pengguna menerima
+ * dua angka berbeda untuk hari yang sama.
+ *
+ * Kuncinya dipegang pada `wa_id`, bukan `user_id`: partisinya sama persis
+ * (satu nomor hanya menempel ke satu akun) dan `wa_id` sudah tersedia sebelum
+ * query pertama ke database. Nomor di-hash — konvensi CLAUDE.md berlaku juga
+ * untuk nama key, karena key bocor ke dashboard dan log Upstash.
+ */
+const LOCK_TTL_SECONDS = 60;
+
+export interface UserLock {
+  readonly key: string;
+  readonly token: string;
+}
+
+export async function acquireUserLock(keyHash: string, token: string): Promise<UserLock | null> {
+  const key = `lock:wa:${keyHash}`;
+  const result = await command<string | null>(['SET', key, token, 'NX', 'EX', LOCK_TTL_SECONDS]);
+  return result === 'OK' ? { key, token } : null;
+}
+
+/**
+ * Melepas kunci hanya kalau masih milik pemegang yang sama.
+ *
+ * `GET` lalu `DEL` dari sisi klien punya celah: kunci bisa kedaluwarsa di
+ * antara keduanya dan yang terhapus adalah kunci milik worker berikutnya.
+ * Perbandingan dilakukan di server lewat `EVAL` supaya keduanya atomik.
+ */
+const RELEASE_SCRIPT =
+  "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+
+export async function releaseUserLock(lock: UserLock): Promise<void> {
+  await command(['EVAL', RELEASE_SCRIPT, 1, lock.key, lock.token]);
 }

@@ -7,13 +7,18 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 # ⇥ MULAI DARI SINI
 
 > Bagian ini untuk agen/pengembang yang baru masuk ke proyek ini.
-> Diperbarui 11 Agustus 2026. Commit terakhir: `0366267`, sudah di `origin/main`.
+> Diperbarui 13 Agustus 2026.
 >
-> **Perhatian: ada migration baru yang belum tentu sudah dijalankan.**
+> **Perhatian: ada migration yang belum tentu sudah dijalankan.**
 > `0003_idempotency.sql` menambah tabel `idempotency_keys`. Jalankan
 > `pnpm db:migrate` sebelum menguji `POST /api/onboarding` — tanpa tabel itu,
 > jalur sukses mengembalikan 500 (jalur guardrail tetap jalan, karena tidak
-> menyentuh database sama sekali).
+> menyentuh database sama sekali). M5 tidak menambah migration.
+>
+> **Yang paling mungkin bikin bingung di M5:** `WA_APP_SECRET` masih kosong di
+> `.env.local`, dan tanpa itu webhook menolak SEMUA request dengan 401 — termasuk
+> simulator, yang menandatangani payloadnya sendiri. Isi dengan string bebas apa
+> pun untuk kerja lokal; nilai aslinya baru perlu saat menyambung ke Meta.
 
 ## Sudah selesai
 
@@ -24,9 +29,34 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 | M2 — Nutrition engine & guardrail | ✅ selesai | `499a66f` |
 | M3 — Onboarding & plan reveal | ✅ selesai | `60b1b5c` + perbaikan `31c9f2f` |
 | M4 — Landing page | ✅ selesai | `42418a3` |
-| M5 — Webhook WhatsApp & pairing | 🚧 sebagian | `0366267` |
+| M5 — Webhook WhatsApp, queue, pairing, text logging | ✅ selesai | `d8230a0` + `(5/n)` |
 
 Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.
+
+## Menguji WhatsApp tanpa nomor asli
+
+Approval Meta belum ada, dan seluruh alur tetap bisa dijalankan. Simulator
+membangun payload berbentuk Meta, menandatanganinya dengan HMAC yang sama, lalu
+mengirimkannya ke handler webhook yang sama — tidak ada jalur pintas. Yang
+diganti cuma pengiriman balasan: alih-alih ke Graph API, isinya dikembalikan di
+respons.
+
+```bash
+# Isi WA_APP_SECRET di .env.local dengan string bebas dulu, lalu `pnpm dev`.
+curl -s localhost:3000/api/dev/wa-simulator -H 'content-type: application/json' \
+  -d '{"waId":"628123456789","text":"MULAI-XXXXXX"}'
+
+curl -s localhost:3000/api/dev/wa-simulator -H 'content-type: application/json' \
+  -d '{"waId":"628123456789","text":"Tadi gue makan nasi sama ayam geprek"}'
+
+# Tombol: id-nya ada di `outbound[].buttons` dari respons sebelumnya.
+curl -s localhost:3000/api/dev/wa-simulator -H 'content-type: application/json' \
+  -d '{"waId":"628123456789","buttonId":"log:confirm:<logId>"}'
+```
+
+`{"drain":false}` menghentikannya setelah enqueue, kalau yang ingin dilihat cuma
+handler webhooknya. Endpoint ini **404 di produksi** — ia menyuntik pesan atas
+nama nomor mana pun tanpa melewati Meta.
 
 ## Cara menjalankan proyek ini
 
@@ -84,6 +114,15 @@ Teks M0–M2 di bawah sengaja dibiarkan apa adanya sebagai catatan rencana awal.
 - [ ] **`DATABASE_CA_CERT_PATH` belum diset** (lihat jebakan no. 5).
 - [ ] **Status CI di GitHub belum pernah diperiksa.** Repo privat dan `gh` belum login di mesin ini.
 - [ ] **ER diagram `docs/01-system-design.md` §5 menyebut tabel `conversations`** yang tidak ada di §3; `messages` menempel langsung ke `users`. §3 yang dipakai. Rapikan salah satunya.
+
+Ditambahkan di M5:
+
+- [ ] **Kredit MiniMax habis (402/1008).** Jalur coach LLM belum pernah berhasil dipanggil sekali pun — yang terverifikasi live justru fallback-nya. Sampai kredit diisi, produk berjalan dengan balasan template deterministik: benar dan berguna, tapi bukan yang dijual.
+- [ ] **Belum ada `vercel.json` dengan cron ke `/api/worker/drain`.** Tanpa itu antrean tidak pernah dikuras di produksi dan tidak ada balasan yang terkirim. Latensi balasan = jeda cron; Vercel Hobby hanya mengizinkan cron harian, jadi ini juga keputusan paket. Untuk sekarang endpointnya bisa dipanggil manual dengan `Authorization: Bearer $WORKER_DRAIN_SECRET`.
+- [ ] **Batas Free belum ditegakkan.** `LIMITS.free.foodLogsPerDay = 3` (§9) belum diperiksa di mana pun; `countLogsOnDate` sudah ada tapi belum dipanggil. Pengguna Free saat ini mencatat tanpa batas.
+- [ ] **`ai_usage` belum diisi dari jalur coach.** Biaya per pesan tidak tercatat, jadi `cost.guard` (§8) tidak punya bahan dan cap harian `AI_DAILY_COST_CAP_IDR` belum berarti apa-apa.
+- [ ] **"Ubah porsi" membuang log lalu meminta pengguna mengetik ulang.** Itu dua ketukan, bukan satu, dan tidak mengikuti janji "dapat dikoreksi satu ketukan" di DoD M6. Perbaiki bersama koreksi item di M6.
+- [ ] **Handshake webhook GET belum pernah dijalankan terhadap Meta.** Hanya diuji lewat unit test.
 
 ## Perbaikan M3 setelah review (11 Agustus 2026)
 
@@ -370,8 +409,54 @@ apps/web/app/(onboarding)/rencana/page.tsx
 
 ---
 
-## M5 — Webhook WhatsApp, queue, pairing, text logging 🚧 SEDANG DIKERJAKAN
+## M5 — Webhook WhatsApp, queue, pairing, text logging ✅ SELESAI
 
+> **Diverifikasi live 13 Agustus 2026** terhadap Supabase dan Upstash nyata,
+> lewat simulator — jadi yang dijalankan adalah handler webhook yang sama,
+> verifikasi HMAC yang sama, dan worker yang sama. Hasil per butir DoD:
+>
+> | DoD | Hasil |
+> | --- | --- |
+> | Signature tidak valid ditolak 401 | ✅ (11 test `signature.test.ts` + secret kosong menolak semuanya) |
+> | Handler balas 200 < 300 ms | ✅ **17–66 ms** setelah koneksi hangat (159 ms pada request pertama, biaya TLS+pool). Diukur dari header `X-Handler-Ms`, bukan diklaim |
+> | Replay identik 3× → satu `food_log` | ✅ dan **kedua lapisnya diuji terpisah**: replay ke-2 dihentikan dedup Redis, lalu kunci Redis dihapus sengaja dan replay ke-3 dihentikan unique constraint `source_message_id` (`{"kind":"duplicate"}`) |
+> | Pairing `MULAI-<token>`, hangus setelah dipakai & 24 jam | ✅ pairing berhasil; token yang sama dikirim ulang → `already_used` |
+> | "Tadi gue makan nasi ayam geprek" → dua item + makro dari DB | ✅ Nasi putih 150 g ±195 kkal P4 K42 L0 · Ayam geprek 120 g ±342 kkal P25 K14 L22, keduanya `match_stage=alias` |
+> | Balasan berisi sisa target + tombol Catat/Ubah porsi/Batal | ✅ pesan interaktif, tiga tombol, "Kalau dicatat, sisa ±2.345 kkal · protein kurang 84g" |
+> | Tiga pesan berurutan diproses berurutan | ✅ kunci Redis per nomor (`SET NX` + `EVAL` untuk melepas); job yang kuncinya dipegang dikembalikan ke antrean, tidak diproses paralel |
+> | Gangguan makan → tanpa angka apa pun | ✅ `{"kind":"concern","severity":"eating_disorder"}`, balasan nol digit |
+> | Angka balasan cocok 100% dengan engine | ✅ jalur pencatatan **tidak melewati LLM sama sekali** (lihat keputusan di bawah) |
+>
+> **Keputusan yang layak diingat**
+>
+> - **Jalur pencatatan makanan sepenuhnya deterministik.** LLM tidak menyusun
+>   kalimatnya. Ini jalur yang paling sering dilewati dan paling padat angka;
+>   membuatnya tidak pernah menyentuh model berarti verifikasi §6.4 tidak punya
+>   apa pun untuk gagal di sana. LLM dipakai untuk pertanyaan bebas, dan di sana
+>   verifikasi + fallback template berlaku penuh.
+> - **Log dibuat berstatus `pending`, bukan `confirmed`.** Yang memasukkannya ke
+>   hitungan harian adalah tombol "Catat". Kalau langsung `confirmed`, ketiga
+>   tombol itu tidak punya arti, dan angka di WhatsApp berbeda dari angka di
+>   dashboard sampai tombolnya ditekan. Karena itu sisanya ditulis bersyarat
+>   ("kalau dicatat"), bukan sebagai fakta.
+> - **Pertanyaan dipilah sebelum food resolver.** "Enaknya makan ayam geprek gak
+>   ya?" akan dicocokkan resolver dan tercatat 342 kkal yang tidak pernah dimakan
+>   siapa pun. Sama untuk "berat gue 70kg". Keduanya dipilah lebih dulu, dan
+>   pemilahannya sengaja condong ke arah menahan pencatatan.
+> - **Foto dijawab jujur** ("belum bisa gue baca, nyusul"), bukan didiamkan.
+>   Analisis foto adalah M7.
+>
+> **Yang belum bisa diverifikasi, dan kenapa**
+>
+> - **Jalur coach LLM tidak pernah berhasil dipanggil**: MiniMax membalas
+>   402/1008 — **saldo akun habis**. Yang justru terverifikasi live adalah
+>   fallback-nya: provider mati → balasan template deterministik dengan angka
+>   engine, pengguna tetap terjawab. Isi ulang kredit di platform.minimax.io
+>   sebelum menganggap coach jalan.
+> - **Belum pernah menyentuh Meta.** `WA_APP_SECRET` masih kosong; verifikasi di
+>   atas memakai secret lokal. Handshake GET dan pengiriman nyata ke Graph API
+>   belum pernah dijalankan sekali pun.
+>
 > **Keputusan yang sudah diambil (12 Agustus 2026)**
 >
 > - **Provider AI: MiniMax.** Model `MiniMax-M3` lewat antarmuka
@@ -397,20 +482,8 @@ apps/web/app/(onboarding)/rencana/page.tsx
 >   `extractMessages`.
 > - 174 test lulus; tidak satu pun butuh kunci API.
 >
-> **Belum dikerjakan:**
->
-> - `packages/core/coach/` — perakit `user_context_block` deterministik,
->   verifikasi angka (§6.4), deteksi bahasa gangguan makan.
-> - Repository `food_logs`, `food_log_items`, `messages`, `weight_entries`.
-> - Dedup Redis (SETNX) + antrean; `apps/worker/functions/message-received.ts`.
-> - `apps/web/app/api/webhooks/whatsapp/route.ts` (GET handshake + POST).
-> - `apps/web/app/api/dev/wa-simulator/route.ts`.
-> - Food resolver tahap 1–2 (alias + trigram) yang dibutuhkan text logging.
->
-> **Blokir yang butuh kamu:** `WA_APP_SECRET`, `WA_WEBHOOK_VERIFY_TOKEN`, dan
-> `AI_PROVIDER_KEY` masih kosong di `.env.local`. Kode bisa dibangun dan dites
-> penuh tanpa ketiganya (itu gunanya simulator), tapi **tidak bisa diverifikasi
-> terhadap Meta maupun MiniMax yang sebenarnya** sampai terisi.
+> **Blokir yang masih butuh kamu:** `WA_APP_SECRET` kosong (isi string bebas
+> untuk kerja lokal, nilai Meta untuk produksi) dan **kredit MiniMax habis**.
 
 **Tujuan:** pengguna bisa menautkan WhatsApp dan mencatat makanan lewat teks.
 

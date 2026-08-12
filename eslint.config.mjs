@@ -21,8 +21,12 @@ const AI_VENDOR_SDKS = [
   '@google/genai',
   '@mistralai/**',
   'cohere-ai',
-  'ai',
-  'ai/**',
+  // Vercel AI SDK. Diawali garis miring supaya berlabuh di awal specifier:
+  // pola no-restricted-imports memakai semantik gitignore, di mana `ai` polos
+  // cocok dengan SEGMEN bernama `ai` di mana pun — termasuk `@bodycoach/ai`,
+  // package abstraksi kita sendiri, yang justru wajib boleh diimpor.
+  '/ai',
+  '/ai/**',
 ];
 
 /** Apa pun yang berarti I/O, framework, atau infrastruktur. */

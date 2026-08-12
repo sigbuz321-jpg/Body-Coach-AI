@@ -73,3 +73,14 @@ export function formatIdr(amount: number): string {
 export function formatWeight(kg: number): string {
   return `${intDecimal1.format(kg)} kg`;
 }
+
+/**
+ * Gram porsi: `150 g`, `187,5 g`.
+ *
+ * Desimal hanya ditampilkan kalau memang ada — "setengah porsi nasi padang"
+ * menghasilkan 175 g, tapi setengah porsi 125 g menghasilkan 62,5 g, dan
+ * membulatkannya diam-diam membuat angka porsi tidak cocok dengan kalorinya.
+ */
+export function formatGrams(g: number): string {
+  return `${Number.isInteger(g) ? intWhole.format(g) : intDecimal1.format(g)} g`;
+}

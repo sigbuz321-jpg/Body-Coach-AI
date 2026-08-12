@@ -2,7 +2,7 @@
 
 Konteks proyek untuk agen coding. Dibaca setiap sesi. Detail panjang ada di `docs/`.
 
-> **Status 11 Agustus 2026 — M0, M1, M2 selesai. Berikutnya M3.**
+> **Status 13 Agustus 2026 — M0–M5 selesai. Berikutnya M6 (food resolver tahap 3 & koreksi pengguna).**
 > Sebelum mulai, baca bagian **"⇥ MULAI DARI SINI"** di awal `PLAN.md`. Isinya
 > jebakan lingkungan yang sudah pernah memakan waktu (pnpm tidak di PATH,
 > `DIRECT_URL` harus session pooler karena koneksi langsung Supabase IPv6-only,

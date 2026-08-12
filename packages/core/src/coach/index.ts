@@ -19,4 +19,24 @@ export {
 } from './numbers';
 export type { ClaimKind, NumberClaim, TruthSet, VerificationResult } from './numbers';
 
+export {
+  NEEDS_CHECK_BELOW,
+  remainingAfter,
+  renderFoodLogPreview,
+  renderLogCancelled,
+  renderLogConfirmed,
+  renderNoFoodFound,
+  renderNotLinked,
+  renderPaired,
+  renderPairFailure,
+  renderPortionPrompt,
+  renderWeightSaved,
+  sumItems,
+  truthForItems,
+} from './reply';
+export type { LoggedItemView, PairFailure } from './reply';
+
+export { looksLikeQuestion } from './intent';
+export { parseWeightMessage } from './weight';
+
 export type { CoachContext, DailyTarget, DailyTotals, MealSlot, Remaining } from './types';

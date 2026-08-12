@@ -22,6 +22,7 @@ import { NextResponse } from 'next/server';
 import { randomInt } from 'node:crypto';
 
 import type { FoodPreference, OnboardingSubmitPayload } from '../../../lib/onboarding';
+import { buildWaUrl } from '../../../lib/waLink';
 
 /**
  * Endpoint POST /api/onboarding.
@@ -79,6 +80,12 @@ interface ReadyResponse {
     readonly engineVersion: string;
   };
   readonly linkToken: string;
+  /**
+   * Deep link `wa.me` siap pakai (§4.1). `null` bila `WA_BUSINESS_NUMBER`
+   * belum diisi — klien menampilkan keadaannya apa adanya, bukan tautan
+   * cadangan ke nomor yang bukan milik kita.
+   */
+  readonly waUrl: string | null;
 }
 
 function todayInJakarta(): string {
@@ -241,6 +248,7 @@ export async function POST(req: Request) {
           engineVersion: targets.engineVersion,
         },
         linkToken: linkToken.token,
+        waUrl: buildWaUrl(process.env['WA_BUSINESS_NUMBER'], linkToken.token),
       };
       await storeIdempotencyResponse(client, ENDPOINT, idempotencyKey, body);
       return { replayed: null, body };

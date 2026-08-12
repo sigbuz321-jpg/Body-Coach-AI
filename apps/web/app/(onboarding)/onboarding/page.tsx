@@ -197,7 +197,7 @@ export default function OnboardingPage() {
         body: JSON.stringify(payload),
       });
       const json = (await res.json()) as
-        | { kind: 'ready'; plan: OnboardingPlan; linkToken: string }
+        | { kind: 'ready'; plan: OnboardingPlan; linkToken: string; waUrl?: string | null }
         | { kind: 'blocked'; reason: string }
         | { error: string };
       if (!res.ok || 'error' in json) {
@@ -216,7 +216,14 @@ export default function OnboardingPage() {
         return;
       }
       // Sukses: simpan hasil, bersihkan state wizard, lalu ke halaman rencana.
-      writeLastResult({ plan: json.plan, linkToken: json.linkToken });
+      // `waUrl` dirakit server (§4.1). `null` bila nomor bisnis belum diisi —
+      // respons lama yang tersimpan di kunci idempotensi juga belum punya
+      // field ini, jadi ketiadaannya normal, bukan kegagalan.
+      writeLastResult({
+        plan: json.plan,
+        linkToken: json.linkToken,
+        waUrl: json.waUrl ?? null,
+      });
       try {
         window.sessionStorage.removeItem(SESSION_KEY);
         window.sessionStorage.removeItem(STEP_SESSION_KEY);

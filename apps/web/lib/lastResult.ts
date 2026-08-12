@@ -33,13 +33,19 @@ export interface OnboardingPlan {
 export interface LastResult {
   readonly plan: OnboardingPlan;
   readonly linkToken: string;
+  /**
+   * Deep link `wa.me` yang dirakit server. `null` bila nomor bisnis belum
+   * dikonfigurasi — layar sambungkan menampilkan keadaannya apa adanya.
+   */
+  readonly waUrl: string | null;
 }
 
 /**
- * v2: bentuk `plan` bertambah `timeline`. Kunci dinaikkan supaya tab yang masih
- * memegang snapshot v1 tidak dibaca dengan tipe yang salah.
+ * v3: bertambah `waUrl`, yang sebelumnya dirakit di klien dari env var yang
+ * tidak pernah ada. Kunci dinaikkan supaya tab yang masih memegang snapshot
+ * lama tidak dibaca dengan tipe yang salah.
  */
-export const LAST_RESULT_KEY = 'bodycoach.lastResult.v2';
+export const LAST_RESULT_KEY = 'bodycoach.lastResult.v3';
 
 export function readLastResult(): LastResult | null {
   if (typeof window === 'undefined') return null;

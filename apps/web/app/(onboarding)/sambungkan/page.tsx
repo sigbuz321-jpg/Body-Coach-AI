@@ -22,17 +22,19 @@ import { ROUTES } from '../../../lib/routes';
 export default function SambungkanPage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
-  const [phoneNumber, setPhoneNumber] = useState<string>('6281234567890');
+  const [waUrl, setWaUrl] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [waiting, setWaiting] = useState(false);
 
   useEffect(() => {
     const last = readLastResult();
     setToken(last?.linkToken ?? null);
-    // Nomor WhatsApp bisnis disuntikkan via env var saat runtime. Untuk dev,
-    // placeholder digunakan — pairing gagal di M5 sampai env diisi.
-    const fromEnv = process.env['NEXT_PUBLIC_WA_BUSINESS_NUMBER'];
-    if (fromEnv) setPhoneNumber(fromEnv);
+    // Deep link dirakit SERVER dan datang bersama respons onboarding (§4.1).
+    // Versi lama merakitnya di sini dari `NEXT_PUBLIC_WA_BUSINESS_NUMBER` —
+    // env yang tidak pernah ada, karena namanya `WA_BUSINESS_NUMBER`. Nilainya
+    // selalu jatuh ke placeholder yang di-hardcode, dan setiap pengguna
+    // diarahkan mengirim token pairingnya ke nomor milik orang lain.
+    setWaUrl(last?.waUrl ?? null);
     setReady(true);
   }, []);
 
@@ -64,12 +66,12 @@ export default function SambungkanPage() {
   }
 
   const message = `MULAI-${token.replace(/^MULAI-/, '')}`;
-  const waUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
   function onBukaWhatsApp() {
+    if (!waUrl) return;
     setWaiting(true);
-    // Buka WA di tab baru. Tidak menutup tab ini — pairing M5 akan mengubah
-    // state ke "linked" saat webhook menerima pesan MULAI-XXXX.
+    // Buka WA di tab baru. Tidak menutup tab ini — webhook mengubah state ke
+    // "linked" saat menerima pesan MULAI-XXXX.
     window.open(waUrl, '_blank', 'noopener,noreferrer');
   }
 
@@ -106,7 +108,9 @@ export default function SambungkanPage() {
                 </svg>
               </div>
               <div className="ob-wa__token-hint">
-                Kode ini yang menyambungkan chat kamu ke rencana ini.
+                {waUrl
+                  ? 'Kode ini yang menyambungkan chat kamu ke rencana ini.'
+                  : 'Nomor WhatsApp kami belum aktif. Simpan kode ini dulu — kodenya berlaku 24 jam.'}
               </div>
             </div>
             <div className="ob-wa__prompts">
@@ -135,7 +139,10 @@ export default function SambungkanPage() {
       </div>
       <div className={`ob-nextbar${waiting ? ' ob-nextbar--center' : ''}`}>
         {!waiting ? (
-          <Button onClick={onBukaWhatsApp}>
+          // Tanpa `waUrl` tombolnya dinonaktifkan, bukan diarahkan ke nomor
+          // cadangan: token pairing adalah kunci ke akun, dan mengirimkannya
+          // ke nomor yang salah lebih buruk daripada tidak mengirim apa pun.
+          <Button onClick={onBukaWhatsApp} disabled={!waUrl}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="M20 12.5a7 7 0 0 1-7 7H9.5L5 22v-4.2A7 7 0 0 1 4 12.5v-.5a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v.5z"
@@ -144,7 +151,7 @@ export default function SambungkanPage() {
                 strokeLinejoin="round"
               />
             </svg>
-            Buka WhatsApp
+            {waUrl ? 'Buka WhatsApp' : 'WhatsApp belum aktif'}
           </Button>
         ) : (
           <Button variant="ghost" onClick={onLewati}>

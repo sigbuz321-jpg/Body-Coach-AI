@@ -71,6 +71,12 @@ describe('splitFoodItems', () => {
     expect(splitFoodItems('nasi dengan rendang')).toEqual(['nasi', 'rendang']);
   });
 
+  it('tidak memecah idiom "sama sekali"', () => {
+    // Ditemukan saat menguji resolver ke database nyata: "nggak ada sama
+    // sekali" terpecah jadi dua kueri makanan.
+    expect(splitFoodItems('nggak ada sama sekali')).toEqual(['nggak ada sama sekali']);
+  });
+
   it('kalimat satu makanan tetap satu item', () => {
     expect(splitFoodItems('nasi padang')).toEqual(['nasi padang']);
   });

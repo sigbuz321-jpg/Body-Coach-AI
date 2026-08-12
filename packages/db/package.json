@@ -12,6 +12,7 @@
     "db:seed": "node --env-file-if-exists=../../.env.local --import tsx ./src/seed.ts"
   },
   "dependencies": {
+    "@bodycoach/core": "workspace:*",
     "csv-parse": "^5.6.0",
     "pg": "^8.16.3",
     "zod": "^4.1.12"

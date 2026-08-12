@@ -111,3 +111,44 @@ export interface FoodPortionRow {
   grams: string;
   is_default: boolean;
 }
+
+export interface FoodLogRow {
+  id: string;
+  user_id: string;
+  logged_at: Date;
+  local_date: string;
+  meal_slot: string | null;
+  source: LogSource;
+  source_message_id: string | null;
+  status: string;
+}
+
+export interface FoodLogItemInput {
+  foodItemId: string | null;
+  rawLabel: string;
+  grams: number;
+  portionBasis: 'user_stated' | 'vision' | 'default';
+  matchStage: MatchStage;
+  confidence: number;
+  kcal: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+}
+
+export interface DailyTotalsRow {
+  kcal: string;
+  protein_g: string;
+  carbs_g: string;
+  fat_g: string;
+  log_count: number;
+}
+
+export interface MessageInput {
+  userId: string;
+  waMessageId: string | null;
+  direction: 'inbound' | 'outbound';
+  kind: 'text' | 'image' | 'interactive' | 'template' | 'system';
+  body?: string | null;
+  meta?: Record<string, unknown> | null;
+}

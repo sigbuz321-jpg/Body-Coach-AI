@@ -171,8 +171,50 @@ export function normalizeFoodQuery(raw: string): NormalizedQuery {
  * kata sambung yang benar-benar dipakai untuk mendaftar makanan.
  */
 export function splitFoodItems(raw: string): string[] {
-  return raw
-    .split(/\s*(?:,|\+|\bsama\b|\bdan\b|\bdengan\b|\bplus\b|\bterus\b|\btrus\b|\blalu\b)\s*/i)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
+  return (
+    raw
+      // "sama" adalah kata sambung di "nasi sama ayam", tapi bukan di "sama
+      // sekali" — idiom yang berarti "langsung tidak ada". Tanpa pengecualian
+      // ini, "nggak ada sama sekali" pecah jadi dua kueri makanan.
+      .split(
+        /\s*(?:,|\+|\bsama\b(?!\s+sekali)|\bdan\b|\bdengan\b|\bplus\b|\bterus\b|\btrus\b|\blalu\b)\s*/i,
+      )
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
+  );
+}
+
+/** Nilai gizi per 100 gram, apa adanya dari food database. */
+export interface Per100g {
+  readonly kcal: number;
+  readonly proteinG: number;
+  readonly carbsG: number;
+  readonly fatG: number;
+}
+
+export interface Nutrition {
+  readonly kcal: number;
+  readonly proteinG: number;
+  readonly carbsG: number;
+  readonly fatG: number;
+}
+
+/**
+ * Menghitung gizi satu porsi dari nilai per 100 gram.
+ *
+ * Fungsi aritmetika, sengaja di domain murni: inilah satu-satunya tempat
+ * konversi ini boleh terjadi. Kalau tersebar, dua layar bisa menampilkan dua
+ * angka untuk makanan yang sama — persis kelas kesalahan yang AD-1 cegah.
+ *
+ * Pembulatan ke bilangan bulat dilakukan di sini, bukan di lapisan tampilan,
+ * supaya angka yang disimpan ke `food_log_items` sama dengan yang ditampilkan.
+ */
+export function nutritionForGrams(per100g: Per100g, grams: number): Nutrition {
+  const f = grams / 100;
+  return {
+    kcal: Math.round(per100g.kcal * f),
+    proteinG: Math.round(per100g.proteinG * f),
+    carbsG: Math.round(per100g.carbsG * f),
+    fatG: Math.round(per100g.fatG * f),
+  };
 }

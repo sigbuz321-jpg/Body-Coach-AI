@@ -66,3 +66,59 @@ export async function createUniqueLinkToken(
   }
   throw new Error(`gagal membuat link token unik setelah ${maxAttempts} percobaan`);
 }
+
+export type PairResult =
+  | { readonly kind: 'paired'; readonly userId: string }
+  | { readonly kind: 'not_found' }
+  | { readonly kind: 'expired' }
+  | { readonly kind: 'already_used' }
+  | { readonly kind: 'wa_taken' };
+
+/**
+ * Menukar `MULAI-XXXXXX` menjadi tautan `wa_id` -> `user_id`.
+ *
+ * Semua pemeriksaan dilakukan di dalam satu transaksi dengan `FOR UPDATE`:
+ * dua pesan `MULAI-` yang sama tiba bersamaan (Meta me-retry, atau pengguna
+ * mengirim dua kali) harus menghasilkan tepat satu tautan. Tanpa row lock,
+ * keduanya membaca `used_at IS NULL` lalu sama-sama menautkan.
+ *
+ * Token hangus setelah dipakai **dan** setelah 24 jam — dua syarat terpisah,
+ * bukan salah satu.
+ */
+export async function consumeLinkToken(
+  client: PoolClient,
+  token: string,
+  waId: string,
+): Promise<PairResult> {
+  const { rows } = await client.query<LinkTokenRow>(
+    'SELECT * FROM link_tokens WHERE token = $1 FOR UPDATE',
+    [token],
+  );
+  const row = rows[0];
+  if (!row) return { kind: 'not_found' };
+  if (row.used_at !== null) return { kind: 'already_used' };
+  if (row.expires_at.getTime() <= Date.now()) return { kind: 'expired' };
+
+  // `wa_id` unik: satu nomor hanya boleh menempel ke satu akun. Kalau sudah
+  // dipakai user lain, pairing gagal — itu perilaku yang diinginkan, bukan
+  // sesuatu yang boleh ditimpa diam-diam.
+  const taken = await client.query<{ id: string }>(
+    'SELECT id FROM users WHERE wa_id = $1 AND id <> $2',
+    [waId, row.user_id],
+  );
+  if ((taken.rowCount ?? 0) > 0) return { kind: 'wa_taken' };
+
+  await client.query('UPDATE users SET wa_id = $2, wa_linked_at = now() WHERE id = $1', [
+    row.user_id,
+    waId,
+  ]);
+  await client.query('UPDATE link_tokens SET used_at = now() WHERE token = $1', [token]);
+
+  return { kind: 'paired', userId: row.user_id };
+}
+
+/** Mendeteksi pesan pairing. Tidak peduli huruf besar maupun spasi berlebih. */
+export function parsePairingMessage(body: string): string | null {
+  const m = /^\s*(MULAI-[A-Z0-9]{4,12})\s*$/i.exec(body);
+  return m ? (m[1] ?? '').toUpperCase() : null;
+}

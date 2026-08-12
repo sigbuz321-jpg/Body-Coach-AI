@@ -6,5 +6,5 @@
  * tidak butuh I/O dan justru paling banyak butuh test.
  */
 
-export { normalizeFoodQuery, splitFoodItems } from './normalize';
-export type { NormalizedQuery } from './normalize';
+export { normalizeFoodQuery, nutritionForGrams, splitFoodItems } from './normalize';
+export type { NormalizedQuery, Nutrition, Per100g } from './normalize';

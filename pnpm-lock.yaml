@@ -139,6 +139,10 @@ importers:
         version: 5.9.3
 
   packages/ui:
+    dependencies:
+      '@bodycoach/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@types/react':
         specifier: ^19.2.0

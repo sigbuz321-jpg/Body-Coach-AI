@@ -10,5 +10,6 @@
 
 export const CORE_PACKAGE = '@bodycoach/core' as const;
 
+export * from './format';
 export * from './nutrition';
 export * from './pricing';

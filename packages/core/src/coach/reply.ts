@@ -147,6 +147,46 @@ export function renderLogConfirmed(ctx: CoachContext): string {
   return `${inti} Kalau protein masih nyangkut, ayam sama telur paling gampang nutupnya.`;
 }
 
+/** Item setelah dikoreksi. Angkanya sudah dihitung ulang dari food database. */
+export interface CorrectedItem {
+  readonly nameId: string;
+  readonly grams: number;
+  readonly kcal: number;
+  readonly proteinG: number;
+}
+
+/**
+ * Balasan setelah koreksi satu ketukan diterapkan (M6).
+ *
+ * Menyebut angka barunya, bukan cuma "oke sudah diganti": pengguna baru saja
+ * memberi tahu kita bahwa tebakan kita salah, dan hal paling masuk akal
+ * berikutnya adalah menunjukkan bahwa perbaikannya benar-benar masuk.
+ *
+ * Sisa target **hanya** disebut kalau lognya sudah dikonfirmasi. Log yang masih
+ * `pending` belum masuk hitungan harian, jadi menyebut sisanya setelah koreksi
+ * menghasilkan kalimat yang membingungkan: pengguna baru saja memperbaiki
+ * sebuah item lalu diberi tahu sisanya masih target penuh, seolah koreksinya
+ * tidak berpengaruh. Yang benar di kondisi itu adalah mengingatkan tombolnya.
+ *
+ * `ctx` boleh `null` — target bisa saja belum ada. Tanpa target, sisanya tidak
+ * disebut sama sekali, bukan ditulis nol.
+ */
+export function renderCorrectionApplied(
+  item: CorrectedItem,
+  ctx: CoachContext | null,
+  opts: { readonly sudahDicatat: boolean },
+): string {
+  const inti =
+    `Oke, gue ganti jadi ${item.nameId} ${formatGrams(item.grams)} — ` +
+    `${formatEstimate(item.kcal, 'kkal')} · P${formatInt(item.proteinG)}.`;
+
+  if (!opts.sudahDicatat) return `${inti} Tekan Catat kalau udah bener.`;
+  if (!ctx) return `${inti} Makasih koreksinya.`;
+
+  const sisa = remaining(ctx);
+  return `${inti} ${kapital(intiSisa(sisa, ctx))}.`;
+}
+
 export function renderLogCancelled(): string {
   return 'Oke, gue batalin. Nggak masuk hitungan hari ini.';
 }

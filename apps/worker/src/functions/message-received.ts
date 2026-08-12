@@ -13,6 +13,7 @@ import {
   parseWeightMessage,
   progressJson,
   remaining,
+  renderCorrectionApplied,
   renderDeterministicTemplate,
   renderFoodLogPreview,
   renderLogCancelled,
@@ -30,13 +31,19 @@ import {
   verifyCoachNumbers,
   type CoachContext,
   type ConcernSeverity,
+  type CorrectedItem,
   type FoodCandidate,
   type LocalMoment,
   type LoggedItemView,
   type PairFailure,
 } from '@bodycoach/core';
 import { parsePairingMessage, type FoodResolution, type MessageJob } from '@bodycoach/db';
-import { foodConfirmButtons, hashWaId, parseButtonId } from '@bodycoach/whatsapp';
+import {
+  foodConfirmButtons,
+  foodCorrectionSections,
+  hashWaId,
+  parseButtonId,
+} from '@bodycoach/whatsapp';
 
 /**
  * `message.received` — satu-satunya tempat pesan WhatsApp benar-benar diproses.
@@ -73,6 +80,17 @@ export interface Messenger {
     body: string;
     footer?: string;
     buttons: readonly { id: string; title: string }[];
+  }): Promise<{ messageId: string }>;
+  /** Pesan daftar — dipakai koreksi satu ketukan (M6). */
+  sendList(msg: {
+    to: string;
+    body: string;
+    buttonText: string;
+    footer?: string;
+    sections: readonly {
+      title: string;
+      rows: readonly { id: string; title: string; description?: string }[];
+    }[];
   }): Promise<{ messageId: string }>;
 }
 
@@ -125,7 +143,18 @@ export interface Store {
     mealSlot: string;
     sourceMessageId: string;
     items: readonly FoodResolution[];
-  }): Promise<string | null>;
+  }): Promise<{ logId: string; itemIds: readonly string[] } | null>;
+  /**
+   * Menerapkan koreksi pengguna. `null` bila item bukan milik `userId` —
+   * id item dibawa di dalam id tombol, dan tombol adalah masukan dari luar.
+   */
+  applyCorrection(input: {
+    itemId: string;
+    userId: string;
+    type: 'wrong_food' | 'wrong_portion';
+    foodItemId?: string;
+    portionMultiplier?: number;
+  }): Promise<(CorrectedItem & { sudahDicatat: boolean }) | null>;
   setLogStatus(input: {
     logId: string;
     userId: string;
@@ -183,6 +212,8 @@ export type MessageOutcome =
   | { readonly kind: 'log_cancelled' }
   | { readonly kind: 'log_portion' }
   | { readonly kind: 'log_stale' }
+  | { readonly kind: 'corrected'; readonly itemId: string }
+  | { readonly kind: 'correction_stale' }
   | { readonly kind: 'answered'; readonly fallback: boolean };
 
 /** Balasan teks + pencatatannya ke `messages`. */
@@ -366,6 +397,29 @@ async function tekanTombol(sesi: Sesi): Promise<MessageOutcome> {
     return { kind: 'ignored', reason: 'tombol_tidak_dikenal' };
   }
 
+  // ── Koreksi satu ketukan (M6) ───────────────────────────────────────────
+  if (aksi.kind === 'fix_food' || aksi.kind === 'fix_portion') {
+    const hasil = await deps.store.applyCorrection({
+      itemId: aksi.itemId,
+      userId,
+      ...(aksi.kind === 'fix_food'
+        ? { type: 'wrong_food' as const, foodItemId: aksi.foodItemId }
+        : { type: 'wrong_portion' as const, portionMultiplier: aksi.multiplier }),
+    });
+
+    if (!hasil) {
+      await balas(userId, 'Item itu udah nggak ada. Coba catat ulang aja ya.');
+      return { kind: 'correction_stale' };
+    }
+
+    const ctxBaru = await deps.store.loadContext(userId, saat.date, saat.hour);
+    await balas(
+      userId,
+      renderCorrectionApplied(hasil, ctxBaru, { sudahDicatat: hasil.sudahDicatat }),
+    );
+    return { kind: 'corrected', itemId: aksi.itemId };
+  }
+
   const status = aksi.kind === 'confirm' ? 'confirmed' : 'discarded';
   const berhasil = await deps.store.setLogStatus({ logId: aksi.logId, userId, status });
 
@@ -412,7 +466,7 @@ async function catatMakanan(
     return { kind: 'no_food' };
   }
 
-  const logId = await deps.store.createPendingLog({
+  const dibuat = await deps.store.createPendingLog({
     userId,
     // Tanggal diambil dari momen yang sama dengan yang dipakai memuat konteks.
     // Menghitungnya ulang di sini berisiko: job yang diproses tepat di
@@ -424,7 +478,7 @@ async function catatMakanan(
     items: resolved,
   });
 
-  if (!logId) {
+  if (!dibuat) {
     // `source_message_id` sudah dipakai: pesan ini sudah pernah diproses dan
     // balasannya sudah terkirim. Membalas lagi berarti pengguna menerima dua
     // pesan untuk satu kalimat.
@@ -438,7 +492,7 @@ async function catatMakanan(
     to: job.waId,
     body,
     footer: 'Cek dulu, baru Catat.',
-    buttons: foodConfirmButtons(logId).map((b) => ({ id: b.id, title: b.title })),
+    buttons: foodConfirmButtons(dibuat.logId).map((b) => ({ id: b.id, title: b.title })),
   });
   await deps.store.recordMessage({
     userId,
@@ -448,7 +502,70 @@ async function catatMakanan(
     body,
   });
 
-  return { kind: 'logged', logId, items: items.length };
+  await tawarkanKoreksi(sesi, resolved, dibuat.itemIds);
+
+  return { kind: 'logged', logId: dibuat.logId, items: items.length };
+}
+
+/**
+ * Menawarkan koreksi satu ketukan untuk item yang tidak meyakinkan (DoD M6).
+ *
+ * Dikirim sebagai pesan kedua, bukan digabung ke pratinjau, karena tiga tombol
+ * sudah habis untuk Catat/Ubah porsi/Batal — dan mengganti salah satunya
+ * berarti alur normal kehilangan tombol demi kasus yang jarang.
+ *
+ * Hanya satu item yang ditawarkan per pesan, yaitu yang paling tidak
+ * meyakinkan. Menawarkan semuanya sekaligus mengubah satu pertanyaan sederhana
+ * ("yang ini bener nggak?") menjadi formulir.
+ */
+async function tawarkanKoreksi(
+  sesi: Sesi,
+  resolved: readonly FoodResolution[],
+  itemIds: readonly string[],
+): Promise<void> {
+  let ragu = -1;
+  let terendah = NEEDS_CHECK_BELOW;
+  resolved.forEach((r, i) => {
+    if (r.kind === 'resolved' && r.item.confidence < terendah) {
+      terendah = r.item.confidence;
+      ragu = i;
+    }
+  });
+  if (ragu < 0) return;
+
+  const item = resolved[ragu];
+  const itemId = itemIds[ragu];
+  if (!itemId || item?.kind !== 'resolved') return;
+
+  // Kalori kandidat sengaja tidak ikut: menampilkannya berarti satu query per
+  // kandidat untuk pilihan yang sebagian besar tidak akan pernah ditekan.
+  const kandidat = item.item.alternatives
+    .slice(0, 4)
+    .map((a) => ({ foodItemId: a.id, label: a.nameId }));
+
+  const { deps, job, userId } = sesi;
+  const body =
+    `Gue kurang yakin soal "${item.item.rawLabel}" — gue tebak ${item.item.nameId}. ` +
+    'Kalau salah, pilih yang bener di bawah.';
+
+  const res = await deps.messenger.sendList({
+    to: job.waId,
+    body,
+    buttonText: 'Perbaiki',
+    footer: 'Kalau udah bener, abaikan aja.',
+    sections: foodCorrectionSections(itemId, kandidat).map((s) => ({
+      title: s.title,
+      rows: [...s.rows],
+    })),
+  });
+
+  await deps.store.recordMessage({
+    userId,
+    waMessageId: res.messageId || null,
+    direction: 'outbound',
+    kind: 'interactive',
+    body,
+  });
 }
 
 /**

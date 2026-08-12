@@ -22,6 +22,7 @@ export type { ClaimKind, NumberClaim, TruthSet, VerificationResult } from './num
 export {
   NEEDS_CHECK_BELOW,
   remainingAfter,
+  renderCorrectionApplied,
   renderFoodLogPreview,
   renderLogCancelled,
   renderLogConfirmed,
@@ -34,7 +35,7 @@ export {
   sumItems,
   truthForItems,
 } from './reply';
-export type { LoggedItemView, PairFailure } from './reply';
+export type { CorrectedItem, LoggedItemView, PairFailure } from './reply';
 
 export { looksLikeQuestion } from './intent';
 

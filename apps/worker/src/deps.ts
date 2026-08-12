@@ -32,6 +32,14 @@ function createMessenger(): Messenger {
         ...(msg.footer ? { footer: msg.footer } : {}),
         buttons: msg.buttons,
       }),
+    sendList: (msg) =>
+      client.sendList({
+        to: msg.to,
+        body: msg.body,
+        buttonText: msg.buttonText,
+        ...(msg.footer ? { footer: msg.footer } : {}),
+        sections: msg.sections,
+      }),
   };
 }
 

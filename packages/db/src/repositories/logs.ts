@@ -46,18 +46,27 @@ export async function createFoodLog(db: Q, input: CreateFoodLogInput): Promise<F
   return rows[0] ?? null;
 }
 
+/**
+ * Menyisipkan item dan mengembalikan id-nya **dalam urutan yang sama**.
+ *
+ * Id-nya dibutuhkan koreksi satu ketukan (M6): id tombol koreksi membawa
+ * `food_log_item_id`, dan tanpa nilai kembalian ini pemanggil harus membaca
+ * ulang barisnya lalu menebak mana yang mana.
+ */
 export async function addFoodLogItems(
   db: Q,
   foodLogId: string,
   items: readonly FoodLogItemInput[],
-): Promise<void> {
-  if (items.length === 0) return;
+): Promise<string[]> {
+  const ids: string[] = [];
+  if (items.length === 0) return ids;
   for (const it of items) {
-    await db.query(
+    const { rows } = await db.query<{ id: string }>(
       `INSERT INTO food_log_items (
          food_log_id, food_item_id, raw_label, grams, portion_basis,
          match_stage, confidence, kcal, protein_g, carbs_g, fat_g
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+       RETURNING id`,
       [
         foodLogId,
         it.foodItemId,
@@ -72,7 +81,11 @@ export async function addFoodLogItems(
         it.fatG,
       ],
     );
+    const id = rows[0]?.id;
+    if (!id) throw new Error('addFoodLogItems tidak mengembalikan id');
+    ids.push(id);
   }
+  return ids;
 }
 
 export type FoodLogStatus = 'pending' | 'confirmed' | 'discarded';

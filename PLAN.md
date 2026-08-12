@@ -30,6 +30,7 @@ Milestone berurutan. Setiap milestone punya _definition of done_ yang bisa diver
 | M3 — Onboarding & plan reveal | ✅ selesai | `60b1b5c` + perbaikan `31c9f2f` |
 | M4 — Landing page | ✅ selesai | `42418a3` |
 | M5 — Webhook WhatsApp, queue, pairing, text logging | ✅ selesai | `2de0cef` |
+| M6 — Food resolver & koreksi pengguna | ✅ sebagian — `PATCH /api/me/logs` menunggu auth | `2202cc5` + koreksi |
 
 Aturan urutan sudah terpenuhi: engine lulus test, jadi UI boleh dikerjakan.
 
@@ -168,6 +169,12 @@ Teks M0–M2 di bawah sengaja dibiarkan apa adanya sebagai catatan rencana awal.
 - [ ] **`DATABASE_CA_CERT_PATH` belum diset** (lihat jebakan no. 5).
 - [ ] **Status CI di GitHub belum pernah diperiksa.** Repo privat dan `gh` belum login di mesin ini.
 - [ ] **ER diagram `docs/01-system-design.md` §5 menyebut tabel `conversations`** yang tidak ada di §3; `messages` menempel langsung ke `users`. §3 yang dipakai. Rapikan salah satunya.
+
+Ditambahkan di M6:
+
+- [ ] **Belum ada autentikasi sama sekali.** Memblokir seluruh `/api/me/*`, termasuk `PATCH /api/me/logs/:itemId` (M6) dan `GET /api/me/dashboard` (M8). Harus diputuskan sebelum M8 dimulai, karena dashboard tidak bisa dibangun tanpa tahu siapa yang sedang melihat.
+- [ ] **Ambang trigram disetel dengan golden set di tangan.** Akurasi 99,5% karenanya bukan taksiran tak bias untuk kategori typo. Untuk angka yang jujur, butuh set kedua yang ditulis setelah ambangnya dibekukan.
+- [ ] **Nilai `verified=false` masih menyebar ke koreksi.** Pengguna mengoreksi ke makanan yang angkanya juga belum diverifikasi TKPI. Koreksinya benar secara identitas, belum tentu benar secara gizi.
 
 Ditambahkan di M5:
 
@@ -587,7 +594,35 @@ packages/ai/providers/*.ts
 
 ---
 
-## M6 — Food resolver & koreksi pengguna
+## M6 — Food resolver & koreksi pengguna ✅ SEBAGIAN
+
+> **Diverifikasi 13 Agustus 2026.**
+>
+> | DoD | Hasil |
+> | --- | --- |
+> | Golden set 200 kalimat, akurasi top-1 ≥ 85% | ✅ **99,5%** (199/200 kalimat, 209/210 item), `pnpm evals` |
+> | Normalisasi slang & salah ketik umum | ✅ slang 20/20, typo 29/30 |
+> | Item confidence < 0,75 ditandai "perlu dicek" dan dapat dikoreksi satu ketukan | ✅ lewat pesan daftar WhatsApp — kandidat makanan + tiga pilihan porsi |
+> | Koreksi tersimpan ke `corrections` beserta sebelum-sesudah | ✅ diverifikasi terhadap database nyata |
+> | Laporan koreksi bisa di-query | ✅ `topCorrectedFoods` — dikelompokkan pada tebakan yang **meleset**, bukan hasil koreksinya |
+>
+> **Angka yang paling berarti: nol tebakan palsu.** Delapan kasus golden set
+> memang tidak boleh menghasilkan makanan apa pun ("berat gue 70 kg", "makasih
+> ya coach"). Tanpa kasus semacam itu, resolver yang selalu menebak bisa
+> mencetak akurasi tinggi sambil memasukkan kalori yang tidak pernah dimakan.
+>
+> **Yang perlu diakui:** ambang trigram disetel dengan golden set di tangan,
+> jadi 99,5% bukan taksiran tak bias untuk kategori typo. Yang tetap bermakna
+> adalah nol tebakan palsu dan kategori lain yang tidak ikut disetel.
+>
+> **Belum dikerjakan: `PATCH /api/me/logs/:itemId`.** Bukan soal usaha —
+> **belum ada sistem autentikasi sama sekali di repo ini**, dan tidak ada
+> milestone yang membangunnya. Endpoint `/api/me/*` tanpa identitas berarti
+> siapa pun yang menebak sebuah uuid bisa mengubah catatan makan orang lain.
+> Jalur WhatsApp tidak punya masalah itu karena identitasnya datang dari
+> `wa_id` yang sudah ditautkan. Memilih mekanisme auth (magic link, Supabase
+> Auth, sesi cookie) adalah keputusan pemilik produk, dan mau tidak mau harus
+> diselesaikan di M8 saat dashboard butuh membaca data per pengguna.
 
 **Tujuan:** pencocokan teks Indonesia ke makanan kanonik yang cukup akurat untuk dipercaya.
 

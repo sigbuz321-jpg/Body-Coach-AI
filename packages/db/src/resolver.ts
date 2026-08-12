@@ -23,6 +23,11 @@ type Q = Pool | PoolClient;
  * diberi angka yang kelihatan pasti padahal karangan.
  */
 
+export interface FoodAlternative {
+  readonly id: string;
+  readonly nameId: string;
+}
+
 export interface ResolvedFood {
   readonly rawLabel: string;
   readonly foodItemId: string;
@@ -33,6 +38,15 @@ export interface ResolvedFood {
   readonly matchStage: MatchStage;
   readonly confidence: number;
   readonly nutrition: Nutrition;
+  /**
+   * Kandidat lain yang kalah tipis, tanpa yang menang.
+   *
+   * Dibawa ikut supaya koreksi satu ketukan (M6) tidak perlu menjalankan
+   * ulang pencarian: saat pengguna bilang "bukan itu", pilihannya sudah ada.
+   * Kosong untuk kecocokan alias — di situ tidak ada keraguan yang perlu
+   * ditawarkan alternatifnya.
+   */
+  readonly alternatives: readonly FoodAlternative[];
 }
 
 export interface UnresolvedFood {
@@ -48,7 +62,18 @@ export type FoodResolution =
 
 /** Ambang §5. Di bawah `TRIGRAM_ACCEPT`, resolver menolak menebak. */
 const TRIGRAM_ACCEPT = 0.6;
-const TRIGRAM_FLOOR = 0.45;
+
+/**
+ * Ambang untuk **mengambil kandidat**, bukan untuk memilih pemenang.
+ *
+ * Sengaja lebih rendah daripada ambang penerimaan, dan itu dua pekerjaan yang
+ * berbeda: yang ketat menentukan apa yang boleh dicatat otomatis, yang longgar
+ * menentukan apa yang boleh **ditawarkan** ke pengguna untuk dikoreksi.
+ * Menyamakan keduanya membuat daftar koreksi kosong justru pada kasus yang
+ * paling butuh koreksi — "ayam pnyet" memilih Ayam geprek (0,546) sementara
+ * pesaing terdekatnya, Ayam pop (0,429), tidak pernah ikut terambil.
+ */
+const CANDIDATE_FLOOR = 0.3;
 
 /**
  * Tingkat kedua: cocok yang meyakinkan **secara relatif**.
@@ -105,7 +130,9 @@ async function resolveOne(db: Q, rawLabel: string): Promise<FoodResolution> {
 
   // Tahap 1 — alias eksak. Paling murah, paling akurat.
   const alias = await findByAlias(db, norm.query);
-  const trigram = alias ? [] : await searchByTrigram(db, norm.query, { threshold: TRIGRAM_FLOOR });
+  const trigram = alias
+    ? []
+    : await searchByTrigram(db, norm.query, { threshold: CANDIDATE_FLOOR });
 
   const teratas = trigram[0];
   const kedua = trigram[1];
@@ -157,6 +184,10 @@ async function resolveOne(db: Q, rawLabel: string): Promise<FoodResolution> {
       portionLabel: portion?.label ?? '100 g',
       matchStage: stage,
       confidence,
+      alternatives: trigram
+        .filter((c) => c.id !== hit.id)
+        .slice(0, 4)
+        .map((c) => ({ id: c.id, nameId: c.name_id })),
       nutrition: nutritionForGrams(
         {
           kcal: Number(hit.kcal_per_100g),

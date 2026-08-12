@@ -45,6 +45,7 @@ function resolved(over: {
   carbsG?: number;
   fatG?: number;
   confidence?: number;
+  alternatives?: readonly { id: string; nameId: string }[];
 }): FoodResolution {
   return {
     kind: 'resolved',
@@ -57,6 +58,7 @@ function resolved(over: {
       portionLabel: '1 porsi',
       matchStage: 'alias',
       confidence: over.confidence ?? 1,
+      alternatives: over.alternatives ?? [],
       nutrition: {
         kcal: over.kcal,
         proteinG: over.proteinG,
@@ -90,7 +92,13 @@ const GEPREK = resolved({
 });
 
 interface Rekaman {
-  readonly outbound: { kind: 'text' | 'interactive'; body: string; buttons?: string[] }[];
+  readonly outbound: {
+    kind: 'text' | 'interactive' | 'list';
+    body: string;
+    buttons?: string[];
+    rows?: string[];
+  }[];
+  readonly koreksi: { itemId: string; type: string; foodItemId?: string; multiplier?: number }[];
   readonly logsDibuat: string[];
   readonly statusDiubah: { logId: string; status: string }[];
   readonly beratDisimpan: number[];
@@ -135,6 +143,8 @@ function harness(
     lockTersedia?: boolean;
     latestWeight?: number | null;
     kandidat?: readonly FoodCandidate[];
+    koreksiGagal?: boolean;
+    logSudahDicatat?: boolean;
   } = {},
 ): { deps: MessageDeps; rekam: Rekaman; requeued: MessageJob[]; released: number[] } {
   const rekam: Rekaman = {
@@ -145,6 +155,7 @@ function harness(
     pesanTercatat: [],
     rondeCoach: [],
     kandidatDiminta: [],
+    koreksi: [],
   };
   const requeued: MessageJob[] = [];
   const released: number[] = [];
@@ -159,6 +170,14 @@ function harness(
         kind: 'interactive',
         body: msg.body,
         buttons: msg.buttons.map((b) => b.title),
+      });
+      return { messageId: `out-${rekam.outbound.length}` };
+    },
+    async sendList(msg) {
+      rekam.outbound.push({
+        kind: 'list',
+        body: msg.body,
+        rows: msg.sections.flatMap((s) => s.rows.map((r) => r.id)),
       });
       return { messageId: `out-${rekam.outbound.length}` };
     },
@@ -178,10 +197,28 @@ function harness(
     async resolveFood() {
       return over.resolve ?? [unresolved('halo')];
     },
-    async createPendingLog() {
+    async createPendingLog(input) {
       const id = over.createLog ? over.createLog() : `log-${++logCounter}`;
-      if (id) rekam.logsDibuat.push(id);
-      return id;
+      if (!id) return null;
+      rekam.logsDibuat.push(id);
+      return { logId: id, itemIds: input.items.map((_, i) => `${id}-item-${i}`) };
+    },
+
+    async applyCorrection(input) {
+      rekam.koreksi.push({
+        itemId: input.itemId,
+        type: input.type,
+        ...(input.foodItemId ? { foodItemId: input.foodItemId } : {}),
+        ...(input.portionMultiplier === undefined ? {} : { multiplier: input.portionMultiplier }),
+      });
+      if (over.koreksiGagal) return null;
+      return {
+        nameId: 'Ayam pop',
+        grams: 110,
+        kcal: 198,
+        proteinG: 29,
+        sudahDicatat: over.logSudahDicatat ?? false,
+      };
     },
     async setLogStatus(input) {
       rekam.statusDiubah.push({ logId: input.logId, status: input.status });
@@ -492,6 +529,140 @@ describe('tombol interaktif', () => {
       job({ type: 'interactive', body: '', buttonId: 'apa-ini' }),
     );
     expect(hasil).toEqual({ kind: 'ignored', reason: 'tombol_tidak_dikenal' });
+  });
+});
+
+describe('koreksi satu ketukan', () => {
+  /** Item yang confidence-nya di bawah 0,75 — inilah yang perlu dicek. */
+  const RAGU = resolved({
+    rawLabel: 'ayam pnyet',
+    nameId: 'Ayam geprek',
+    grams: 120,
+    kcal: 342,
+    proteinG: 25,
+    confidence: 0.7,
+    alternatives: [
+      { id: 'food-pop', nameId: 'Ayam pop' },
+      { id: 'food-bakar', nameId: 'Ayam bakar' },
+    ],
+  });
+
+  it('menawarkan daftar koreksi saat ada item yang tidak meyakinkan', async () => {
+    const { deps, rekam } = harness({ resolve: [RAGU] });
+
+    await handleMessageReceived(deps, job({ body: 'ayam pnyet' }));
+
+    const daftar = rekam.outbound.find((o) => o.kind === 'list');
+    expect(daftar).toBeDefined();
+    expect(daftar?.body).toContain('kurang yakin');
+    expect(daftar?.rows).toContain('fix:food:log-1-item-0:food-pop');
+    // Porsi selalu ditawarkan, walau kandidat makanannya tidak ada.
+    expect(daftar?.rows).toContain('fix:porsi:log-1-item-0:0.5');
+  });
+
+  it('tidak menawarkan koreksi kalau semua item meyakinkan', async () => {
+    const { deps, rekam } = harness({ resolve: [NASI, GEPREK] });
+
+    await handleMessageReceived(deps, job());
+
+    expect(rekam.outbound.some((o) => o.kind === 'list')).toBe(false);
+  });
+
+  it('hanya menawarkan satu item — yang paling tidak meyakinkan', async () => {
+    const lebihRagu = resolved({
+      rawLabel: 'rawn',
+      nameId: 'Rawon',
+      grams: 200,
+      kcal: 300,
+      proteinG: 20,
+      confidence: 0.55,
+    });
+    const { deps, rekam } = harness({ resolve: [RAGU, lebihRagu] });
+
+    await handleMessageReceived(deps, job());
+
+    const daftar = rekam.outbound.filter((o) => o.kind === 'list');
+    expect(daftar).toHaveLength(1);
+    // Item kedua (indeks 1) yang confidence-nya paling rendah.
+    expect(daftar[0]?.rows?.[0]).toContain('log-1-item-1');
+  });
+
+  it('mengganti makanan lalu melaporkan angka barunya', async () => {
+    const { deps, rekam } = harness();
+
+    const hasil = await handleMessageReceived(
+      deps,
+      job({ type: 'interactive', body: '', buttonId: 'fix:food:item-9:food-pop' }),
+    );
+
+    expect(hasil).toEqual({ kind: 'corrected', itemId: 'item-9' });
+    expect(rekam.koreksi).toEqual([
+      { itemId: 'item-9', type: 'wrong_food', foodItemId: 'food-pop' },
+    ]);
+    expect(rekam.outbound[0]?.body).toContain('Ayam pop 110 g');
+    expect(rekam.outbound[0]?.body).toContain('±198 kkal');
+  });
+
+  it('tidak menyebut sisa target selama lognya belum dicatat', async () => {
+    // Log `pending` belum masuk hitungan harian. Menyebut sisanya di situ
+    // membuat pengguna membaca "sisa masih target penuh" tepat setelah
+    // memperbaiki item — seolah koreksinya tidak berpengaruh.
+    const { deps, rekam } = harness({ logSudahDicatat: false });
+
+    await handleMessageReceived(
+      deps,
+      job({ type: 'interactive', body: '', buttonId: 'fix:food:item-9:food-pop' }),
+    );
+
+    expect(rekam.outbound[0]?.body).toContain('Tekan Catat');
+    expect(rekam.outbound[0]?.body).not.toContain('Sisa');
+  });
+
+  it('menyebut sisa target kalau lognya sudah dicatat', async () => {
+    const { deps, rekam } = harness({ logSudahDicatat: true });
+
+    await handleMessageReceived(
+      deps,
+      job({ type: 'interactive', body: '', buttonId: 'fix:food:item-9:food-pop' }),
+    );
+
+    expect(rekam.outbound[0]?.body).toContain('Sisa ±820 kkal');
+  });
+
+  it('mengubah porsi lewat pengali, bukan gram mentah', async () => {
+    const { deps, rekam } = harness();
+
+    await handleMessageReceived(
+      deps,
+      job({ type: 'interactive', body: '', buttonId: 'fix:porsi:item-9:0.5' }),
+    );
+
+    expect(rekam.koreksi).toEqual([{ itemId: 'item-9', type: 'wrong_portion', multiplier: 0.5 }]);
+  });
+
+  it('item yang bukan miliknya ditolak, bukan diubah', async () => {
+    // Id item dibawa di dalam id tombol, dan tombol adalah masukan dari luar.
+    const { deps, rekam } = harness({ koreksiGagal: true });
+
+    const hasil = await handleMessageReceived(
+      deps,
+      job({ type: 'interactive', body: '', buttonId: 'fix:food:item-orang-lain:food-pop' }),
+    );
+
+    expect(hasil).toEqual({ kind: 'correction_stale' });
+    expect(rekam.outbound[0]?.body).toContain('udah nggak ada');
+  });
+
+  it('pengali porsi di luar akal ditolak di parser', async () => {
+    const { deps, rekam } = harness();
+
+    const hasil = await handleMessageReceived(
+      deps,
+      job({ type: 'interactive', body: '', buttonId: 'fix:porsi:item-9:99' }),
+    );
+
+    expect(hasil).toEqual({ kind: 'ignored', reason: 'tombol_tidak_dikenal' });
+    expect(rekam.koreksi).toHaveLength(0);
   });
 });
 

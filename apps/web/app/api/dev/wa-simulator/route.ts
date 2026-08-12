@@ -40,7 +40,8 @@ const Body = z
 
 type SimOutbound =
   | { kind: 'text'; to: string; body: string }
-  | { kind: 'interactive'; to: string; body: string; footer?: string; buttons: string[] };
+  | { kind: 'interactive'; to: string; body: string; footer?: string; buttons: string[] }
+  | { kind: 'list'; to: string; body: string; footer?: string; rows: string[] };
 
 function buildMetaPayload(input: {
   waId: string;
@@ -170,6 +171,16 @@ export async function POST(req: Request): Promise<Response> {
         body: msg.body,
         ...(msg.footer ? { footer: msg.footer } : {}),
         buttons: msg.buttons.map((b) => `${b.id} — ${b.title}`),
+      });
+      return { messageId: `sim-out-${outbound.length}` };
+    },
+    async sendList(msg) {
+      outbound.push({
+        kind: 'list',
+        to: msg.to,
+        body: msg.body,
+        ...(msg.footer ? { footer: msg.footer } : {}),
+        rows: msg.sections.flatMap((s) => s.rows.map((r) => `${r.id} — ${r.title}`)),
       });
       return { messageId: `sim-out-${outbound.length}` };
     },

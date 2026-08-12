@@ -1,6 +1,7 @@
 import { nutritionForGrams, shiftDate, type CoachContext } from '@bodycoach/core';
 import {
   addFoodLogItems,
+  applyCorrection,
   consumeLinkToken,
   countLoggedDays,
   createFoodLog,
@@ -147,9 +148,40 @@ export function createStore(): Store {
         // diproses. Lapis kedua idempotency (AD-2).
         if (!log) return null;
 
-        await addFoodLogItems(client, log.id, toItems(input.items));
-        return log.id;
+        const itemIds = await addFoodLogItems(client, log.id, toItems(input.items));
+        return { logId: log.id, itemIds };
       });
+    },
+
+    async applyCorrection(input) {
+      const hasil = await withTransaction((client) =>
+        applyCorrection(client, {
+          itemId: input.itemId,
+          userId: input.userId,
+          type: input.type,
+          ...(input.foodItemId ? { foodItemId: input.foodItemId } : {}),
+          ...(input.portionMultiplier === undefined
+            ? {}
+            : { portionMultiplier: input.portionMultiplier }),
+        }),
+      );
+      if (!hasil) return null;
+
+      const { rows } = await getPool().query<{ name_id: string }>(
+        'SELECT name_id FROM food_items WHERE id = $1',
+        [hasil.after.food_item_id],
+      );
+
+      return {
+        nameId: rows[0]?.name_id ?? hasil.after.raw_label,
+        grams: Number(hasil.after.grams),
+        kcal: Number(hasil.after.kcal),
+        proteinG: Number(hasil.after.protein_g),
+        // Diambil dari snapshot SEBELUM koreksi: koreksi tidak mengubah status
+        // log induknya, dan yang dibutuhkan pemanggil adalah apakah item ini
+        // sudah masuk hitungan harian atau masih menunggu tombol "Catat".
+        sudahDicatat: hasil.before.log_status === 'confirmed',
+      };
     },
 
     async setLogStatus(input) {

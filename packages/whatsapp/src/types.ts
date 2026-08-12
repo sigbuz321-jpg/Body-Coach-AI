@@ -115,3 +115,32 @@ export interface OutboundInteractive {
   readonly buttons: readonly OutboundButton[];
   readonly footer?: string;
 }
+
+/**
+ * Baris dalam pesan daftar. Dipakai koreksi satu ketukan (M6): tiga tombol
+ * tidak cukup untuk menawarkan beberapa kandidat makanan sekaligus beberapa
+ * pilihan porsi.
+ */
+export interface OutboundListRow {
+  /** Maks 200 karakter. */
+  readonly id: string;
+  /** Maks 24 karakter — batas Meta, dipotong builder. */
+  readonly title: string;
+  /** Maks 72 karakter. Dipakai menampilkan kalori kandidat. */
+  readonly description?: string;
+}
+
+export interface OutboundListSection {
+  /** Maks 24 karakter. */
+  readonly title: string;
+  readonly rows: readonly OutboundListRow[];
+}
+
+export interface OutboundList {
+  readonly to: string;
+  readonly body: string;
+  /** Teks tombol yang membuka daftarnya. Maks 20 karakter. */
+  readonly buttonText: string;
+  readonly sections: readonly OutboundListSection[];
+  readonly footer?: string;
+}

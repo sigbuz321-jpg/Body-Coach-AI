@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
-import { buildInteractiveMessage, buildTextMessage } from './interactive';
-import type { OutboundInteractive } from './types';
+import { buildInteractiveMessage, buildListMessage, buildTextMessage } from './interactive';
+import type { OutboundInteractive, OutboundList } from './types';
 
 /**
  * Klien Meta WhatsApp Cloud API (Graph).
@@ -46,6 +46,8 @@ export interface SendResult {
 export interface WhatsAppClient {
   sendText(to: string, body: string): Promise<SendResult>;
   sendInteractive(msg: OutboundInteractive): Promise<SendResult>;
+  /** Pesan daftar — dipakai koreksi satu ketukan (M6). */
+  sendList(msg: OutboundList): Promise<SendResult>;
   /** URL media sementara dari Meta; harus diunduh dengan token yang sama. */
   getMediaUrl(mediaId: string): Promise<string>;
   downloadMedia(url: string): Promise<{ data: ArrayBuffer; contentType: string }>;
@@ -103,6 +105,10 @@ export function createWhatsAppClient(opts: WhatsAppClientOptions): WhatsAppClien
 
     sendInteractive(msg) {
       return postMessage(buildInteractiveMessage(msg));
+    },
+
+    sendList(msg) {
+      return postMessage(buildListMessage(msg));
     },
 
     async getMediaUrl(mediaId) {

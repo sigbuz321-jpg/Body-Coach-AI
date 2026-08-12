@@ -20,14 +20,19 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 function authorized(req: Request): boolean {
-  const secret = process.env['WORKER_DRAIN_SECRET'] ?? '';
-  // Rahasia kosong berarti belum dikonfigurasi. Sama seperti webhook: menerima
-  // semua request dalam kondisi itu lebih berbahaya daripada menolak semuanya —
-  // endpoint ini mengirim pesan WhatsApp atas nama nomor bisnis.
-  if (!secret) return false;
+  // `CRON_SECRET` ikut diterima karena itu nama yang dipakai Vercel Cron: ia
+  // mengirim `Authorization: Bearer $CRON_SECRET` dan nama variabelnya tidak
+  // bisa diganti. `WORKER_DRAIN_SECRET` untuk pemicu manual dan penjadwal lain.
+  const rahasia = [process.env['WORKER_DRAIN_SECRET'], process.env['CRON_SECRET']].filter(
+    (s): s is string => typeof s === 'string' && s.length > 0,
+  );
+  // Tidak ada rahasia sama sekali berarti belum dikonfigurasi. Sama seperti
+  // webhook: menerima semua request dalam kondisi itu lebih berbahaya daripada
+  // menolak semuanya — endpoint ini mengirim pesan atas nama nomor bisnis.
+  if (rahasia.length === 0) return false;
 
   const header = req.headers.get('authorization') ?? '';
-  return header === `Bearer ${secret}`;
+  return rahasia.some((s) => header === `Bearer ${s}`);
 }
 
 async function jalankan(req: Request): Promise<Response> {

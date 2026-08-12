@@ -1,10 +1,11 @@
-import type { CoachContext } from '@bodycoach/core';
+import type { CoachContext, FoodCandidate } from '@bodycoach/core';
 import type { FoodResolution, MessageJob } from '@bodycoach/db';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
   handleMessageReceived,
   type CoachAnswer,
+  type CoachTurn,
   type MessageDeps,
   type Messenger,
   type PairOutcome,
@@ -94,7 +95,32 @@ interface Rekaman {
   readonly statusDiubah: { logId: string; status: string }[];
   readonly beratDisimpan: number[];
   readonly pesanTercatat: { direction: string; body?: string }[];
+  /** Giliran yang diterima model per putaran — untuk memeriksa loop tool. */
+  readonly rondeCoach: (readonly CoachTurn[])[];
+  readonly kandidatDiminta: { maxKcal: number; exclude: readonly string[] }[];
 }
+
+/** Kandidat contoh dari "food database". Angkanya yang boleh disebut model. */
+const KANDIDAT: readonly FoodCandidate[] = [
+  {
+    nameId: 'Ayam geprek',
+    portionLabel: '1 porsi',
+    grams: 120,
+    kcal: 342,
+    proteinG: 25,
+    carbsG: 14,
+    fatG: 22,
+  },
+  {
+    nameId: 'Telur dadar',
+    portionLabel: '1 butir',
+    grams: 60,
+    kcal: 93,
+    proteinG: 6,
+    carbsG: 1,
+    fatG: 7,
+  },
+];
 
 function harness(
   over: {
@@ -104,9 +130,11 @@ function harness(
     pair?: PairOutcome;
     createLog?: () => string | null;
     setStatus?: boolean;
-    coach?: CoachAnswer | Error | null;
+    /** Satu jawaban dipakai di semua putaran; larik dipakai berurutan. */
+    coach?: CoachAnswer | readonly CoachAnswer[] | Error | null;
     lockTersedia?: boolean;
     latestWeight?: number | null;
+    kandidat?: readonly FoodCandidate[];
   } = {},
 ): { deps: MessageDeps; rekam: Rekaman; requeued: MessageJob[]; released: number[] } {
   const rekam: Rekaman = {
@@ -115,6 +143,8 @@ function harness(
     statusDiubah: [],
     beratDisimpan: [],
     pesanTercatat: [],
+    rondeCoach: [],
+    kandidatDiminta: [],
   };
   const requeued: MessageJob[] = [];
   const released: number[] = [];
@@ -169,6 +199,10 @@ function harness(
     async saveWeight(_userId, _localDate, kg) {
       rekam.beratDisimpan.push(kg);
     },
+    async findMealCandidates(input) {
+      rekam.kandidatDiminta.push({ maxKcal: input.maxKcal, exclude: input.exclude });
+      return over.kandidat ?? KANDIDAT;
+    },
   };
 
   const coachAnswer = over.coach;
@@ -179,9 +213,14 @@ function harness(
       coachAnswer === undefined || coachAnswer === null
         ? null
         : {
-            async ask() {
+            async ask({ turns }) {
+              rekam.rondeCoach.push(turns);
               if (coachAnswer instanceof Error) throw coachAnswer;
-              return coachAnswer;
+              if (Array.isArray(coachAnswer)) {
+                const ke = rekam.rondeCoach.length - 1;
+                return (coachAnswer[ke] ?? coachAnswer[coachAnswer.length - 1]) as CoachAnswer;
+              }
+              return coachAnswer as CoachAnswer;
             },
           },
     lock: {
@@ -496,7 +535,9 @@ describe('guardrail keselamatan', () => {
       resolve: [unresolved('x')],
       coach: {
         text: 'ini seharusnya tidak terkirim: 2.650 kkal',
-        toolCalls: [{ name: 'escalate_concern', arguments: { severity: 'crisis', reason: 'x' } }],
+        toolCalls: [
+          { id: 't1', name: 'escalate_concern', arguments: { severity: 'crisis', reason: 'x' } },
+        ],
       },
     });
 
@@ -511,7 +552,7 @@ describe('guardrail keselamatan', () => {
       resolve: [unresolved('x')],
       coach: {
         text: '',
-        toolCalls: [{ name: 'escalate_concern', arguments: { severity: 'ringan' } }],
+        toolCalls: [{ id: 't1', name: 'escalate_concern', arguments: { severity: 'ringan' } }],
       },
     });
 
@@ -580,26 +621,6 @@ describe('jalur coach', () => {
     expect(rekam.outbound[0]?.body).toContain('820');
   });
 
-  it('tool call yang belum ditangani tidak menghasilkan pesan kosong', async () => {
-    // `recommend_meal` dan `get_daily_status` belum dieksekusi worker, dan
-    // model membalasnya tanpa teks. Pengguna tetap harus dapat jawaban.
-    const { deps, rekam } = harness({
-      resolve: [unresolved('x')],
-      coach: {
-        text: '',
-        toolCalls: [
-          { name: 'get_daily_status', arguments: {} },
-          { name: 'recommend_meal', arguments: { meal_slot: 'makan_malam' } },
-        ],
-      },
-    });
-
-    const hasil = await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
-
-    expect(hasil).toEqual({ kind: 'answered', fallback: true });
-    expect(rekam.outbound[0]?.body.trim().length).toBeGreaterThan(20);
-  });
-
   it('tetap menjawab dengan angka engine saat provider mati', async () => {
     const { deps, rekam } = harness({
       resolve: [unresolved('x')],
@@ -628,6 +649,7 @@ describe('jalur coach', () => {
         text: 'gue catat ya',
         toolCalls: [
           {
+            id: 't1',
             name: 'log_food',
             arguments: { items: [{ raw_label: 'nasi', quantity_text: 'seporsi' }] },
           },
@@ -647,13 +669,145 @@ describe('jalur coach', () => {
       resolve: [unresolved('x')],
       coach: {
         text: 'oke',
-        toolCalls: [{ name: 'log_food', arguments: { items: [{ raw_label: 'zzz' }] } }],
+        toolCalls: [{ id: 't1', name: 'log_food', arguments: { items: [{ raw_label: 'zzz' }] } }],
       },
     });
 
     const hasil = await handleMessageReceived(deps, job({ body: 'zzz?' }));
 
     expect(hasil).toEqual({ kind: 'no_food' });
+  });
+});
+
+describe('loop tool coach', () => {
+  /**
+   * Bentuk yang benar-benar dikembalikan MiniMax-M3 saat verifikasi live:
+   * putaran pertama tool call tanpa teks, jawaban baru datang setelah datanya
+   * diberikan.
+   */
+  const MINTA_DATA: CoachAnswer = {
+    text: '',
+    toolCalls: [
+      { id: 'c1', name: 'get_daily_status', arguments: {} },
+      { id: 'c2', name: 'recommend_meal', arguments: { meal_slot: 'makan_malam' } },
+    ],
+  };
+
+  it('memberi data tool lalu memakai kalimat putaran kedua', async () => {
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: [
+        MINTA_DATA,
+        { text: 'Sisa lo ±820 kkal. Ayam geprek ±342 kkal udah nutup sebagian.', toolCalls: [] },
+      ],
+    });
+
+    const hasil = await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
+
+    expect(hasil).toEqual({ kind: 'answered', fallback: false });
+    expect(rekam.outbound[0]?.body).toContain('±820 kkal');
+    expect(rekam.rondeCoach).toHaveLength(2);
+  });
+
+  it('menyusun giliran putaran kedua dengan hasil tiap tool', async () => {
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: [MINTA_DATA, { text: 'Sisa lo ±820 kkal, gas.', toolCalls: [] }],
+    });
+
+    await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
+
+    const ronde2 = rekam.rondeCoach[1] ?? [];
+    expect(ronde2.map((t) => t.role)).toEqual(['user', 'assistant', 'tool', 'tool']);
+    // Id tool wajib dibawa apa adanya, kalau tidak hasilnya tidak tertaut.
+    expect(ronde2.filter((t) => t.role === 'tool').map((t) => t.toolCallId)).toEqual(['c1', 'c2']);
+    expect(ronde2[2]?.content).toContain('"sisa"');
+    expect(ronde2[3]?.content).toContain('Ayam geprek');
+  });
+
+  it('angka kandidat dari database ikut jadi angka yang sah', async () => {
+    // Tanpa ini, model yang menyebut angka dari daftar yang KITA berikan
+    // justru ditolak verifikasi, dan setiap rekomendasi jatuh ke template.
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: [MINTA_DATA, { text: 'Telur dadar ±93 kkal, protein 6g. Gampang.', toolCalls: [] }],
+    });
+
+    const hasil = await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
+
+    expect(hasil).toEqual({ kind: 'answered', fallback: false });
+    expect(rekam.outbound[0]?.body).toContain('±93 kkal');
+  });
+
+  it('angka di luar daftar tetap ditolak walau tool sudah dijalankan', async () => {
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: [MINTA_DATA, { text: 'Nasi padang ±870 kkal, hajar.', toolCalls: [] }],
+    });
+
+    const hasil = await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
+
+    expect(hasil).toEqual({ kind: 'answered', fallback: true });
+    expect(rekam.outbound[0]?.body).not.toContain('870');
+  });
+
+  it('membatasi budget kalori satu makan, bukan sisa sehari penuh', async () => {
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: [MINTA_DATA, { text: 'Sisa lo ±820 kkal.', toolCalls: [] }],
+    });
+
+    await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
+
+    // Sisa 820 kkal -> satu hidangan dibatasi 45%, bukan 820.
+    expect(rekam.kandidatDiminta[0]?.maxKcal).toBe(369);
+  });
+
+  it('berhenti setelah dua putaran walau model terus minta tool', async () => {
+    const { deps, rekam } = harness({ resolve: [unresolved('x')], coach: MINTA_DATA });
+
+    const hasil = await handleMessageReceived(deps, job({ body: 'malam makan apa ya?' }));
+
+    expect(hasil).toEqual({ kind: 'answered', fallback: true });
+    expect(rekam.rondeCoach).toHaveLength(2);
+    expect(rekam.outbound[0]?.body).toContain('820');
+  });
+
+  it('eskalasi di putaran kedua tetap menghentikan angka', async () => {
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: [
+        MINTA_DATA,
+        {
+          text: 'ini tidak boleh terkirim: 2.650 kkal',
+          toolCalls: [{ id: 'c9', name: 'escalate_concern', arguments: { severity: 'crisis' } }],
+        },
+      ],
+    });
+
+    const hasil = await handleMessageReceived(deps, job({ body: 'gimana ya' }));
+
+    expect(hasil).toEqual({ kind: 'concern', severity: 'crisis' });
+    expect(memuatAngka(rekam.outbound[0]?.body ?? '')).toBe(false);
+  });
+
+  it('update_weight tidak dieksekusi — berat hanya dari kalimat user', async () => {
+    const { deps, rekam } = harness({
+      resolve: [unresolved('x')],
+      coach: [
+        {
+          text: '',
+          toolCalls: [{ id: 'c1', name: 'update_weight', arguments: { weight_kg: 70 } }],
+        },
+        { text: 'Berapa beratnya? Ketik aja langsung.', toolCalls: [] },
+      ],
+    });
+
+    const hasil = await handleMessageReceived(deps, job({ body: 'kayaknya gue 70an deh' }));
+
+    expect(hasil).toEqual({ kind: 'answered', fallback: false });
+    expect(rekam.beratDisimpan).toHaveLength(0);
+    expect(rekam.rondeCoach[1]?.[2]?.content).toContain('tidak_dieksekusi');
   });
 });
 

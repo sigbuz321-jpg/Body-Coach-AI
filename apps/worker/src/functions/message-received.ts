@@ -1,13 +1,18 @@
 import {
   blocksNumbers,
+  budgetKcalUntukSatuMakan,
   buildUserContextBlock,
+  candidatesJson,
   concernReply,
+  dailyStatusJson,
   detectConcern,
   localMoment,
   looksLikeQuestion,
   mealSlotForHour,
   NEEDS_CHECK_BELOW,
   parseWeightMessage,
+  progressJson,
+  remaining,
   renderDeterministicTemplate,
   renderFoodLogPreview,
   renderLogCancelled,
@@ -18,10 +23,14 @@ import {
   renderPairFailure,
   renderPortionPrompt,
   renderWeightSaved,
+  toWhatsAppText,
   truthFromContext,
+  truthWithCandidates,
+  unsupportedToolJson,
   verifyCoachNumbers,
   type CoachContext,
   type ConcernSeverity,
+  type FoodCandidate,
   type LocalMoment,
   type LoggedItemView,
   type PairFailure,
@@ -67,9 +76,25 @@ export interface Messenger {
   }): Promise<{ messageId: string }>;
 }
 
+export interface CoachToolCall {
+  readonly id: string;
+  readonly name: string;
+  readonly arguments: Record<string, unknown>;
+}
+
 export interface CoachAnswer {
   readonly text: string;
-  readonly toolCalls: readonly { name: string; arguments: Record<string, unknown> }[];
+  readonly toolCalls: readonly CoachToolCall[];
+}
+
+/** Satu giliran percakapan yang dikirim ke model. */
+export interface CoachTurn {
+  readonly role: 'user' | 'assistant' | 'tool';
+  readonly content: string;
+  /** Diisi saat `role: 'tool'` — menautkan hasil ke permintaan tool. */
+  readonly toolCallId?: string;
+  /** Diisi saat `role: 'assistant'` dan model meminta tool. */
+  readonly toolCalls?: readonly CoachToolCall[];
 }
 
 export interface CoachRunner {
@@ -78,7 +103,7 @@ export interface CoachRunner {
    * utuh. Penyusunan promptnya milik `@bodycoach/ai` yang memegang versinya
    * (`coach.v1`); worker tidak boleh ikut menentukan bunyi prompt.
    */
-  ask(input: { contextBlock: string; userText: string }): Promise<CoachAnswer>;
+  ask(input: { contextBlock: string; turns: readonly CoachTurn[] }): Promise<CoachAnswer>;
 }
 
 export type PairOutcome =
@@ -115,6 +140,15 @@ export interface Store {
   }): Promise<void>;
   latestWeightKg(userId: string): Promise<number | null>;
   saveWeight(userId: string, localDate: string, kg: number): Promise<void>;
+  /**
+   * Pilihan makanan dari food database untuk `recommend_meal`. Inilah yang
+   * menjaga AD-1 di jalur rekomendasi: model memilih dari daftar ini, bukan
+   * menyebut makanan dari ingatannya lalu mengarang kalorinya.
+   */
+  findMealCandidates(input: {
+    maxKcal: number;
+    exclude: readonly string[];
+  }): Promise<readonly FoodCandidate[]>;
 }
 
 export interface LockManager {
@@ -417,73 +451,181 @@ async function catatMakanan(
   return { kind: 'logged', logId, items: items.length };
 }
 
+/**
+ * Batas putaran percakapan dengan model.
+ *
+ * Dua, dan angkanya bukan sembarang: putaran pertama model meminta data,
+ * putaran kedua ia menyusun kalimatnya. Lebih dari itu tidak menambah jawaban
+ * yang lebih baik — model yang belum juga menjawab setelah menerima datanya
+ * biasanya sedang berputar — tapi menambah biaya per pesan secara linear, dan
+ * pesan masuk adalah hal yang jumlahnya tidak kita kendalikan.
+ */
+const MAX_RONDE = 2;
+
+/** Tool yang menghentikan percakapan pada putaran itu juga. */
+function tebakTerminal(jawaban: CoachAnswer): CoachToolCall | null {
+  return (
+    jawaban.toolCalls.find((t) => t.name === 'escalate_concern') ??
+    jawaban.toolCalls.find((t) => t.name === 'log_food') ??
+    null
+  );
+}
+
+/**
+ * Menjalankan satu tool dan mengembalikan jawabannya untuk model.
+ *
+ * Semua isinya berasal dari engine atau food database. Kandidat yang ikut
+ * dikembalikan dipakai memperluas daftar kebenaran §6.4 — tanpa itu, model
+ * yang menyebut "ayam geprek ±342 kkal" dari daftar yang KITA berikan justru
+ * ditolak verifikasi, dan setiap rekomendasi jatuh ke template.
+ */
+async function jalankanTool(
+  sesi: Sesi,
+  call: CoachToolCall,
+): Promise<{ content: string; candidates: readonly FoodCandidate[] }> {
+  const { deps, ctx } = sesi;
+  const kosong: readonly FoodCandidate[] = [];
+
+  switch (call.name) {
+    case 'get_daily_status':
+      return { content: dailyStatusJson(ctx), candidates: kosong };
+
+    case 'get_progress':
+      return { content: progressJson(ctx), candidates: kosong };
+
+    case 'recommend_meal': {
+      const sisa = remaining(ctx);
+      const exclude = daftarString(call.arguments['exclude']);
+      const kandidat = await deps.store.findMealCandidates({
+        maxKcal: budgetKcalUntukSatuMakan(sisa.kcal),
+        exclude,
+      });
+      return { content: candidatesJson(kandidat), candidates: kandidat };
+    }
+
+    case 'lookup_food': {
+      const query = typeof call.arguments['query'] === 'string' ? call.arguments['query'] : '';
+      const hasil = query ? await deps.store.resolveFood(query) : [];
+      const kandidat = hasil
+        .map((r) =>
+          r.kind === 'resolved'
+            ? {
+                nameId: r.item.nameId,
+                portionLabel: r.item.portionLabel,
+                grams: r.item.grams,
+                kcal: r.item.nutrition.kcal,
+                proteinG: r.item.nutrition.proteinG,
+                carbsG: r.item.nutrition.carbsG,
+                fatG: r.item.nutrition.fatG,
+              }
+            : null,
+        )
+        .filter((c): c is FoodCandidate => c !== null);
+      return { content: candidatesJson(kandidat), candidates: kandidat };
+    }
+
+    default:
+      // `update_weight` sengaja masuk sini — alasannya di `coach/tools.ts`.
+      return { content: unsupportedToolJson(call.name), candidates: kosong };
+  }
+}
+
+function daftarString(raw: unknown): string[] {
+  return Array.isArray(raw) ? raw.filter((v): v is string => typeof v === 'string') : [];
+}
+
+/**
+ * Jalur pertanyaan bebas — satu-satunya tempat LLM menyusun kalimat.
+ *
+ * Bentuknya loop, bukan panggilan tunggal, karena `coach.v1` memerintahkan
+ * model memanggil tool untuk semua angka. Tanpa putaran kedua, model membalas
+ * permintaan tool dengan teks kosong dan setiap pertanyaan jatuh ke template —
+ * persis yang terjadi sebelum ini, dan persis bagian yang membuat produk ini
+ * berguna.
+ */
 async function jawabPertanyaan(sesi: Sesi, teks: string): Promise<MessageOutcome> {
   const { deps, job, userId, ctx, catatanMedis, balas } = sesi;
 
-  if (!deps.coach) {
-    // Tanpa provider AI, produk tetap menjawab — dengan angka engine dan satu
+  const mundur = async (alasan: string): Promise<MessageOutcome> => {
+    // Tanpa jawaban model, produk tetap menjawab — dengan angka engine dan satu
     // langkah berikutnya. Yang hilang cuma kalimatnya, bukan gunanya.
+    console.warn('[message.received] coach fallback:', alasan, hashWaId(job.waId));
     await balas(userId, catatanMedis + renderDeterministicTemplate(ctx));
     return { kind: 'answered', fallback: true };
-  }
+  };
 
-  let jawaban: CoachAnswer;
-  try {
-    jawaban = await deps.coach.ask({
-      contextBlock: buildUserContextBlock(ctx),
-      userText: teks,
-    });
-  } catch (err) {
-    // Provider mati bukan alasan pengguna tidak dijawab.
-    console.error('[message.received] coach gagal', hashWaId(job.waId), err);
-    await balas(userId, catatanMedis + renderDeterministicTemplate(ctx));
-    return { kind: 'answered', fallback: true };
-  }
+  if (!deps.coach) return mundur('provider belum dikonfigurasi');
 
-  // Guardrail lapis pertama: model sendiri yang mengangkat tangan.
-  const eskalasi = jawaban.toolCalls.find((t) => t.name === 'escalate_concern');
-  if (eskalasi) {
-    const severity = severityDari(eskalasi.arguments['severity']);
-    await balas(userId, concernReply(severity));
-    return { kind: 'concern', severity };
-  }
+  const contextBlock = buildUserContextBlock(ctx);
+  const turns: CoachTurn[] = [{ role: 'user', content: teks }];
+  const kandidatTerkumpul: FoodCandidate[] = [];
 
-  // Model menyimpulkan ini laporan makan, bukan pertanyaan. Yang dipakai hanya
-  // label makanannya; kalorinya tetap dari database (AD-1).
-  const logFood = jawaban.toolCalls.find((t) => t.name === 'log_food');
-  if (logFood) {
-    const labels = labelDariToolCall(logFood.arguments);
-    if (labels.length > 0) {
-      return catatMakanan(sesi, labels.join(', '), { bolehTanyaCoach: false });
+  for (let ronde = 1; ronde <= MAX_RONDE; ronde++) {
+    let jawaban: CoachAnswer;
+    try {
+      jawaban = await deps.coach.ask({ contextBlock, turns });
+    } catch (err) {
+      // Provider mati bukan alasan pengguna tidak dijawab.
+      console.error('[message.received] coach gagal', hashWaId(job.waId), err);
+      return mundur('provider melempar');
     }
-  }
 
-  // Balasan kosong bukan balasan. Ini bisa terjadi pada model penalar yang
-  // kehabisan token di tengah monolognya: setelah blok `<think>` dibuang,
-  // yang tersisa nol karakter. Tanpa penjagaan ini, pengguna menerima pesan
-  // kosong — dan verifikasi angka meloloskannya, karena teks tanpa angka
-  // memang tidak punya klaim untuk dicocokkan.
-  if (jawaban.text.trim().length === 0) {
-    console.warn('[message.received] coach balas kosong', hashWaId(job.waId));
-    await balas(userId, catatanMedis + renderDeterministicTemplate(ctx));
-    return { kind: 'answered', fallback: true };
-  }
+    // Guardrail lapis pertama: model sendiri yang mengangkat tangan.
+    const terminal = tebakTerminal(jawaban);
+    if (terminal?.name === 'escalate_concern') {
+      const severity = severityDari(terminal.arguments['severity']);
+      await balas(userId, concernReply(severity));
+      return { kind: 'concern', severity };
+    }
+    if (terminal?.name === 'log_food') {
+      // Model menyimpulkan ini laporan makan, bukan pertanyaan. Yang dipakai
+      // hanya label makanannya; kalorinya tetap dari database (AD-1).
+      const labels = labelDariToolCall(terminal.arguments);
+      if (labels.length > 0) {
+        return catatMakanan(sesi, labels.join(', '), { bolehTanyaCoach: false });
+      }
+    }
 
-  const verifikasi = verifyCoachNumbers(jawaban.text, truthFromContext(ctx));
-  if (!verifikasi.ok) {
-    // §6.4: fallback ke template deterministik, bukan retry. Mengulang ke model
-    // yang sama untuk masalah yang sama hanya membakar token.
-    console.warn(
-      '[message.received] coach.number_mismatch',
-      hashWaId(job.waId),
-      verifikasi.offending.map((o) => o.source),
+    const diminta = jawaban.toolCalls.filter(
+      (t) => t.name !== 'escalate_concern' && t.name !== 'log_food',
     );
-    await balas(userId, catatanMedis + renderDeterministicTemplate(ctx));
-    return { kind: 'answered', fallback: true };
+
+    if (diminta.length > 0 && ronde < MAX_RONDE) {
+      turns.push({ role: 'assistant', content: jawaban.text, toolCalls: diminta });
+      for (const call of diminta) {
+        const hasil = await jalankanTool(sesi, call);
+        kandidatTerkumpul.push(...hasil.candidates);
+        turns.push({ role: 'tool', toolCallId: call.id, content: hasil.content });
+      }
+      continue;
+    }
+
+    // Balasan kosong bukan balasan. Terjadi pada model penalar yang kehabisan
+    // token di tengah monolognya, dan pada putaran terakhir yang masih minta
+    // tool. Verifikasi angka meloloskannya begitu saja — teks tanpa angka
+    // memang tidak punya klaim untuk dicocokkan — jadi penjaganya terpisah.
+    if (jawaban.text.trim().length === 0) return mundur('balasan kosong');
+
+    const truth = truthWithCandidates(truthFromContext(ctx), kandidatTerkumpul);
+    const verifikasi = verifyCoachNumbers(jawaban.text, truth);
+    if (!verifikasi.ok) {
+      // §6.4: fallback ke template deterministik, bukan retry. Mengulang ke
+      // model yang sama untuk masalah yang sama hanya membakar token.
+      console.warn(
+        '[message.received] coach.number_mismatch',
+        hashWaId(job.waId),
+        verifikasi.offending.map((o) => o.source),
+      );
+      return mundur('angka tidak cocok');
+    }
+
+    // Pembersihan bentuk dilakukan SETELAH verifikasi, supaya yang diperiksa
+    // adalah teks apa adanya dari model.
+    await balas(userId, catatanMedis + toWhatsAppText(jawaban.text));
+    return { kind: 'answered', fallback: false };
   }
 
-  await balas(userId, catatanMedis + jawaban.text);
-  return { kind: 'answered', fallback: false };
+  return mundur('putaran habis');
 }
 
 /**

@@ -37,6 +37,18 @@ export {
 export type { LoggedItemView, PairFailure } from './reply';
 
 export { looksLikeQuestion } from './intent';
+
+export {
+  budgetKcalUntukSatuMakan,
+  candidatesJson,
+  dailyStatusJson,
+  progressJson,
+  truthWithCandidates,
+  unsupportedToolJson,
+} from './tools';
+export type { FoodCandidate } from './tools';
+
+export { toWhatsAppText } from './wa-text';
 export { parseWeightMessage } from './weight';
 
 export type { CoachContext, DailyTarget, DailyTotals, MealSlot, Remaining } from './types';

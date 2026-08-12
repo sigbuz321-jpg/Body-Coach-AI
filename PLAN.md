@@ -58,6 +58,41 @@ curl -s localhost:3000/api/dev/wa-simulator -H 'content-type: application/json' 
 handler webhooknya. Endpoint ini **404 di produksi** — ia menyuntik pesan atas
 nama nomor mana pun tanpa melewati Meta.
 
+## Deploy ke Vercel
+
+Belum ada `vercel.json` di repo, dan itu disengaja: pengaturannya bergantung
+pada **Root Directory** yang dipilih di dashboard, dan menebaknya menghasilkan
+build yang gagal dengan pesan yang menyesatkan.
+
+1. **Root Directory: `apps/web`.** Vercel mendeteksi Next.js sendiri; script
+   `build` di `apps/web/package.json` sudah memuat env dari root repo.
+2. **Environment variables** — salin dari `.env.local`, minus yang kosong.
+   Yang wajib ada supaya endpoint tidak diam-diam menolak semuanya:
+   `DATABASE_URL`, `REDIS_URL`, `REDIS_TOKEN`, `WA_APP_SECRET`,
+   `WA_WEBHOOK_VERIFY_TOKEN`, `WA_PHONE_NUMBER_ID`, `WA_ACCESS_TOKEN`,
+   `AI_PROVIDER_KEY`, `APP_URL` (isi dengan URL Vercel-nya), dan
+   `WORKER_DRAIN_SECRET`.
+3. **Webhook di Meta**: `https://<app>.vercel.app/api/webhooks/whatsapp`,
+   verify token = `WA_WEBHOOK_VERIFY_TOKEN`.
+4. **Penguras antrean.** Tanpa ini pesan masuk diproses nol kali dan tidak ada
+   balasan yang terkirim. Pilih salah satu:
+   - **Vercel Cron** — tambahkan `vercel.json` **di `apps/web/`** (bukan root,
+     karena Root Directory-nya `apps/web`):
+     ```json
+     { "crons": [{ "path": "/api/worker/drain", "schedule": "* * * * *" }] }
+     ```
+     Set juga env `CRON_SECRET`; endpointnya sudah menerima nama itu karena
+     Vercel mengirim `Authorization: Bearer $CRON_SECRET` dan nama variabelnya
+     tidak bisa diganti. **Paket Hobby hanya mengizinkan cron harian** — kalau
+     masih Hobby, `* * * * *` akan ditolak saat deploy.
+   - **Penjadwal luar** (cron-job.org, UptimeRobot) memanggil
+     `GET /api/worker/drain` dengan header
+     `Authorization: Bearer $WORKER_DRAIN_SECRET`.
+   - **Manual** saat mencoba: `curl` endpoint yang sama.
+
+Simulator (`/api/dev/wa-simulator`) **404 di produksi** dan itu disengaja — ia
+menyuntik pesan atas nama nomor mana pun tanpa melewati Meta.
+
 ## Cara menjalankan proyek ini
 
 ```
@@ -118,7 +153,8 @@ Teks M0–M2 di bawah sengaja dibiarkan apa adanya sebagai catatan rencana awal.
 Ditambahkan di M5:
 
 - [ ] **`WA_ACCESS_TOKEN` sudah kedaluwarsa.** Graph API membalas 401 `OAuthException 190/463`: _"Session has expired on Monday, 10-Aug-26"_. Itu token sementara 24 jam dari halaman Getting Started. Yang dibutuhkan adalah **System User token permanen** (Business Settings → Users → System Users → Generate token, pilih aplikasi dan izin `whatsapp_business_messaging` + `whatsapp_business_management`). Sampai diganti, worker bisa memproses pesan tapi **tidak satu balasan pun terkirim**.
-- [ ] **Coach tidak pernah menyelesaikan jawabannya — belum ada loop tool.** Diverifikasi 13 Agustus dengan kredit MiniMax yang sudah terisi: untuk "malam ini enaknya makan apa ya?", model **selalu** membalas dengan tool call (`get_daily_status` + `recommend_meal`) dan teks kosong, persis seperti yang diperintahkan `coach.v1`. Worker hanya mengeksekusi `escalate_concern` dan `log_food`, jadi sisanya jatuh ke template deterministik. Akibatnya jalur coach **selalu** fallback. Ini menyentuh langsung hal yang dijual produk ini ("AI tahu apa yang harus kamu lakukan berikutnya"), jadi seharusnya jadi pekerjaan pertama setelah M5. Yang perlu diputuskan sekaligus: tool mana yang dieksekusi, berapa putaran maksimum, dan bagaimana angka hasil tool masuk ke daftar kebenaran §6.4 — `recommend_meal` khususnya menuntut kandidat makanan datang dari food database, bukan dari ingatan model, kalau AD-1 mau tetap utuh.
+- [x] ~~**Coach tidak pernah menyelesaikan jawabannya — belum ada loop tool.**~~ **Selesai 13 Agustus** (`loop tool`). Dua putaran: model minta data, worker menjalankan tool, model menyusun kalimatnya. `recommend_meal` mengambil kandidat dari food database (`findMealCandidates`), dan angka kandidat itu masuk ke daftar kebenaran §6.4 — tanpa itu, model yang menyebut angka dari daftar yang **kita** berikan justru ditolak verifikasinya sendiri. `update_weight` sengaja **tidak** dieksekusi: berat adalah masukan rekalibrasi target, dan membiarkan model menetapkannya dari hasil bacaannya sendiri berarti "sekitar 70 ribuan" bisa jadi berat 70 kg.
+- [ ] **Verifikasi angka menolak sekitar sepertiga balasan coach.** Diukur pada tiga pertanyaan nyata, dua kali jalan: yang lolos konsisten adalah pertanyaan status dan progres; yang jatuh adalah balasan ketika model **menjumlahkan sendiri** ("nasi 250g + ayam 200g + tempe = ±900 kkal") atau menambah makanan di luar daftar kandidat. Gerbangnya bekerja persis seperti seharusnya — pengguna dapat template yang benar, bukan angka karangan — tapi angka jatuhnya masih terlalu tinggi untuk fitur yang paling dijual. Dua arah yang belum dicoba: menyediakan tool penjumlah porsi supaya model tidak perlu berhitung, dan menaikkan cakupan `recommend_meal` ke kombinasi hidangan, bukan hidangan tunggal.
 - [ ] **`embo-01` menolak dengan `1002 rate limit exceeded (RPM)` terus-menerus.** Empat percobaan berjarak 20 detik, semuanya ditolak, padahal `chat` di akun dan kunci yang sama jalan normal. Jadi ini bukan burst — kemungkinan model embedding-nya belum aktif untuk akun ini atau namanya berbeda di platform internasional. **Memblokir tahap 3 food resolver (M6).** Bentuk requestnya sendiri sudah diperbaiki (`texts`, bukan `input`).
 - [ ] **Belum ada `vercel.json` dengan cron ke `/api/worker/drain`.** Tanpa itu antrean tidak pernah dikuras di produksi dan tidak ada balasan yang terkirim. Latensi balasan = jeda cron; Vercel Hobby hanya mengizinkan cron harian, jadi ini juga keputusan paket. Untuk sekarang endpointnya bisa dipanggil manual dengan `Authorization: Bearer $WORKER_DRAIN_SECRET`.
 - [ ] **Batas Free belum ditegakkan.** `LIMITS.free.foodLogsPerDay = 3` (§9) belum diperiksa di mana pun; `countLogsOnDate` sudah ada tapi belum dipanggil. Pengguna Free saat ini mencatat tanpa batas.

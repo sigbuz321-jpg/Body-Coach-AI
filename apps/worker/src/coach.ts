@@ -1,6 +1,11 @@
-import { buildCoachSystemPrompt, COACH_TOOLS, getAiProvider } from '@bodycoach/ai';
+import {
+  buildCoachSystemPrompt,
+  COACH_TOOLS,
+  getAiProvider,
+  type ChatMessage,
+} from '@bodycoach/ai';
 
-import type { CoachAnswer, CoachRunner } from './functions/message-received';
+import type { CoachAnswer, CoachRunner, CoachTurn } from './functions/message-received';
 
 /**
  * `CoachRunner` nyata di atas provider aktif.
@@ -10,26 +15,41 @@ import type { CoachAnswer, CoachRunner } from './functions/message-received';
  * balasan lama harus tetap bisa dijelaskan oleh versi prompt yang
  * menghasilkannya.
  *
- * Satu putaran, bukan loop tool. Tool yang benar-benar dieksekusi worker hanya
- * `log_food` dan `escalate_concern`, dan keduanya menghentikan percakapan pada
- * putaran itu juga. Tool sisanya (`get_daily_status`, `lookup_food`, …) baru
- * masuk akal setelah ada loop, dan loop tanpa batas biaya adalah cara tercepat
- * membakar kuota — itu urusan M6.
+ * Tanpa status: setiap panggilan membawa seluruh giliran percakapan yang
+ * relevan. Yang menyimpan dan membatasi giliran adalah pemanggil
+ * (`jawabPertanyaan`), bukan file ini, supaya batas putaran dan batas biaya
+ * hidup di satu tempat bersama keputusan lainnya.
  */
 
-/** Balasan WhatsApp pendek. Batas ini juga menahan biaya per pesan. */
-const MAX_TOKENS = 400;
+/**
+ * Balasan WhatsApp pendek — tapi `MiniMax-M3` adalah model penalar dan
+ * monolognya ikut menghabiskan jatah ini. Diverifikasi 13 Agustus: dengan 400,
+ * satu putaran habis 151–184 token dan balasan sering terpotong sebelum
+ * kalimatnya keluar. 1.024 memberi ruang untuk berpikir lalu menjawab, dan
+ * tetap jauh di bawah batas panjang pesan WhatsApp.
+ */
+const MAX_TOKENS = 1024;
 
 /** Cukup variasi untuk terdengar manusiawi, tidak cukup untuk mengarang. */
 const TEMPERATURE = 0.6;
 
+function toChatMessage(turn: CoachTurn): ChatMessage {
+  if (turn.role === 'tool') {
+    return { role: 'tool', content: turn.content, toolCallId: turn.toolCallId ?? '' };
+  }
+  if (turn.role === 'assistant' && turn.toolCalls && turn.toolCalls.length > 0) {
+    return { role: 'assistant', content: turn.content, toolCalls: turn.toolCalls };
+  }
+  return { role: turn.role, content: turn.content };
+}
+
 export function createCoachRunner(): CoachRunner {
   return {
-    async ask({ contextBlock, userText }): Promise<CoachAnswer> {
+    async ask({ contextBlock, turns }): Promise<CoachAnswer> {
       const res = await getAiProvider().chat({
         messages: [
           { role: 'system', content: buildCoachSystemPrompt(contextBlock) },
-          { role: 'user', content: userText },
+          ...turns.map(toChatMessage),
         ],
         tools: COACH_TOOLS,
         maxTokens: MAX_TOKENS,
@@ -38,7 +58,13 @@ export function createCoachRunner(): CoachRunner {
 
       return {
         text: res.text.trim(),
-        toolCalls: res.toolCalls.map((t) => ({ name: t.name, arguments: t.arguments })),
+        // `id` dibawa apa adanya: putaran berikutnya harus menautkan hasil tool
+        // ke permintaan aslinya, dan id itu milik vendor.
+        toolCalls: res.toolCalls.map((t) => ({
+          id: t.id,
+          name: t.name,
+          arguments: t.arguments,
+        })),
       };
     },
   };

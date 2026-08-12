@@ -1,9 +1,10 @@
-import { shiftDate, type CoachContext } from '@bodycoach/core';
+import { nutritionForGrams, shiftDate, type CoachContext } from '@bodycoach/core';
 import {
   addFoodLogItems,
   consumeLinkToken,
   countLoggedDays,
   createFoodLog,
+  findMealCandidates,
   getDailyTotals,
   getLatestWeight,
   getPool,
@@ -173,6 +174,33 @@ export function createStore(): Store {
 
     async saveWeight(userId, localDate, kg) {
       await upsertWeight(getPool(), userId, localDate, kg);
+    },
+
+    async findMealCandidates(input) {
+      const rows = await findMealCandidates(getPool(), {
+        maxKcal: input.maxKcal,
+        excludeTerms: input.exclude,
+      });
+      return rows.map((r) => {
+        const grams = Number(r.portion_grams);
+        return {
+          nameId: r.name_id,
+          portionLabel: r.portion_label,
+          grams,
+          // Konversi per-100g ke porsi lewat satu-satunya tempat yang boleh
+          // melakukannya, supaya angka rekomendasi identik dengan angka yang
+          // muncul kalau makanan yang sama dicatat.
+          ...nutritionForGrams(
+            {
+              kcal: Number(r.kcal_per_100g),
+              proteinG: Number(r.protein_per_100g),
+              carbsG: Number(r.carbs_per_100g),
+              fatG: Number(r.fat_per_100g),
+            },
+            grams,
+          ),
+        };
+      });
     },
   };
 }

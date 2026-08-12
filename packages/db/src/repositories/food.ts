@@ -61,6 +61,61 @@ export async function searchByTrigram(
   return rows;
 }
 
+export interface MealCandidateRow {
+  name_id: string;
+  portion_label: string;
+  portion_grams: string;
+  kcal_per_100g: string;
+  protein_per_100g: string;
+  carbs_per_100g: string;
+  fat_per_100g: string;
+}
+
+/**
+ * Kandidat makanan untuk `recommend_meal` (§6.2).
+ *
+ * Ini yang menjaga AD-1 di jalur rekomendasi: model tidak menyebut makanan
+ * dari ingatannya lalu mengarang kalorinya, ia memilih dari daftar ini —
+ * daftar yang seluruh angkanya berasal dari food database dan sudah dihitung
+ * untuk porsi defaultnya.
+ *
+ * Diurutkan dari protein per porsi tertinggi. Protein adalah makro yang paling
+ * sering tertinggal, baik saat bulk maupun cut, jadi mendahulukannya membuat
+ * saran pertama hampir selalu saran yang berguna.
+ *
+ * `excludeTerms` dicocokkan ke nama makanan apa adanya. Batasan yang perlu
+ * jujur diakui: skema belum punya penanda halal/pork/seafood (§3), jadi
+ * preferensi seperti "no_pork" tidak bisa ditegakkan di sini — hanya disaring
+ * lewat kata di namanya. Penandanya harus masuk skema sebelum preferensi
+ * makanan boleh diklaim benar-benar dihormati.
+ */
+export async function findMealCandidates(
+  db: Q,
+  opts: { maxKcal: number; excludeTerms?: readonly string[]; limit?: number },
+): Promise<MealCandidateRow[]> {
+  const excludes = (opts.excludeTerms ?? [])
+    .filter((t) => t.trim().length > 0)
+    .map((t) => `%${t}%`);
+
+  const { rows } = await db.query<MealCandidateRow>(
+    `SELECT fi.name_id,
+            fp.label AS portion_label,
+            fp.grams AS portion_grams,
+            fi.kcal_per_100g,
+            fi.protein_per_100g,
+            fi.carbs_per_100g,
+            fi.fat_per_100g
+       FROM food_items fi
+       JOIN food_portions fp ON fp.food_item_id = fi.id AND fp.is_default
+      WHERE fi.kcal_per_100g * fp.grams / 100 <= $1
+        AND ($2::text[] = '{}' OR NOT (fi.name_id ILIKE ANY($2::text[])))
+      ORDER BY fi.protein_per_100g * fp.grams / 100 DESC
+      LIMIT $3`,
+    [opts.maxKcal, excludes, opts.limit ?? 8],
+  );
+  return rows;
+}
+
 export async function getPortions(db: Q, foodItemId: string): Promise<FoodPortionRow[]> {
   const { rows } = await db.query<FoodPortionRow>(
     `SELECT * FROM food_portions

@@ -16,6 +16,7 @@ import {
 } from './reply';
 import { truthFromContext } from './numbers';
 import type { CoachContext } from './types';
+import { toWhatsAppText } from './wa-text';
 import { parseWeightMessage } from './weight';
 
 function ctx(over: Partial<CoachContext> = {}): CoachContext {
@@ -240,6 +241,38 @@ describe('parseWeightMessage', () => {
   it('menolak angka di luar batas constraint weight_entries', () => {
     expect(parseWeightMessage('berat gue 12 kg')).toBeNull();
     expect(parseWeightMessage('berat gue 900 kg')).toBeNull();
+  });
+});
+
+describe('toWhatsAppText', () => {
+  /**
+   * WhatsApp bukan Markdown. Model tetap memakainya — contoh di bawah diambil
+   * apa adanya dari balasan nyata pada uji live 13 Agustus 2026.
+   */
+  it('mengubah tebal ganda jadi tebal WhatsApp', () => {
+    expect(toWhatsAppText('**Saran malam ini:** ayam bakar')).toBe('*Saran malam ini:* ayam bakar');
+  });
+
+  it('tidak menyatukan dua pasang tebal jadi satu', () => {
+    expect(toWhatsAppText('**Ayam bakar** dan **Nasi putih**')).toBe(
+      '*Ayam bakar* dan *Nasi putih*',
+    );
+  });
+
+  it('menurunkan judul Markdown jadi baris tebal', () => {
+    expect(toWhatsAppText('### Saran\nayam bakar')).toBe('*Saran*\nayam bakar');
+  });
+
+  it('menyeragamkan penanda daftar', () => {
+    expect(toWhatsAppText('- ayam bakar\n- nasi putih')).toBe('• ayam bakar\n• nasi putih');
+  });
+
+  it('membiarkan tebal WhatsApp yang sudah benar', () => {
+    expect(toWhatsAppText('*Protein* lo kurang 42g.')).toBe('*Protein* lo kurang 42g.');
+  });
+
+  it('tidak menyentuh angka', () => {
+    expect(toWhatsAppText('**±283 kkal** sisa')).toContain('±283 kkal');
   });
 });
 

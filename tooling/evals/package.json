@@ -1,0 +1,19 @@
+{
+  "name": "@bodycoach/evals",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "evals": "node --env-file-if-exists=../../.env.local --import tsx ./src/food-matching/run.ts"
+  },
+  "dependencies": {
+    "@bodycoach/core": "workspace:*",
+    "@bodycoach/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

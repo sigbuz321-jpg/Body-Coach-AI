@@ -24,6 +24,16 @@ const STOPWORDS = new Set([
   'makan',
   'minum',
   'makanan',
+  // Kata kerja ngemil. Tanpa ini "tadi ngemil cireng" menyisakan "ngemil
+  // cireng" sebagai kueri, dan trigram terhadap "cireng" jatuh di bawah ambang
+  // — camilan justru jenis yang paling sering tidak tercatat.
+  'ngemil',
+  'nyemil',
+  'cemilan',
+  'camilan',
+  'ngunyah',
+  'jajan',
+  'nyicip',
   'sarapan',
   'siang',
   'malam',
@@ -63,6 +73,12 @@ const SLANG: readonly (readonly [RegExp, string])[] = [
   [/\bnasi gor\b/g, 'nasi goreng'],
   [/\bgeprek\b/g, 'ayam geprek'],
   [/\bayam ayam geprek\b/g, 'ayam geprek'],
+  // Yang berkata dua HARUS didahulukan. "indomie rebus" adalah alias sah untuk
+  // mie instan kuah, tapi aturan `indomie` polos di bawah mengubahnya lebih
+  // dulu menjadi "mie instan goreng rebus" — dan pengguna yang makan mie kuah
+  // dicatat makan mie goreng, dua makanan dengan lemak yang jauh berbeda.
+  [/\bindomie?\s+(rebus|kuah)\b/g, 'mie instan kuah'],
+  [/\bmie\s+rebus\b/g, 'mie instan kuah'],
   [/\bindomie\b/g, 'mie instan goreng'],
   [/\bindomi\b/g, 'mie instan goreng'],
   [/\bmigor\b/g, 'mie instan goreng'],

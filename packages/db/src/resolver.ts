@@ -50,6 +50,34 @@ export type FoodResolution =
 const TRIGRAM_ACCEPT = 0.6;
 const TRIGRAM_FLOOR = 0.45;
 
+/**
+ * Tingkat kedua: cocok yang meyakinkan **secara relatif**.
+ *
+ * [DEVIASI §5] §5 hanya mengenal satu ambang, 0,6. Diukur terhadap database
+ * nyata, ambang itu menolak salah ketik satu huruf yang sebenarnya tidak
+ * ambigu sama sekali: `capcai`→Capcay 0,556 · `risols`→Risoles 0,594 ·
+ * `lontng`→Lontong 0,500 · `bubur ayem`→Bubur ayam 0,571. Semuanya kandidat
+ * teratas, sebagian tanpa pesaing sama sekali.
+ *
+ * Sebabnya panjang string: similarity trigram turun tajam untuk kata pendek
+ * karena jumlah trigramnya sedikit, jadi satu huruf salah memakan porsi yang
+ * jauh lebih besar. Menurunkan ambang tunggal ke 0,5 akan mengobati itu tapi
+ * juga melonggarkan kueri panjang yang justru harus ketat.
+ *
+ * Jadi yang dipakai bukan ambang lebih rendah, melainkan syarat berbeda:
+ * di rentang 0,50–0,60, kecocokan diterima hanya kalau ia **unggul jelas** atas
+ * kandidat kedua. Pertanyaannya bergeser dari "seberapa mirip" menjadi
+ * "seberapa menentukan" — dan itu pertanyaan yang benar, karena yang berbahaya
+ * bukan kemiripan rendah melainkan dua kandidat yang sama-sama mungkin.
+ *
+ * Hasilnya diberi confidence di bawah `NEEDS_CHECK_BELOW` (0,75), jadi selalu
+ * ditandai "perlu dicek" ke pengguna. Ini tebakan yang diakui sebagai tebakan.
+ */
+const TRIGRAM_NEAR = 0.5;
+
+/** Jarak minimum ke kandidat kedua supaya kecocokan tingkat dua diterima. */
+const TRIGRAM_MARGIN = 0.08;
+
 function clamp(v: number, lo: number, hi: number): number {
   return Math.min(hi, Math.max(lo, v));
 }
@@ -79,7 +107,17 @@ async function resolveOne(db: Q, rawLabel: string): Promise<FoodResolution> {
   const alias = await findByAlias(db, norm.query);
   const trigram = alias ? [] : await searchByTrigram(db, norm.query, { threshold: TRIGRAM_FLOOR });
 
-  const hit = alias ?? (trigram[0] && trigram[0].similarity >= TRIGRAM_ACCEPT ? trigram[0] : null);
+  const teratas = trigram[0];
+  const kedua = trigram[1];
+  const meyakinkan = teratas !== undefined && teratas.similarity >= TRIGRAM_ACCEPT;
+  // Unggul jelas: tanpa pesaing, atau jaraknya cukup lebar. Tanpa syarat ini,
+  // dua makanan yang sama-sama mungkin akan diputuskan oleh selisih 0,01.
+  const menentukan =
+    teratas !== undefined &&
+    teratas.similarity >= TRIGRAM_NEAR &&
+    teratas.similarity - (kedua?.similarity ?? 0) >= TRIGRAM_MARGIN;
+
+  const hit = alias ?? (meyakinkan || menentukan ? teratas : null);
 
   if (!hit) {
     return {
@@ -93,7 +131,13 @@ async function resolveOne(db: Q, rawLabel: string): Promise<FoodResolution> {
   }
 
   const stage: MatchStage = alias ? 'alias' : 'trigram';
-  const confidence = alias ? 1 : clamp(trigram[0]?.similarity ?? 0, 0.7, 0.9);
+  // Kecocokan tingkat dua tidak pernah mencapai 0,75, jadi selalu sampai ke
+  // pengguna dengan tanda "perlu dicek". Yang meyakinkan memakai rentang §5.
+  const confidence = alias
+    ? 1
+    : meyakinkan
+      ? clamp(teratas?.similarity ?? 0, 0.7, 0.9)
+      : clamp(teratas?.similarity ?? 0, 0.5, 0.7);
 
   const portion = await getDefaultPortion(db, hit.id);
   // Tanpa porsi default, 100 g adalah satu-satunya asumsi yang jujur: itulah

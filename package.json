@@ -9,6 +9,7 @@
   "scripts": {
     "db:migrate": "pnpm --filter @bodycoach/db db:migrate",
     "db:seed": "pnpm --filter @bodycoach/db db:seed",
+    "evals": "pnpm --filter @bodycoach/evals evals",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",

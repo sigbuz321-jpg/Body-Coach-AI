@@ -2,6 +2,29 @@ import { describe, expect, it } from 'vitest';
 
 import { normalizeFoodQuery, splitFoodItems } from './normalize';
 
+describe('normalisasi yang ditemukan lewat eval', () => {
+  it('"indomie rebus" tidak berubah jadi mie goreng', () => {
+    // Aturan `indomie` polos dulu menang lebih awal dan menghasilkan "mie
+    // instan goreng rebus": pengguna yang makan mie kuah dicatat makan mie
+    // goreng, dua makanan dengan lemak yang jauh berbeda.
+    expect(normalizeFoodQuery('indomie rebus').query).toBe('mie instan kuah');
+    expect(normalizeFoodQuery('indomie kuah').query).toBe('mie instan kuah');
+    expect(normalizeFoodQuery('mie rebus').query).toBe('mie instan kuah');
+  });
+
+  it('"indomie" polos tetap mie goreng', () => {
+    expect(normalizeFoodQuery('indomie').query).toBe('mie instan goreng');
+    expect(normalizeFoodQuery('sebungkus indomie').query).toBe('mie instan goreng');
+  });
+
+  it('membuang kata kerja ngemil', () => {
+    // "tadi ngemil cireng" dulu menyisakan "ngemil cireng" dan trigramnya
+    // jatuh di bawah ambang — camilan justru paling sering tidak tercatat.
+    expect(normalizeFoodQuery('tadi ngemil cireng').query).toBe('cireng');
+    expect(normalizeFoodQuery('nyemil pisang goreng').query).toBe('pisang goreng');
+  });
+});
+
 describe('normalizeFoodQuery', () => {
   it('membuang stopword percakapan', () => {
     expect(normalizeFoodQuery('tadi gue makan nasi padang').query).toBe('nasi padang');

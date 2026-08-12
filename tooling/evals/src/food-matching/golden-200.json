@@ -1,0 +1,498 @@
+{
+  "versi": 1,
+  "catatan": [
+    "Golden set food matching (DoD M6: akurasi top-1 >= 85%).",
+    "`expect` adalah name_id kanonik yang seharusnya keluar, TIDAK berurutan —",
+    "yang dinilai himpunannya, karena urutan item dalam satu kalimat bukan janji",
+    "produk. `expect: []` berarti kalimatnya memang TIDAK boleh menghasilkan",
+    "catatan makanan apa pun; itu sama pentingnya dengan yang cocok, karena",
+    "resolver yang menebak menghasilkan kalori yang tidak pernah dimakan.",
+    "",
+    "Ditulis sebagai perilaku yang DIINGINKAN, bukan cerminan implementasi saat",
+    "ini. Kalau ada yang gagal, yang diperbaiki normalisasinya — bukan barisnya."
+  ],
+  "cases": [
+    { "id": 1, "kategori": "nama-polos", "text": "nasi putih", "expect": ["Nasi putih"] },
+    { "id": 2, "kategori": "nama-polos", "text": "nasi goreng", "expect": ["Nasi goreng"] },
+    { "id": 3, "kategori": "nama-polos", "text": "nasi uduk", "expect": ["Nasi uduk"] },
+    { "id": 4, "kategori": "nama-polos", "text": "nasi kuning", "expect": ["Nasi kuning"] },
+    { "id": 5, "kategori": "nama-polos", "text": "nasi padang", "expect": ["Nasi Padang"] },
+    { "id": 6, "kategori": "nama-polos", "text": "lontong", "expect": ["Lontong"] },
+    { "id": 7, "kategori": "nama-polos", "text": "bubur ayam", "expect": ["Bubur ayam"] },
+    { "id": 8, "kategori": "nama-polos", "text": "ayam goreng", "expect": ["Ayam goreng"] },
+    { "id": 9, "kategori": "nama-polos", "text": "ayam geprek", "expect": ["Ayam geprek"] },
+    { "id": 10, "kategori": "nama-polos", "text": "ayam bakar", "expect": ["Ayam bakar"] },
+    { "id": 11, "kategori": "nama-polos", "text": "ayam pop", "expect": ["Ayam pop"] },
+    { "id": 12, "kategori": "nama-polos", "text": "rendang", "expect": ["Rendang daging sapi"] },
+    { "id": 13, "kategori": "nama-polos", "text": "dendeng balado", "expect": ["Dendeng balado"] },
+    { "id": 14, "kategori": "nama-polos", "text": "telur dadar", "expect": ["Telur dadar"] },
+    { "id": 15, "kategori": "nama-polos", "text": "telur ceplok", "expect": ["Telur ceplok"] },
+    { "id": 16, "kategori": "nama-polos", "text": "telur rebus", "expect": ["Telur rebus"] },
+    { "id": 17, "kategori": "nama-polos", "text": "telur balado", "expect": ["Telur balado"] },
+    { "id": 18, "kategori": "nama-polos", "text": "lele goreng", "expect": ["Ikan lele goreng"] },
+    {
+      "id": 19,
+      "kategori": "nama-polos",
+      "text": "ikan kembung",
+      "expect": ["Ikan kembung goreng"]
+    },
+    { "id": 20, "kategori": "nama-polos", "text": "sate ayam", "expect": ["Sate ayam"] },
+    { "id": 21, "kategori": "nama-polos", "text": "sate kambing", "expect": ["Sate kambing"] },
+    { "id": 22, "kategori": "nama-polos", "text": "tempe goreng", "expect": ["Tempe goreng"] },
+    { "id": 23, "kategori": "nama-polos", "text": "tahu goreng", "expect": ["Tahu goreng"] },
+    { "id": 24, "kategori": "nama-polos", "text": "bakwan", "expect": ["Bakwan sayur"] },
+    { "id": 25, "kategori": "nama-polos", "text": "tahu isi", "expect": ["Tahu isi"] },
+    { "id": 26, "kategori": "nama-polos", "text": "pisang goreng", "expect": ["Pisang goreng"] },
+    { "id": 27, "kategori": "nama-polos", "text": "risoles", "expect": ["Risoles"] },
+    { "id": 28, "kategori": "nama-polos", "text": "cireng", "expect": ["Cireng"] },
+    { "id": 29, "kategori": "nama-polos", "text": "mie ayam", "expect": ["Mie ayam"] },
+    {
+      "id": 30,
+      "kategori": "nama-polos",
+      "text": "mie instan goreng",
+      "expect": ["Mie instan goreng"]
+    },
+    {
+      "id": 31,
+      "kategori": "nama-polos",
+      "text": "mie instan kuah",
+      "expect": ["Mie instan kuah"]
+    },
+    {
+      "id": 32,
+      "kategori": "nama-polos",
+      "text": "kwetiau goreng",
+      "expect": ["Kwetiau goreng"]
+    },
+    { "id": 33, "kategori": "nama-polos", "text": "bakso", "expect": ["Bakso"] },
+    { "id": 34, "kategori": "nama-polos", "text": "soto ayam", "expect": ["Soto ayam"] },
+    { "id": 35, "kategori": "nama-polos", "text": "rawon", "expect": ["Rawon"] },
+    { "id": 36, "kategori": "nama-polos", "text": "sayur sop", "expect": ["Sayur sop"] },
+    { "id": 37, "kategori": "nama-polos", "text": "gulai ayam", "expect": ["Gulai ayam"] },
+    { "id": 38, "kategori": "nama-polos", "text": "gado-gado", "expect": ["Gado-gado"] },
+    { "id": 39, "kategori": "nama-polos", "text": "capcay", "expect": ["Capcay"] },
+    { "id": 40, "kategori": "nama-polos", "text": "tumis kangkung", "expect": ["Tumis kangkung"] },
+
+    { "id": 41, "kategori": "alias", "text": "urap", "expect": ["Urap"] },
+    { "id": 42, "kategori": "alias", "text": "sayur asem", "expect": ["Sayur asem"] },
+    { "id": 43, "kategori": "alias", "text": "es teh manis", "expect": ["Es teh manis"] },
+    { "id": 44, "kategori": "alias", "text": "es kopi susu", "expect": ["Es kopi susu"] },
+    { "id": 45, "kategori": "alias", "text": "teh tawar", "expect": ["Teh tawar"] },
+    { "id": 46, "kategori": "alias", "text": "jus alpukat", "expect": ["Jus alpukat"] },
+    { "id": 47, "kategori": "alias", "text": "susu uht", "expect": ["Susu UHT full cream"] },
+    { "id": 48, "kategori": "alias", "text": "martabak manis", "expect": ["Martabak manis"] },
+    { "id": 49, "kategori": "alias", "text": "martabak telur", "expect": ["Martabak telur"] },
+    { "id": 50, "kategori": "alias", "text": "keripik singkong", "expect": ["Keripik singkong"] },
+    { "id": 51, "kategori": "alias", "text": "ayam penyet", "expect": ["Ayam geprek"] },
+    { "id": 52, "kategori": "alias", "text": "ayam kremes", "expect": ["Ayam goreng"] },
+    { "id": 53, "kategori": "alias", "text": "baso", "expect": ["Bakso"] },
+    { "id": 54, "kategori": "alias", "text": "soto", "expect": ["Soto ayam"] },
+    { "id": 55, "kategori": "alias", "text": "sate", "expect": ["Sate ayam"] },
+    { "id": 56, "kategori": "alias", "text": "tempe", "expect": ["Tempe goreng"] },
+    { "id": 57, "kategori": "alias", "text": "tahu", "expect": ["Tahu goreng"] },
+    { "id": 58, "kategori": "alias", "text": "kangkung", "expect": ["Tumis kangkung"] },
+    { "id": 59, "kategori": "alias", "text": "lotek", "expect": ["Gado-gado"] },
+    { "id": 60, "kategori": "alias", "text": "terang bulan", "expect": ["Martabak manis"] },
+
+    { "id": 61, "kategori": "slang", "text": "nasgor", "expect": ["Nasi goreng"] },
+    { "id": 62, "kategori": "slang", "text": "geprek", "expect": ["Ayam geprek"] },
+    { "id": 63, "kategori": "slang", "text": "indomie", "expect": ["Mie instan goreng"] },
+    { "id": 64, "kategori": "slang", "text": "indomie goreng", "expect": ["Mie instan goreng"] },
+    { "id": 65, "kategori": "slang", "text": "indomie rebus", "expect": ["Mie instan kuah"] },
+    { "id": 66, "kategori": "slang", "text": "mie goreng instan", "expect": ["Mie instan goreng"] },
+    { "id": 67, "kategori": "slang", "text": "pisgor", "expect": ["Pisang goreng"] },
+    { "id": 68, "kategori": "slang", "text": "kopsu", "expect": ["Es kopi susu"] },
+    { "id": 69, "kategori": "slang", "text": "kopi susu", "expect": ["Es kopi susu"] },
+    { "id": 70, "kategori": "slang", "text": "sego kuning", "expect": ["Nasi kuning"] },
+    { "id": 71, "kategori": "slang", "text": "uduk", "expect": ["Nasi uduk"] },
+    { "id": 72, "kategori": "slang", "text": "nasi pdg", "expect": ["Nasi Padang"] },
+    { "id": 73, "kategori": "slang", "text": "telor dadar", "expect": ["Telur dadar"] },
+    { "id": 74, "kategori": "slang", "text": "telor ceplok", "expect": ["Telur ceplok"] },
+    { "id": 75, "kategori": "slang", "text": "telor rebus", "expect": ["Telur rebus"] },
+    { "id": 76, "kategori": "slang", "text": "martabak telor", "expect": ["Martabak telur"] },
+    { "id": 77, "kategori": "slang", "text": "mi ayam", "expect": ["Mie ayam"] },
+    { "id": 78, "kategori": "slang", "text": "kwetiaw", "expect": ["Kwetiau goreng"] },
+    { "id": 79, "kategori": "slang", "text": "bala-bala", "expect": ["Bakwan sayur"] },
+    { "id": 80, "kategori": "slang", "text": "risol", "expect": ["Risoles"] },
+
+    {
+      "id": 81,
+      "kategori": "kalimat",
+      "text": "tadi gue makan nasi goreng",
+      "expect": ["Nasi goreng"]
+    },
+    {
+      "id": 82,
+      "kategori": "kalimat",
+      "text": "barusan makan ayam geprek",
+      "expect": ["Ayam geprek"]
+    },
+    {
+      "id": 83,
+      "kategori": "kalimat",
+      "text": "gue udah makan nasi padang",
+      "expect": ["Nasi Padang"]
+    },
+    { "id": 84, "kategori": "kalimat", "text": "aku sarapan bubur ayam", "expect": ["Bubur ayam"] },
+    {
+      "id": 85,
+      "kategori": "kalimat",
+      "text": "siang tadi makan soto ayam",
+      "expect": ["Soto ayam"]
+    },
+    { "id": 86, "kategori": "kalimat", "text": "malam ini makan rawon", "expect": ["Rawon"] },
+    {
+      "id": 87,
+      "kategori": "kalimat",
+      "text": "saya makan tempe goreng",
+      "expect": ["Tempe goreng"]
+    },
+    { "id": 88, "kategori": "kalimat", "text": "abis makan bakso", "expect": ["Bakso"] },
+    { "id": 89, "kategori": "kalimat", "text": "udah makan mie ayam", "expect": ["Mie ayam"] },
+    {
+      "id": 90,
+      "kategori": "kalimat",
+      "text": "tadi minum es teh manis",
+      "expect": ["Es teh manis"]
+    },
+    { "id": 91, "kategori": "kalimat", "text": "gue minum kopi susu", "expect": ["Es kopi susu"] },
+    {
+      "id": 92,
+      "kategori": "kalimat",
+      "text": "barusan minum jus alpukat",
+      "expect": ["Jus alpukat"]
+    },
+    { "id": 93, "kategori": "kalimat", "text": "makan sate ayam nih", "expect": ["Sate ayam"] },
+    { "id": 94, "kategori": "kalimat", "text": "sarapan nasi uduk", "expect": ["Nasi uduk"] },
+    {
+      "id": 95,
+      "kategori": "kalimat",
+      "text": "tadi gue makan telur dadar",
+      "expect": ["Telur dadar"]
+    },
+    {
+      "id": 96,
+      "kategori": "kalimat",
+      "text": "gw makan pisang goreng",
+      "expect": ["Pisang goreng"]
+    },
+    {
+      "id": 97,
+      "kategori": "kalimat",
+      "text": "aku makan gado-gado tadi siang",
+      "expect": ["Gado-gado"]
+    },
+    {
+      "id": 98,
+      "kategori": "kalimat",
+      "text": "makan siang nasi kuning",
+      "expect": ["Nasi kuning"]
+    },
+    {
+      "id": 99,
+      "kategori": "kalimat",
+      "text": "baru aja makan ayam bakar",
+      "expect": ["Ayam bakar"]
+    },
+    {
+      "id": 100,
+      "kategori": "kalimat",
+      "text": "tadi makan rendang",
+      "expect": ["Rendang daging sapi"]
+    },
+    { "id": 101, "kategori": "kalimat", "text": "gue makan capcay", "expect": ["Capcay"] },
+    { "id": 102, "kategori": "kalimat", "text": "barusan makan tahu isi", "expect": ["Tahu isi"] },
+    {
+      "id": 103,
+      "kategori": "kalimat",
+      "text": "udah makan martabak manis",
+      "expect": ["Martabak manis"]
+    },
+    { "id": 104, "kategori": "kalimat", "text": "saya makan sayur asem", "expect": ["Sayur asem"] },
+    {
+      "id": 105,
+      "kategori": "kalimat",
+      "text": "tadi makan lele goreng",
+      "expect": ["Ikan lele goreng"]
+    },
+    { "id": 106, "kategori": "kalimat", "text": "makan urap aja", "expect": ["Urap"] },
+    {
+      "id": 107,
+      "kategori": "kalimat",
+      "text": "gue makan keripik singkong",
+      "expect": ["Keripik singkong"]
+    },
+    { "id": 108, "kategori": "kalimat", "text": "tadi ngemil cireng", "expect": ["Cireng"] },
+    {
+      "id": 109,
+      "kategori": "kalimat",
+      "text": "abis makan kwetiau goreng",
+      "expect": ["Kwetiau goreng"]
+    },
+    {
+      "id": 110,
+      "kategori": "kalimat",
+      "text": "minum susu uht",
+      "expect": ["Susu UHT full cream"]
+    },
+    { "id": 111, "kategori": "kalimat", "text": "sarapan telur rebus", "expect": ["Telur rebus"] },
+    {
+      "id": 112,
+      "kategori": "kalimat",
+      "text": "gue makan sate kambing",
+      "expect": ["Sate kambing"]
+    },
+    {
+      "id": 113,
+      "kategori": "kalimat",
+      "text": "makan gulai ayam tadi",
+      "expect": ["Gulai ayam"]
+    },
+    { "id": 114, "kategori": "kalimat", "text": "barusan makan risoles", "expect": ["Risoles"] },
+    {
+      "id": 115,
+      "kategori": "kalimat",
+      "text": "tadi makan tumis kangkung",
+      "expect": ["Tumis kangkung"]
+    },
+
+    {
+      "id": 116,
+      "kategori": "porsi",
+      "text": "setengah porsi nasi padang",
+      "expect": ["Nasi Padang"]
+    },
+    { "id": 117, "kategori": "porsi", "text": "seporsi nasi goreng", "expect": ["Nasi goreng"] },
+    { "id": 118, "kategori": "porsi", "text": "2 potong ayam geprek", "expect": ["Ayam geprek"] },
+    { "id": 119, "kategori": "porsi", "text": "sepiring nasi putih", "expect": ["Nasi putih"] },
+    { "id": 120, "kategori": "porsi", "text": "semangkok bakso", "expect": ["Bakso"] },
+    { "id": 121, "kategori": "porsi", "text": "segelas es teh manis", "expect": ["Es teh manis"] },
+    {
+      "id": 122,
+      "kategori": "porsi",
+      "text": "sebungkus indomie",
+      "expect": ["Mie instan goreng"]
+    },
+    { "id": 123, "kategori": "porsi", "text": "3 tusuk sate ayam", "expect": ["Sate ayam"] },
+    { "id": 124, "kategori": "porsi", "text": "2 butir telur rebus", "expect": ["Telur rebus"] },
+    { "id": 125, "kategori": "porsi", "text": "setengah porsi mie ayam", "expect": ["Mie ayam"] },
+    {
+      "id": 126,
+      "kategori": "porsi",
+      "text": "seperempat porsi rendang",
+      "expect": ["Rendang daging sapi"]
+    },
+    { "id": 127, "kategori": "porsi", "text": "1/2 porsi nasi goreng", "expect": ["Nasi goreng"] },
+    {
+      "id": 128,
+      "kategori": "porsi",
+      "text": "dua potong tempe goreng",
+      "expect": ["Tempe goreng"]
+    },
+    { "id": 129, "kategori": "porsi", "text": "satu porsi soto ayam", "expect": ["Soto ayam"] },
+    { "id": 130, "kategori": "porsi", "text": "2 buah pisang goreng", "expect": ["Pisang goreng"] },
+    { "id": 131, "kategori": "porsi", "text": "semangkuk bubur ayam", "expect": ["Bubur ayam"] },
+    {
+      "id": 132,
+      "kategori": "porsi",
+      "text": "tiga potong tahu goreng",
+      "expect": ["Tahu goreng"]
+    },
+    { "id": 133, "kategori": "porsi", "text": "segelas jus alpukat", "expect": ["Jus alpukat"] },
+    { "id": 134, "kategori": "porsi", "text": "seporsi gado-gado", "expect": ["Gado-gado"] },
+    { "id": 135, "kategori": "porsi", "text": "2 porsi nasi uduk", "expect": ["Nasi uduk"] },
+    {
+      "id": 136,
+      "kategori": "porsi",
+      "text": "sebungkus keripik singkong",
+      "expect": ["Keripik singkong"]
+    },
+    { "id": 137, "kategori": "porsi", "text": "satu piring capcay", "expect": ["Capcay"] },
+    { "id": 138, "kategori": "porsi", "text": "1 mangkok sayur sop", "expect": ["Sayur sop"] },
+    {
+      "id": 139,
+      "kategori": "porsi",
+      "text": "setengah martabak manis",
+      "expect": ["Martabak manis"]
+    },
+    { "id": 140, "kategori": "porsi", "text": "2 potong ayam goreng", "expect": ["Ayam goreng"] },
+    {
+      "id": 141,
+      "kategori": "porsi",
+      "text": "gue makan setengah porsi nasi padang",
+      "expect": ["Nasi Padang"]
+    },
+    {
+      "id": 142,
+      "kategori": "porsi",
+      "text": "tadi makan 2 potong ayam geprek",
+      "expect": ["Ayam geprek"]
+    },
+    {
+      "id": 143,
+      "kategori": "porsi",
+      "text": "barusan minum segelas susu uht",
+      "expect": ["Susu UHT full cream"]
+    },
+    {
+      "id": 144,
+      "kategori": "porsi",
+      "text": "sarapan sepiring nasi uduk",
+      "expect": ["Nasi uduk"]
+    },
+    {
+      "id": 145,
+      "kategori": "porsi",
+      "text": "makan 3 tusuk sate kambing",
+      "expect": ["Sate kambing"]
+    },
+
+    { "id": 146, "kategori": "typo", "text": "nasi pdang", "expect": ["Nasi Padang"] },
+    { "id": 147, "kategori": "typo", "text": "ayam gprek", "expect": ["Ayam geprek"] },
+    { "id": 148, "kategori": "typo", "text": "nasi gorng", "expect": ["Nasi goreng"] },
+    { "id": 149, "kategori": "typo", "text": "tempe gorng", "expect": ["Tempe goreng"] },
+    { "id": 150, "kategori": "typo", "text": "bakso urat", "expect": ["Bakso"] },
+    { "id": 151, "kategori": "typo", "text": "sotoayam", "expect": ["Soto ayam"] },
+    { "id": 152, "kategori": "typo", "text": "gadogado", "expect": ["Gado-gado"] },
+    { "id": 153, "kategori": "typo", "text": "nasigoreng", "expect": ["Nasi goreng"] },
+    { "id": 154, "kategori": "typo", "text": "ayamgoreng", "expect": ["Ayam goreng"] },
+    { "id": 155, "kategori": "typo", "text": "mieayam", "expect": ["Mie ayam"] },
+    { "id": 156, "kategori": "typo", "text": "telur dadr", "expect": ["Telur dadar"] },
+    { "id": 157, "kategori": "typo", "text": "pisang gorng", "expect": ["Pisang goreng"] },
+    { "id": 158, "kategori": "typo", "text": "es teh mns", "expect": ["Es teh manis"] },
+    { "id": 159, "kategori": "typo", "text": "nasi kunig", "expect": ["Nasi kuning"] },
+    { "id": 160, "kategori": "typo", "text": "sate ayem", "expect": ["Sate ayam"] },
+    { "id": 161, "kategori": "typo", "text": "tahu gorng", "expect": ["Tahu goreng"] },
+    { "id": 162, "kategori": "typo", "text": "martabak mnis", "expect": ["Martabak manis"] },
+    { "id": 163, "kategori": "typo", "text": "rendang sapi", "expect": ["Rendang daging sapi"] },
+    { "id": 164, "kategori": "typo", "text": "ayam pnyet", "expect": ["Ayam geprek"] },
+    { "id": 165, "kategori": "typo", "text": "kwetiau gorng", "expect": ["Kwetiau goreng"] },
+    { "id": 166, "kategori": "typo", "text": "bubur ayem", "expect": ["Bubur ayam"] },
+    { "id": 167, "kategori": "typo", "text": "sayur sup", "expect": ["Sayur sop"] },
+    { "id": 168, "kategori": "typo", "text": "capcai", "expect": ["Capcay"] },
+    { "id": 169, "kategori": "typo", "text": "kripik singkong", "expect": ["Keripik singkong"] },
+    { "id": 170, "kategori": "typo", "text": "tumis kangkong", "expect": ["Tumis kangkung"] },
+    { "id": 171, "kategori": "typo", "text": "nasi udk", "expect": ["Nasi uduk"] },
+    { "id": 172, "kategori": "typo", "text": "lontng", "expect": ["Lontong"] },
+    { "id": 173, "kategori": "typo", "text": "rawn", "expect": ["Rawon"] },
+    { "id": 174, "kategori": "typo", "text": "dendeng blado", "expect": ["Dendeng balado"] },
+    { "id": 175, "kategori": "typo", "text": "risols", "expect": ["Risoles"] },
+
+    {
+      "id": 176,
+      "kategori": "multi",
+      "text": "tadi gue makan nasi sama ayam geprek",
+      "expect": ["Nasi putih", "Ayam geprek"]
+    },
+    {
+      "id": 177,
+      "kategori": "multi",
+      "text": "nasi goreng dan es teh manis",
+      "expect": ["Nasi goreng", "Es teh manis"]
+    },
+    {
+      "id": 178,
+      "kategori": "multi",
+      "text": "bakso plus es teh manis",
+      "expect": ["Bakso", "Es teh manis"]
+    },
+    {
+      "id": 179,
+      "kategori": "multi",
+      "text": "nasi putih, tempe goreng, sayur asem",
+      "expect": ["Nasi putih", "Tempe goreng", "Sayur asem"]
+    },
+    {
+      "id": 180,
+      "kategori": "multi",
+      "text": "ayam bakar sama nasi putih",
+      "expect": ["Ayam bakar", "Nasi putih"]
+    },
+    {
+      "id": 181,
+      "kategori": "multi",
+      "text": "mie ayam terus es kopi susu",
+      "expect": ["Mie ayam", "Es kopi susu"]
+    },
+    {
+      "id": 182,
+      "kategori": "multi",
+      "text": "sate ayam dengan lontong",
+      "expect": ["Sate ayam", "Lontong"]
+    },
+    {
+      "id": 183,
+      "kategori": "multi",
+      "text": "gue makan nasi uduk sama telur balado",
+      "expect": ["Nasi uduk", "Telur balado"]
+    },
+    {
+      "id": 184,
+      "kategori": "multi",
+      "text": "soto ayam dan nasi putih",
+      "expect": ["Soto ayam", "Nasi putih"]
+    },
+    {
+      "id": 185,
+      "kategori": "multi",
+      "text": "tahu goreng + tempe goreng",
+      "expect": ["Tahu goreng", "Tempe goreng"]
+    },
+    {
+      "id": 186,
+      "kategori": "multi",
+      "text": "nasi padang sama rendang",
+      "expect": ["Nasi Padang", "Rendang daging sapi"]
+    },
+    {
+      "id": 187,
+      "kategori": "multi",
+      "text": "bubur ayam sama teh tawar",
+      "expect": ["Bubur ayam", "Teh tawar"]
+    },
+    {
+      "id": 188,
+      "kategori": "multi",
+      "text": "capcay dan ayam pop",
+      "expect": ["Capcay", "Ayam pop"]
+    },
+    {
+      "id": 189,
+      "kategori": "multi",
+      "text": "setengah porsi nasi goreng sama telur ceplok",
+      "expect": ["Nasi goreng", "Telur ceplok"]
+    },
+    {
+      "id": 190,
+      "kategori": "multi",
+      "text": "2 potong ayam geprek dan sepiring nasi",
+      "expect": ["Ayam geprek", "Nasi putih"]
+    },
+    {
+      "id": 191,
+      "kategori": "multi",
+      "text": "gado-gado sama es teh manis",
+      "expect": ["Gado-gado", "Es teh manis"]
+    },
+    {
+      "id": 192,
+      "kategori": "multi",
+      "text": "martabak telur dan susu uht",
+      "expect": ["Martabak telur", "Susu UHT full cream"]
+    },
+
+    {
+      "id": 193,
+      "kategori": "bukan-makanan",
+      "text": "gue lagi males banget hari ini",
+      "expect": []
+    },
+    { "id": 194, "kategori": "bukan-makanan", "text": "nggak ada sama sekali", "expect": [] },
+    { "id": 195, "kategori": "bukan-makanan", "text": "oke sip", "expect": [] },
+    { "id": 196, "kategori": "bukan-makanan", "text": "gue mau nanya dong", "expect": [] },
+    { "id": 197, "kategori": "bukan-makanan", "text": "berat gue 70 kg", "expect": [] },
+    { "id": 198, "kategori": "bukan-makanan", "text": "besok gue mau gym", "expect": [] },
+    { "id": 199, "kategori": "bukan-makanan", "text": "makasih ya coach", "expect": [] },
+    { "id": 200, "kategori": "bukan-makanan", "text": "lagi di jalan nih", "expect": [] }
+  ]
+}
